@@ -1,18 +1,20 @@
-# [Nome do projeto]
+# MeuBolso
 
-[Escreva um ou dois  parágrafo resumindo o objetivo do seu projeto.]
+O Meu Bolso tem como objetivo auxiliar jovens que estão começando a administrar o próprio dinheiro, especialmente após receberem seus primeiros salários. O projeto busca ajudá-los a desenvolver melhores hábitos financeiros, facilitando o planejamento da renda, o controle de gastos, a criação de reservas e a definição de metas e prioridades.
 
 ## Alunos integrantes da equipe
 
-* [Nome completo do aluno 1]
-* [Nome completo do aluno 2]
-* [Nome completo do aluno 3]
-* [Nome completo do aluno 4]
+* Arthur Moraes Braga Araujo
+* Daniel Eiji Serra de Sunga
+* David Aurelio Pedrosa
+* Gabriel de Souza Junqueira Hermont
+* Vinicius Eduardo de Souza Matos Silva
 
 ## Professores responsáveis
 
-* [Nome completo do professor 1]
-* [Nome completo do professor 2]
+* Rommel Vieira Carneiro
+* Cleiton Silva Tavares
+* Rafael Henrique Nogueira Diniz
 
 ## Instruções de utilização
 
