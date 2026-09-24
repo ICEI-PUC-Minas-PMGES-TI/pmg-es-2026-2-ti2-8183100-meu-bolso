@@ -5,7 +5,7 @@ O Meu Bolso tem como objetivo auxiliar jovens que estão começando a administra
 ## Alunos integrantes da equipe
 
 * Arthur Moraes Braga Araujo
-* Daniel Eiji Serra de Sunga
+* Daniel Eiji Serra Tsuruga
 * David Aurelio Pedrosa
 * Gabriel de Souza Junqueira Hermont
 * Vinicius Eduardo de Souza Matos Silva
