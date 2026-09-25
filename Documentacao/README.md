@@ -1,5 +1,3 @@
----
-
 # 💰 Meu Bolso 👨‍💻
 
 > Aplicação web de **controle e educação financeira** para jovens que estão começando a lidar com dinheiro próprio (mesada, primeiro salário ou aumento de renda), com um **assistente de IA** que transforma os dados do usuário em orientações práticas e em linguagem acessível.
