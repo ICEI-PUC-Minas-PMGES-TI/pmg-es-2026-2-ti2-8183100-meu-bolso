@@ -238,12 +238,12 @@ A equipe é formada por cinco integrantes. Como o grupo é pequeno, os papéis p
 
 | Papel | Responsabilidades | Responsável |
 |---|---|---|
-| Gestão do projeto | Manter o quadro Kanban atualizado, organizar reuniões e acompanhar prazos e entregas. | `<preencher>` |
-| UX e protótipo | Wireframes, fluxo de navegação, protótipo interativo e coerência visual das telas. | `<preencher>` |
-| Front-end | Desenvolvimento das telas e da interface responsiva. | `<preencher>` |
-| Back-end e banco de dados | Regras de negócio, cadastro e login, armazenamento e segurança dos dados. | `<preencher>` |
-| Inteligência artificial | Integração e configuração do assistente, definição das orientações e limites de resposta. | `<preencher>` |
-| Qualidade e documentação | Testes, revisão de código, README, documentação e organização do repositório. | `<preencher>` |
+| Gestão do projeto | Manter o quadro Kanban atualizado, organizar reuniões e acompanhar prazos e entregas. | Daniel |
+| UX e protótipo | Wireframes, fluxo de navegação, protótipo interativo e coerência visual das telas. | Vinicius |
+| Front-end | Desenvolvimento das telas e da interface responsiva. | Arthur |
+| Back-end e banco de dados | Regras de negócio, cadastro e login, armazenamento e segurança dos dados. | David |
+| Inteligência artificial | Integração e configuração do assistente, definição das orientações e limites de resposta. | Gabriel |
+| Qualidade e documentação | Testes, revisão de código, README, documentação e organização do repositório. | Daniel |
 
 **Práticas de trabalho previstas.** Reunião semanal de alinhamento; toda tarefa registrada como issue, com responsável e critério de conclusão; commits pequenos e com mensagens claras; e revisão do trabalho por, pelo menos, outro integrante antes de concluir a tarefa.
 
