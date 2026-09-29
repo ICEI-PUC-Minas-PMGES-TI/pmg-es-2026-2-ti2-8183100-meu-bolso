@@ -260,7 +260,7 @@ As tarefas do projeto são controladas no **GitHub Projects**, vinculado ao repo
 | Ferramenta | Uso no projeto | Link |
 |---|---|---|
 | GitHub (repositório) | Código-fonte, documentação, README e histórico de versões. | [Repositório](https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti2-8183100-meu-bolso) |
-| GitHub Projects (Kanban) | Quadro de tarefas, issues e responsáveis. | `<inserir link do GitHub Project>` |
+| GitHub Projects (Kanban) | Quadro de tarefas, issues e responsáveis. | [Kanban](https://github.com/orgs/ICEI-PUC-Minas-PMGES-TI/projects/787/views/1) |
 | Miro | Design Thinking: CSD, stakeholders, entrevistas, personas, mapas de empatia, propostas de valor e priorização. | [Miro](https://miro.com/app/board/uXjVHxiBGwc=/) |
 | Protótipo interativo | Wireframes, fluxo de navegação e protótipo das telas. | [Figma](https://www.figma.com/make/Q8zHsaZnUu3KyRLcZcRIA0/MeuBolso-Wireframe-Desktop?p=f&t=n9PhvkrWvweEkrSG-0&fullscreen=1) |
 | Comunicação da equipe | Alinhamento diário e aviso de reuniões. | Discord e WhatsApp |
