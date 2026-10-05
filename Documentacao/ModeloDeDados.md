@@ -1,6 +1,6 @@
 # Modelo de Dados de Objetos — Meu Bolso
 
-> Modelagem orientada a documentos (**MongoDB**), fiel ao minimundo oficial do projeto. O vocabulário segue o padrão NoSQL: **coleções** (conjunto de documentos), **documentos** (objetos JSON) e relacionamentos por **referência** (guarda-se o `_id` de outro documento) ou **embutido** (o subdocumento é aninhado dentro do documento).
+> Modelagem orientada a documentos (**MongoDB**). O vocabulário segue o padrão NoSQL: **coleções** (conjunto de documentos), **documentos** (objetos JSON) e relacionamentos por **referência** (guarda-se o `_id` de outro documento) ou **embutido** (o subdocumento é aninhado dentro do documento).
 
 ## 1. Minimundo (resumo)
 
