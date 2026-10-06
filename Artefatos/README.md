@@ -34,7 +34,7 @@ Produzidos na etapa de prototipação:
 
 ## Planejamento e gestão
 
-* **Planejamento da Sprint** — artefatos, responsáveis e estrutura de dados por membro (ver pasta `/Documentacao`).
+* [**Planejamento da Sprint 1**](../Documentacao/TIAW%20-%20Planejamento%20da%20Sprint%201%20-%20Equipe.pdf) — artefatos, responsáveis e estrutura de dados por membro.
 * **Quadro Kanban (GitHub Projects)** — issues, responsáveis e andamento das tarefas.
 
 > 🔗 GitHub Projects (Kanban): <https://github.com/orgs/ICEI-PUC-Minas-PMGES-TI/projects/787/views/1>
