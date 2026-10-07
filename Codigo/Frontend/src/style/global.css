@@ -1,0 +1,71 @@
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+    --verde-principal: #7fa878;
+    --verde-hover: #6c9566;
+    --verde-escuro: #476b43;
+    --verde-claro: #e9f1e7;
+    --verde-fundo: #f4f8f3;
+
+    --preto: #101817;
+    --preto-suave: #202a28;
+
+    --branco: #ffffff;
+
+    --cinza-50: #f8f9f8;
+    --cinza-100: #eeeeec;
+    --cinza-300: #c9ceca;
+    --cinza-500: #747c77;
+    --cinza-700: #424a46;
+
+    --erro: #c94242;
+
+    --sombra-card: 0 10px 35px rgba(16, 24, 23, 0.08);
+
+    --radius-pequeno: 8px;
+    --radius-medio: 12px;
+    --radius-grande: 20px;
+    }
+
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    }
+
+    html {
+    font-size: 16px;
+    }
+
+    body {
+    min-width: 320px;
+    min-height: 100vh;
+
+    font-family: 'Inter', Arial, sans-serif;
+
+    background-color: var(--verde-fundo);
+    color: var(--preto);
+
+    -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+    font: inherit;
+    }
+
+    button {
+    cursor: pointer;
+    }
+
+    img {
+    max-width: 100%;
+    display: block;
+    }
+
+    a {
+    color: inherit;
+    text-decoration: none;
+    }
