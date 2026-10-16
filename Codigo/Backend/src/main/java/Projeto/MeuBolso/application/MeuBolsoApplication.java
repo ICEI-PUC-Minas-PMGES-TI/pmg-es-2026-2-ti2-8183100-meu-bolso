@@ -1,4 +1,4 @@
-package Projeto.MeuBolso;
+package Projeto.MeuBolso.application;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
