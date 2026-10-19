@@ -1,20 +1,34 @@
 import { useState } from "react";
-import logo from "../../assets/images/Logo_meu_bolso.png";
+import logo from "/images/Logo_meu_bolso.png";
 import "./Login.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 
 function Login() {
+  const navigate = useNavigate();
+
+  // Dados digitados pelo usuário
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+
+
+  const emailValido = import.meta.env.VITE_EMAIL_TESTE;
+  const senhaValida = import.meta.env.VITE_SENHA_TESTE;
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    console.log({
-      email,
-      senha,
-    });
+    if (email === emailValido && senha === senhaValida) {
+      setErro("");
+      navigate("/dashboard");
+    } else {
+      setErro("E-mail ou senha incorretos.");
+    }
   }
+//Olhar o env//
+
+
 
   return (
     <div className="login-page">
