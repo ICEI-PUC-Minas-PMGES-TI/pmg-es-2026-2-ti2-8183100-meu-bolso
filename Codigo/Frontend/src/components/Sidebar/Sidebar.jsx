@@ -4,6 +4,7 @@ import {
     Receipt,
     Wallet,
     Target,
+    Tags,
     UserRound,
     LogOut,
     X
@@ -13,6 +14,7 @@ import "./Sidebar.css";
 const menuItems = [
     {nome: "Dashboard", caminho:"/dashboard", icone: LayoutDashboard},
     { nome: "Gastos", caminho: "/gastos", icone: Receipt },
+    { nome:"Categorias" ,caminho: "/categorias" , icone: Tags},
     { nome: "Carteiras", caminho: "/carteiras", icone: Wallet },
     { nome: "Metas", caminho: "/metas", icone: Target },
     { nome: "Perfil", caminho: "/perfil", icone: UserRound }
