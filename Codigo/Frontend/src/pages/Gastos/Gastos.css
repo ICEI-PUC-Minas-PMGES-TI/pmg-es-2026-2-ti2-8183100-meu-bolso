@@ -383,3 +383,39 @@
         transition: none;
     }
     }
+    /* ---------- Ações (excluir) ---------- */
+
+    .gastos-col-acoes {
+    width: 56px;
+    text-align: center;
+    }
+
+    .gastos-botao-excluir {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-pequeno);
+    font-size: var(--texto-base);
+    color: var(--cinza-500);
+    transition:
+        background-color var(--transicao-rapida),
+        color var(--transicao-rapida);
+    }
+
+    .gastos-botao-excluir:hover {
+    background-color: var(--erro-fundo);
+    color: var(--erro);
+    }
+
+    .gastos-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    }

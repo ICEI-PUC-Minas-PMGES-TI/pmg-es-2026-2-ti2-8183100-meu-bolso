@@ -308,6 +308,10 @@
         setMesSelecionado(novoGasto.data.slice(0, 7));
         setModalAberto(false);
     }
+    function excluirGasto(id) {
+    if (!window.confirm("Deseja excluir este gasto?")) return;
+    setGastos((atual) => atual.filter((g) => g.id !== id));
+    }
 
     return (
         <section className="gastos-pagina">
@@ -371,6 +375,9 @@
                         <th>Carteira</th>
                         <th>Data</th>
                         <th className="gastos-col-valor">Valor</th>
+                        <th className="gastos-col-acoes">
+                        <span className="gastos-sr-only">Ações</span>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -387,6 +394,17 @@
                         <td data-label="Valor" className="gastos-col-valor">
                             <span className="gastos-valor">− {formatarMoeda(g.valor)}</span>
                         </td>
+                        <td data-label="Ações" className="gastos-col-acoes">
+                            <button
+                            type="button"
+                            className="gastos-botao-excluir"
+                            onClick={() => excluirGasto(g.id)}
+                            aria-label={`Excluir gasto ${g.descricao}`}
+                            title="Excluir"
+                            >
+                            🗑
+                            </button>
+</td>
                         </tr>
                     ))}
                     </tbody>
