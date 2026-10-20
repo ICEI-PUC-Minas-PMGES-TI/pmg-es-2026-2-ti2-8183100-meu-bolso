@@ -3,7 +3,6 @@ import logo from "/images/Logo_meu_bolso.png";
 import "./Login.css";
 import { Link, useNavigate } from "react-router-dom";
 
-
 function Login() {
   const navigate = useNavigate();
 
@@ -11,7 +10,6 @@ function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
-
 
   const emailValido = import.meta.env.VITE_EMAIL_TESTE;
   const senhaValida = import.meta.env.VITE_SENHA_TESTE;
@@ -26,9 +24,7 @@ function Login() {
       setErro("E-mail ou senha incorretos.");
     }
   }
-//Olhar o env//
-
-
+  //Olhar o env//
 
   return (
     <div className="login-page">
