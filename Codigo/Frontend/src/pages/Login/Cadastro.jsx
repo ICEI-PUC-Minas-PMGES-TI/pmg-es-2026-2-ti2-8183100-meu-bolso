@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logo from "/images/Logo_meu_bolso.png";
+import logoBranca from "/images/Logo_meu_bolso_branca.png";
 import styles from "./Login.module.css";
 import { Link } from "react-router-dom";
 
@@ -25,7 +25,7 @@ function Cadastro() {
         <aside className={styles["login-marketing"]}>
           <div className={styles["login-marketing-topo"]}>
             <img
-              src={logo}
+              src={logoBranca}
               alt="Meu Bolso"
               className={styles["login-marketing-logo"]}
             />
