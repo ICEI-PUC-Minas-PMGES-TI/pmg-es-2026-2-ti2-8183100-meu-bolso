@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
 import Layout from "./components/Layout/Layout";
@@ -11,11 +12,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Páginas sem Sidebar e Header */}
+        {/* Páginas sem barra de navegação */}
         <Route path="/" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
 
-        {/* Páginas com Sidebar e Header */}
+        {/* Páginas com barra de navegação superior */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
 

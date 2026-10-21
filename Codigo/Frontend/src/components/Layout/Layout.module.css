@@ -1,27 +1,20 @@
+.app-layout {
+  min-height: 100vh;
+  background-color: var(--verde-fundo);
+  display: flex;
+  flex-direction: column;
+}
 
-    .app-layout {
-    min-height: 100vh;
-    background-color: var(--verde-fundo);
-    }
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--largura-maxima);
+  margin: 0 auto;
+  padding: 24px 32px 32px;
+}
 
-    .app-conteudo {
-    margin-left: var(--largura-sidebar, 250px);
-    min-height: 100vh;
-    min-width: 0;
-    }
-
-    .app-main {
-    padding: 32px;
-    max-width: 1600px;
-    margin: 0 auto;
-    }
-
-    @media (max-width: 768px) {
-    .app-conteudo {
-        margin-left: 0;
-    }
-
-    .app-main {
-        padding: 20px 16px;
-    }
-    }
+@media (max-width: 768px) {
+  .app-main {
+    padding: 20px 16px;
+  }
+}
