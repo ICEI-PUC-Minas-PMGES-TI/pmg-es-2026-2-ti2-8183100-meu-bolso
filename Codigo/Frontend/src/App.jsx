@@ -6,7 +6,7 @@ import Cadastro from "./pages/Login/Cadastro";
 
 // Importe somente as páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
-import Gastos from "./pages/Gastos/Gastos"
+import Gastos from "./pages/Gastos/Gastos";
 
 function App() {
   return (
@@ -21,8 +21,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/gastos" element={<Gastos/>}/>
 
-          /* Adicione quando criar as páginas:
-          <Route path="/gastos" element={<Gastos />} />
+          {/* Adicione quando criar as páginas:*/}
+
         </Route>
       </Routes>
     </BrowserRouter>

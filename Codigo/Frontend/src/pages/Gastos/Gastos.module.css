@@ -142,16 +142,18 @@
 
     /* ---------- Etiqueta de categoria ---------- */
 
-    .gastos-etiqueta {
-    display: inline-block;
-    padding: 4px 10px;
-    font-size: var(--texto-xs);
-    font-weight: 500;
-    color: var(--verde-escuro);
-    background-color: var(--verde-claro);
-    border-radius: var(--radius-redondo);
-    white-space: nowrap;
-    }
+.gastos-etiqueta {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--espaco-2);
+	padding: 4px 10px;
+	font-size: var(--texto-xs);
+	font-weight: 500;
+	color: var(--verde-escuro);
+	background-color: var(--verde-claro);
+	border-radius: var(--radius-redondo);
+	white-space: nowrap;
+}
 
     /* ---------- Valores ---------- */
 
