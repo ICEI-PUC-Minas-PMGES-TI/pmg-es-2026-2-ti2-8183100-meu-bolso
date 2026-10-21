@@ -7,10 +7,10 @@ import styles from "./Header.module.css";
 // itens visuais ate as paginas serem criadas.
 const navItems = [
   { nome: "Visão geral", caminho: "/dashboard" },
-  { nome: "Gastos", caminho: "/gastos", futuro: true },
+  { nome: "Gastos", caminho: "/gastos" },
   { nome: "Planejamento", caminho: "/planejamento", futuro: true },
   { nome: "Carteiras", caminho: "/carteiras" },
-  { nome: "Metas", caminho: "/metas", futuro: true },
+  { nome: "Metas", caminho: "/metas" },
   { nome: "Simulador", caminho: "/simulador", futuro: true },
   { nome: "Assistente IA", caminho: "/assistente", futuro: true },
   { nome: "Aprender", caminho: "/aprender", futuro: true },
@@ -68,7 +68,7 @@ function Header() {
           className={styles.avatar}
         />
         <div className={styles.usuarioInfo}>
-          <strong>Daniel Tsuruga</strong>
+          <strong>Daniel De sunga</strong>
           <button className={styles.sair} type="button" onClick={handleSair}>
             Sair
           </button>
