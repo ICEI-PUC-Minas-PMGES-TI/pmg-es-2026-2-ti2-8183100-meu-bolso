@@ -1,5 +1,7 @@
 /* ========================================
    CARTEIRA FÍSICA — imagens (corpo + bolso) com cartões HTML entre elas
+   .cena      = reserva espaço vertical real para o cartão elevado
+   .carteira  = objeto (mantém a proporção das imagens)
 ======================================== */
 
 .cena {
@@ -7,12 +9,33 @@
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  /* mesma proporção das imagens (603x414) */
-  aspect-ratio: 603 / 414;
+
+  /* espaço reservado acima da carteira para a expansão dos cartões.
+     Fechada = sem reserva; aberta/selecionada = reserva real (não só z-index) */
+  padding-top: 0;
+  transition: padding-top var(--transicao-padrao);
   cursor: pointer;
 }
 
-/* Camadas de imagem: ocupam exatamente o mesmo box, alinhadas */
+/* aberta: pequena reserva para o leque, sem vazio exagerado acima */
+.aberta {
+  padding-top: 8%;
+}
+
+/* com cartão selecionado: espaço vertical próximo ao do hover, apenas o
+   suficiente para o cartão selecionado subir sem cortar nem sobrepor o topo */
+.comSelecao {
+  padding-top: 14%;
+}
+
+/* objeto carteira: proporção fiel das imagens */
+.carteira {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 603 / 414;
+}
+
+/* Camadas de imagem: ocupam o box do objeto, alinhadas */
 .corpo,
 .bolso {
   position: absolute;
@@ -29,13 +52,10 @@
 }
 
 .bolso {
-  z-index: 3; /* frente: cobre a base dos cartões */
+  z-index: 30; /* frente: cobre a base dos cartões empilhados */
 }
 
-/* Cartões (HTML real) na faixa entre corpo e bolso.
-   Cada .slot é posicionado de forma absoluta; a posição vertical é
-   calculada a partir do índice (--i) e do total (--n), adaptando-se a
-   qualquer quantidade de cartões. */
+/* Cartões (HTML real) na faixa entre corpo e bolso. */
 .leque {
   position: absolute;
   left: 50%;
@@ -51,35 +71,44 @@
   position: absolute;
   left: 0;
   right: 0;
-  /* ancoragem base: os cartões partem da região do bolso */
   bottom: 14%;
 
-  /* FECHADO: todos quase no mesmo ponto; só uma pequena ponta de cada
-     cartão (mais ao fundo) assoma acima do topo do anterior */
+  /* FECHADO: todos quase no mesmo ponto; só pequenas pontas assomam */
   transform: translateY(calc(var(--i) * -7px));
 
-  z-index: calc(10 + (var(--n) - var(--i))); /* frente = menor índice */
+  /* entre corpo (1) e bolso (30): cartões empilhados; frente = menor índice */
+  z-index: calc(20 - var(--i));
   pointer-events: auto;
   transition: transform var(--transicao-padrao);
 }
 
-/* ABERTO: leque gradual — cada cartão sobe proporcional ao seu índice,
-   revelando nome/instituição de todos. O passo diminui conforme aumenta
-   o número de cartões, para a composição não crescer indefinidamente. */
+/* ABERTO e COM SELEÇÃO: TODOS os cartões usam o MESMO leque do hover.
+   É o estado comprovadamente visível. Na seleção, os não-selecionados
+   NÃO mudam de posição — ficam exatamente como no hover, portanto
+   continuam visíveis. (translateY em % é relativo à altura do cartão.) */
 .aberta .slot {
+  transform: translateY(calc(var(--i) * (-62% / max(var(--n), 1)) - 8%));
+}
+
+/* Apenas o cartão selecionado sobe um pouco ALÉM da sua posição de hover,
+   somando um deslocamento extra à posição que ele já tem no leque.
+   Os demais permanecem no leque do hover (regra acima), logo visíveis. */
+.comSelecao .slotSelecionado {
   transform: translateY(
-    calc(var(--i) * (-62% / max(var(--n), 1)) - 8%)
+    calc(var(--i) * (-62% / max(var(--n), 1)) - 8% - 55%)
   );
+  z-index: 40; /* à frente do bolso, totalmente visível */
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .cena,
   .slot {
     transition: none;
   }
 }
 
 /* ---------- Responsividade ---------- */
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   .cena {
     max-width: 320px;
   }
