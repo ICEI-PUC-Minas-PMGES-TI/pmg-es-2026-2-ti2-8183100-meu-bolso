@@ -1,7 +1,15 @@
 
     import { useEffect, useMemo, useState } from "react";
     import styles from "./Gastos.module.css";
-
+    import{
+        Utensils,
+        CarFront,
+        Gamepad2,
+        House,
+        GraduationCap,
+        HeartPulse,
+        Clapperboard,
+    } from "lucide-react";
     // ========================================
     // DADOS FICTÍCIOS (SPRINT 1)
     // ========================================
@@ -18,7 +26,6 @@
     "Assinaturas",
     "Outros",
     ];
-
     const CARTEIRAS = [
     "Carteira",
     "Nubank",
@@ -26,6 +33,15 @@
     "Inter",
     "Cartão de crédito",
     ];
+    const ICONES_CATEGORIAS= {
+        "Alimentação" : Utensils,
+        "Transporte" : CarFront,
+        "Lazer": Gamepad2,
+        "Moradia": House,
+        "Educação": GraduationCap,
+        "Saúde": HeartPulse,
+        "Assinaturas": Clapperboard,
+    }
 
     function dataRelativa(mesesAtras, dia) {
     const hoje = new Date();
@@ -40,7 +56,13 @@
 
     return `${data.getFullYear()}-${mes}-${diaStr}`;
     }
-
+    function IconeCategoria({categoria}){
+        const Icone = ICONES_CATEGORIAS[categoria];
+        if (!Icone){
+            return null;
+        }
+        return <Icone size={18} stokeWidth={2} />;
+    }
     const GASTOS_FICTICIOS = [
     {
         id: 1,
@@ -159,7 +181,6 @@
 
     function formatarMesExtenso(chave) {
     const [ano, mes] = chave.split("-");
-
     return `${NOMES_MESES[Number(mes) - 1]} de ${ano}`;
     }
 
@@ -174,7 +195,6 @@
 
     function formatarData(dataISO) {
     const [ano, mes, dia] = dataISO.split("-");
-
     return `${dia}/${mes}/${ano}`;
     }
 
@@ -664,6 +684,7 @@
 
                         <td data-label="Categoria">
                             <span className={styles["gastos-etiqueta"]}>
+                            <IconeCategoria categoria={gasto.categoria}/>
                             {gasto.categoria}
                             </span>
                         </td>
