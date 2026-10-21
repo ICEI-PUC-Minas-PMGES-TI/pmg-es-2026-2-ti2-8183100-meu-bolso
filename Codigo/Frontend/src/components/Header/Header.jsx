@@ -9,7 +9,7 @@ const navItems = [
   { nome: "Visão geral", caminho: "/dashboard" },
   { nome: "Gastos", caminho: "/gastos" },
   { nome: "Planejamento", caminho: "/planejamento", futuro: true },
-  { nome: "Metas", caminho: "/metas", futuro: true },
+  { nome: "Metas", caminho: "/metas" },
   { nome: "Simulador", caminho: "/simulador", futuro: true },
   { nome: "Assistente IA", caminho: "/assistente", futuro: true },
   { nome: "Aprender", caminho: "/aprender", futuro: true },
