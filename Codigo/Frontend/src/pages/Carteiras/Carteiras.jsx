@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, CreditCard, Landmark, Coins } from "lucide-react";
 
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
@@ -15,14 +15,52 @@ import {
 
 import styles from "./Carteiras.module.css";
 
+// Persistência simples em localStorage (sem backend nesta etapa).
+const CHAVE_STORAGE = "meubolso:carteira";
+
+function carregarPersistido() {
+  try {
+    const bruto = localStorage.getItem(CHAVE_STORAGE);
+    if (!bruto) return null;
+    const dados = JSON.parse(bruto);
+    // só aceita se tiver as três listas no formato esperado
+    if (
+      Array.isArray(dados?.cartoes) &&
+      Array.isArray(dados?.contas) &&
+      Array.isArray(dados?.dinheiroEReservas)
+    ) {
+      return dados;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function Carteiras() {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
 
-  // Listas em estado para permitir adicionar novos itens.
-  const [cartoes, setCartoes] = useState(cartoesMock);
-  const [contas, setContas] = useState(contasMock);
-  const [dinheiroEReservas, setDinheiroEReservas] = useState(dinheiroEReservasMock);
+  // Listas em estado. Na primeira carga, usa o que estiver salvo no
+  // localStorage; caso contrário, parte dos dados fictícios.
+  const persistido = carregarPersistido();
+  const [cartoes, setCartoes] = useState(persistido?.cartoes ?? cartoesMock);
+  const [contas, setContas] = useState(persistido?.contas ?? contasMock);
+  const [dinheiroEReservas, setDinheiroEReservas] = useState(
+    persistido?.dinheiroEReservas ?? dinheiroEReservasMock
+  );
+
+  // Salva as listas sempre que mudarem (edição, exclusão, inclusão).
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        CHAVE_STORAGE,
+        JSON.stringify({ cartoes, contas, dinheiroEReservas })
+      );
+    } catch {
+      // armazenamento indisponível: segue apenas em memória
+    }
+  }, [cartoes, contas, dinheiroEReservas]);
 
   // Resumo recalculado a partir do estado atual.
   const saldoContas =
@@ -62,8 +100,26 @@ function Carteiras() {
     setItemEditando(null);
   }
 
+  // Remove o vínculo contaId de itens que apontavam para uma conta excluída,
+  // preservando todos os demais campos.
+  function desvincularConta(contaId, lista) {
+    return lista.map((i) => {
+      if (i.contaId !== contaId) return i;
+      const copia = { ...i };
+      delete copia.contaId;
+      return copia;
+    });
+  }
+
   function excluirItem(item) {
     setListaPorTipo(item.tipo, (lista) => lista.filter((i) => i.id !== item.id));
+
+    // Ao excluir uma conta, limpa vínculos órfãos em cartões e reservas.
+    if (item.tipo === "conta") {
+      setCartoes((lista) => desvincularConta(item.id, lista));
+      setDinheiroEReservas((lista) => desvincularConta(item.id, lista));
+    }
+
     setItemSelecionado(null);
   }
 
