@@ -14,6 +14,10 @@
   max-width: 240px;
 }
 
+.compacto .numero {
+  font-size: 1rem;
+}
+
 .cartao {
   position: relative;
   width: 100%;

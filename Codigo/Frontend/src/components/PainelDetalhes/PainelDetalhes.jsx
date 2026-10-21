@@ -109,6 +109,7 @@ function PainelDetalhes({
                 instituicao={item.instituicao}
                 bandeira={item.bandeira}
                 tema={item.tema}
+                subtipo={item.subtipo}
                 ultimosDigitos={item.ultimosDigitos}
                 validade={item.validade}
                 valor={formatarBRL(item.saldo)}

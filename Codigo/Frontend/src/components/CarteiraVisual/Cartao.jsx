@@ -18,10 +18,40 @@ function Cartao({
   bandeira = "",
   apelido = "",
   tema = "roxo",
+  subtipo = "",
   compacto = false,
 }) {
+  // Representação compacta (topo do painel): só o essencial para
+  // identificar o cartão — tipo, bandeira (se houver) e 4 dígitos.
+  if (compacto) {
+    const rotuloTipo =
+      subtipo === "debito"
+        ? "Débito"
+        : subtipo === "credito"
+        ? "Crédito"
+        : "";
+
+    return (
+      <div className={`${styles.cena} ${styles.compacto}`}>
+        <div className={`${styles.cartao} ${styles[`tema-${tema}`]}`}>
+          <div className={`${styles.face} ${styles.frente}`}>
+            <div className={styles.topo}>
+              {rotuloTipo && <span className={styles.apelido}>{rotuloTipo}</span>}
+              {bandeira && <span className={styles.bandeira}>{bandeira}</span>}
+            </div>
+
+            <div className={styles.numero}>
+              <span>••••</span>
+              <span>{ultimosDigitos || "••••"}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`${styles.cena} ${compacto ? styles.compacto : ""}`}>
+    <div className={styles.cena}>
       <div className={`${styles.cartao} ${styles[`tema-${tema}`]}`}>
         {/* FRENTE */}
         <div className={`${styles.face} ${styles.frente}`}>
