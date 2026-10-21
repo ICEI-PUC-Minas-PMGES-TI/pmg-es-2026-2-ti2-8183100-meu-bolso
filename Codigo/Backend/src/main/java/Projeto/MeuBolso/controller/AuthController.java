@@ -1,20 +1,26 @@
 package Projeto.MeuBolso.controller;
 
+import Projeto.MeuBolso.model.AuthDtos.AuthResponse;
+import Projeto.MeuBolso.model.AuthDtos.CadastroRequest;
+import Projeto.MeuBolso.model.AuthDtos.LoginRequest;
+import Projeto.MeuBolso.model.AuthDtos.MensagemResponse;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.TokenService;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import java.util.Locale;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -26,9 +32,9 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
 
-    public AuthController(UsuarioRepository repository, 
+    public AuthController(UsuarioRepository repository,
                           PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager, 
+                          AuthenticationManager authenticationManager,
                           TokenService tokenService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
@@ -39,17 +45,15 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<MensagemResponse> cadastrar(@Valid @RequestBody CadastroRequest request) {
         String email = request.email().toLowerCase(Locale.ROOT).trim();
-        
+
         if (repository.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Este e-mail já está cadastrado.");
         }
 
-        String telefoneLimpo = request.telefone() != null ? request.telefone().trim() : null;
-
         Usuario usuario = new Usuario(
-            request.nome().trim(), 
-            email, 
-            telefoneLimpo,
+            request.nome().trim(),
+            email,
+            request.telefone().trim(),
             passwordEncoder.encode(request.senha())
         );
 
@@ -63,31 +67,20 @@ public class AuthController {
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         String email = request.email().toLowerCase(Locale.ROOT).trim();
 
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(email, request.senha())
-        );
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, request.senha()));
+        } catch (AuthenticationException e) {
+            // Mesma mensagem para e-mail inexistente e senha errada
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos.");
+        }
 
         Usuario usuario = repository.findByEmail(authentication.getName())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas."));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos."));
 
         String token = tokenService.gerar(usuario.getEmail());
 
         return new AuthResponse(token, "Bearer", usuario.getNome(), usuario.getEmail());
     }
-
-    public record CadastroRequest(
-    @NotBlank String nome,
-    @NotBlank @Email String email,
-    @NotBlank String telefone,
-    @NotBlank String senha
-    ) {}    
-
-    public record LoginRequest(
-        @NotBlank @Email String email, 
-        @NotBlank String senha
-    ) {}
-
-    public record AuthResponse(String token, String type, String nome, String email) {}
-
-    public record MensagemResponse(String mensagem) {}
 }

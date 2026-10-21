@@ -3,6 +3,7 @@ package Projeto.MeuBolso.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -12,20 +13,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenService {
 
-    @Value("${api.security.token.secret:sua-chave-secreta-super-segura-de-32-caracteres-aqui}")
+    // Sem valor padrão no código: se o segredo não estiver configurado, a aplicação não sobe.
+    @Value("${app.jwt.secret}")
     private String secret;
 
-    // Expiração de 2 horas (em milissegundos)
-    private final long EXPIRATION_TIME = 2 * 60 * 60 * 1000;
+    @Value("${app.jwt.expiration-ms}")
+    private long expirationMs;
+
+    @PostConstruct
+    void validarConfiguracao() {
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                "app.jwt.secret precisa ter pelo menos 32 caracteres (defina APP_JWT_SECRET).");
+        }
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    // Método esperado pelo AuthController
     public String gerar(String email) {
         Date agora = new Date();
-        Date expiracao = new Date(agora.getTime() + EXPIRATION_TIME);
+        Date expiracao = new Date(agora.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(email)
@@ -35,7 +44,7 @@ public class TokenService {
                 .compact();
     }
 
-    // Método esperado pelo JwtAuthenticationFilter
+    // Devolve o e-mail do token, ou null se for inválido ou expirado
     public String validar(String token) {
         try {
             Claims claims = Jwts.parser()

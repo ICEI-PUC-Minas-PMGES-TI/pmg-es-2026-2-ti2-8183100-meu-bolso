@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7
     container_name: meubolso-mongodb
     restart: unless-stopped
     ports:
@@ -26,7 +26,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/meubolso
-      API_SECURITY_TOKEN_SECRET: minhaChaveSecretaSuperSeguraParaMeuBolso2026!
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?defina APP_JWT_SECRET no arquivo .env}
     depends_on:
       mongodb:
         condition: service_healthy
