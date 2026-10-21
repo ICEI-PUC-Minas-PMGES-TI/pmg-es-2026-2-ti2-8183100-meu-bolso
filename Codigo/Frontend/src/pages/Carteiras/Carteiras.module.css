@@ -1,11 +1,11 @@
 /* ========================================
-   CARTEIRAS
+   CARTEIRA
 ======================================== */
 
 .carteiras {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-6);
+  gap: var(--espaco-8);
 }
 
 /* ---------- Cabeçalho ---------- */
@@ -24,9 +24,10 @@
 
 .topo p {
   margin-top: var(--espaco-1);
+  max-width: 54ch;
 }
 
-.botaoNova {
+.botaoAdicionar {
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-2);
@@ -36,7 +37,6 @@
 
   background-color: var(--preto);
   color: var(--branco);
-
   border: none;
   border-radius: var(--radius-redondo);
 
@@ -46,78 +46,121 @@
   transition: background-color var(--transicao-padrao);
 }
 
-.botaoNova:hover {
+.botaoAdicionar:hover {
   background-color: var(--verde-escuro);
 }
 
-/* ---------- Saldo consolidado ---------- */
-.cardSaldo {
+/* ---------- Resumo financeiro ---------- */
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.cardResumo {
   display: flex;
   flex-direction: column;
   gap: var(--espaco-1);
 }
 
-.rotulo {
+.resumoRotulo {
   font-size: var(--texto-sm);
   color: var(--cinza-500);
 }
 
-.saldoTotal {
-  font-size: var(--titulo-xl);
+.resumoValor {
+  font-size: var(--titulo-lg);
   font-weight: 800;
   line-height: 1.1;
 }
 
-/* ---------- Grade de carteiras ---------- */
-.grade {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--espaco-6);
-}
-
-.cardCarteira {
+/* ---------- Seções ---------- */
+.secao {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-3);
+  gap: var(--espaco-4);
 }
 
-.cartTopo {
+.secaoTopo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.iconeCircle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: var(--verde-claro);
-  color: var(--verde-escuro);
-}
-
-.tipo {
-  padding: 4px 10px;
-  border-radius: var(--radius-redondo);
-  background-color: var(--cinza-100);
-  color: var(--cinza-700);
-  font-size: var(--texto-xs);
-  font-weight: 600;
-}
-
-.nome {
-  font-size: var(--titulo-sm);
-  font-weight: 700;
-}
-
-.saldo {
-  font-size: var(--titulo-md);
-  font-weight: 800;
+  gap: var(--espaco-2);
   color: var(--preto);
 }
 
-.saldoNegativo {
-  color: var(--erro);
+.secaoTopo h2 {
+  font-size: var(--titulo-md);
+  font-weight: 700;
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--espaco-6);
+}
+
+/* ---------- Item clicável ---------- */
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  align-items: center;
+
+  padding: var(--espaco-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-grande);
+
+  cursor: pointer;
+  transition: border-color var(--transicao-padrao), background-color var(--transicao-padrao);
+}
+
+.item:hover {
+  background-color: var(--cinza-50);
+}
+
+.item:focus-visible {
+  outline: none;
+  border-color: var(--verde-principal);
+}
+
+.itemSelecionado {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-fundo);
+}
+
+.itemRodape {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: 0 var(--espaco-1);
+}
+
+.itemNome {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.itemValor {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--preto);
+  white-space: nowrap;
+}
+
+/* ---------- Estado vazio ---------- */
+.vazio {
+  text-align: center;
+  padding: var(--espaco-8);
+  border-style: dashed;
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 640px) {
+  .resumo {
+    grid-template-columns: 1fr;
+  }
 }
