@@ -1,0 +1,131 @@
+/* ========================================
+   METAS
+======================================== */
+
+.metas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* Cabeçalho da página */
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.cabecalho h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.cabecalho p {
+  margin-top: var(--espaco-1);
+}
+
+/* Cartões de resumo */
+.resumo {
+  margin-top: var(--espaco-1);
+}
+
+.cardResumo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.cardIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  flex-shrink: 0;
+}
+
+.cardValor {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+/* Lista de metas */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.gridMetas {
+  align-items: stretch;
+}
+
+.vazio {
+  text-align: center;
+}
+
+/* Cartão de meta */
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.metaTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+/* Tag de prioridade */
+.tag {
+  padding: 2px 10px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tag-alta {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.tag-media {
+  background-color: var(--alerta-fundo);
+  color: #805b13;
+}
+
+.tag-baixa {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+/* Barra de progresso */
+.progresso {
+  width: 100%;
+  height: 10px;
+  background-color: var(--cinza-100);
+  border-radius: var(--radius-redondo);
+  overflow: hidden;
+}
+
+.progressoBarra {
+  height: 100%;
+  background-color: var(--verde-principal);
+  border-radius: var(--radius-redondo);
+  transition: width var(--transicao-padrao);
+}
+
+.metaValores {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
