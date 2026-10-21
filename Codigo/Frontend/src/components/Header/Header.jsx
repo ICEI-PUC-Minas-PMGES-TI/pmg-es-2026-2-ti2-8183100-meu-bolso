@@ -43,9 +43,10 @@
             </button>
 
             <div className="header-usuario">
-            <div className="header-avatar">
-                <UserRound size={20} />
-            </div>
+                <img
+                src="/images/abner.do.mal.jpg"
+                alt="foto do usuário"
+                className="header-avatar"></img>
 
             <div className="header-usuario-info">
                 <strong>Usuário</strong>
