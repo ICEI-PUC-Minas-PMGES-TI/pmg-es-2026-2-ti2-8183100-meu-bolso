@@ -1,0 +1,123 @@
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 20px;
+
+  background:
+    radial-gradient(circle at top left, rgba(127, 168, 120, 0.20), transparent 35%),
+    var(--verde-fundo);
+}
+
+.login-split {
+  width: 100%;
+  max-width: 1180px;
+
+  display: flex;
+  align-items: center;
+
+  gap: clamp(32px, 8vw, 120px);
+}
+
+/* CARD */
+.login-container {
+  width: 100%;
+  max-width: 440px;
+
+  background-color: var(--branco);
+  padding: 36px;
+
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+}
+
+.login-split .login-container {
+  flex: 0 0 400px;
+  align-self: center;
+}
+
+/* PAINEL PRETO */
+.login-marketing {
+  flex: 1 1 0;
+  max-width: 640px;
+
+  height: min(740px, calc(100vh - 48px));
+
+  display: flex;
+  flex-direction: column;
+
+  padding: clamp(32px, 4vw, 48px);
+
+  background-color: var(--preto);
+  color: var(--branco);
+
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+}
+
+.login-marketing-topo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.login-marketing-logo {
+  width: 105px;
+  max-width: 100%;
+  height: auto;
+}
+
+.login-marketing-titulo {
+  color: var(--branco);
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.login-marketing-descricao {
+  max-width: 380px;
+  color: var(--cinza-300);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.login-marketing-lista {
+  margin-top: auto;
+}
+
+/* CAMPOS E BOTÃO */
+.input-group input {
+  width: 100%;
+  padding: 13px 16px;
+
+  color: var(--preto);
+  background-color: var(--cinza-50);
+
+  border: 1px solid var(--cinza-100);
+  border-radius: 12px;
+
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-button {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 999px;
+
+  background-color: var(--preto);
+  color: var(--branco);
+
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}

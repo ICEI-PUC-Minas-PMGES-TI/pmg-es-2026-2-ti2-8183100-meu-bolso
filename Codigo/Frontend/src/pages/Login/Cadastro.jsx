@@ -1,9 +1,9 @@
 import { useState } from "react";
 import logo from "/images/Logo_meu_bolso.png";
-import "./Login.css";
+import styles from "./Login.module.css";
 import { Link } from "react-router-dom";
 
-function Login() {
+function Cadastro() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -19,19 +19,19 @@ function Login() {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-logo">
+    <div className={styles["login-page"]}>
+      <div className={styles["login-container"]}>
+        <div className={styles["login-logo"]}>
           <img src={logo} alt="MeuBolso" />
         </div>
 
-        <div className="login-header">
+        <div className={styles["login-header"]}>
           <h1>Crie sua conta</h1>
           <p>Comece a organizar sua vida financeira</p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="input-group">
+        <form className={styles["login-form"]} onSubmit={handleSubmit}>
+          <div className={styles["input-group"]}>
             <label htmlFor="nome">Nome Completo</label>
             <input
               id="nome"
@@ -42,7 +42,7 @@ function Login() {
               required
             />
           </div>
-          <div className="input-group">
+          <div className={styles["input-group"]}>
             <label htmlFor="email">E-mail</label>
 
             <input
@@ -55,7 +55,7 @@ function Login() {
             />
           </div>
 
-          <div className="input-group">
+          <div className={styles["input-group"]}>
             <label htmlFor="telefone">Telefone</label>
 
             <input
@@ -71,7 +71,7 @@ function Login() {
             </p>
           </div>
 
-          <div className="input-group">
+          <div className={styles["input-group"]}>
             <label htmlFor="senha">Senha</label>
 
             <input
@@ -84,7 +84,7 @@ function Login() {
             />
           </div>
 
-          <div className="input-group">
+          <div className={styles["input-group"]}>
             <label htmlFor="confirmarSenha">Confirmar Senha</label>
             <input
               id="confirmarSenha"
@@ -94,12 +94,12 @@ function Login() {
             />
           </div>
 
-          <button className="login-button" type="submit">
+          <button className={styles["login-button"]} type="submit">
             Entrar
           </button>
         </form>
 
-        <div className="login-register">
+        <div className={styles["login-register"]}>
           Já possui uma conta? <Link to="/">Faça login</Link>
         </div>
       </div>
@@ -107,4 +107,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Cadastro;
