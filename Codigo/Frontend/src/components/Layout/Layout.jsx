@@ -1,31 +1,30 @@
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
 
-    import { useState } from "react";
-    import { Outlet } from "react-router-dom";
+import Sidebar from "../Sidebar/Sidebar";
+import Header from "../Header/Header";
 
-    import Sidebar from "../Sidebar/Sidebar";
-    import Header from "../Header/Header";
+import styles from "./Layout.module.css";
 
-    import "./Layout.css";
+function Layout() {
+  const [menuAberto, setMenuAberto] = useState(false);
 
-    function Layout() {
-    const [menuAberto, setMenuAberto] = useState(false);
+  return (
+    <div className={styles["app-layout"]}>
+      <Sidebar
+        aberta={menuAberto}
+        fechar={() => setMenuAberto(false)}
+      />
 
-    return (
-        <div className="app-layout">
-        <Sidebar
-            aberta={menuAberto}
-            fechar={() => setMenuAberto(false)}
-        />
+      <div className={styles["app-conteudo"]}>
+        <Header abrirMenu={() => setMenuAberto(true)} />
 
-        <div className="app-conteudo">
-            <Header abrirMenu={() => setMenuAberto(true)} />
+        <main className={styles["app-main"]}>
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
 
-            <main className="app-main">
-            <Outlet />
-            </main>
-        </div>
-        </div>
-    );
-    }
-
-    export default Layout;
+export default Layout;

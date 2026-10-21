@@ -1,85 +1,90 @@
-import { NavLink,useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
-    LayoutDashboard,
-    Receipt,
-    Wallet,
-    Target,
-    UserRound,
-    LogOut,
-    X
-}from "lucide-react";
+  LayoutDashboard,
+  Receipt,
+  Wallet,
+  Target,
+  UserRound,
+  LogOut,
+  X
+} from "lucide-react";
 import logo from "/images/Logo_meu_bolso.png";
-import "./Sidebar.css";
+import styles from "./Sidebar.module.css";
+
 const menuItems = [
-    {nome: "Dashboard", caminho:"/dashboard", icone: LayoutDashboard},
-    { nome: "Gastos", caminho: "/gastos", icone: Receipt },
-    { nome: "Carteiras", caminho: "/carteiras", icone: Wallet },
-    { nome: "Metas", caminho: "/metas", icone: Target },
-    { nome: "Perfil", caminho: "/perfil", icone: UserRound }
+  { nome: "Dashboard", caminho: "/dashboard", icone: LayoutDashboard },
+  { nome: "Gastos", caminho: "/gastos", icone: Receipt },
+  { nome: "Carteiras", caminho: "/carteiras", icone: Wallet },
+  { nome: "Metas", caminho: "/metas", icone: Target },
+  { nome: "Perfil", caminho: "/perfil", icone: UserRound }
 ];
 
 function Sidebar({ aberta, fechar }) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    function handleSair() {
+  function handleSair() {
     // Logout temporário, até existir autenticação no backend
     fechar();
     navigate("/");
-    }
+  }
 
-    return (
+  return (
     <>
-        {aberta && (
+      {aberta && (
         <div
-            className="sidebar-overlay"
-            onClick={fechar}
+          className={styles["sidebar-overlay"]}
+          onClick={fechar}
         />
-        )}
+      )}
 
-        <aside className={`sidebar ${aberta ? "sidebar-aberta" : ""}`}>
-        <div className="sidebar-topo">
-            <div className="sidebar-marca">
+      <aside
+        className={`${styles.sidebar} ${aberta ? styles["sidebar-aberta"] : ""}`}
+      >
+        <div className={styles["sidebar-topo"]}>
+          <div className={styles["sidebar-marca"]}>
             <img src={logo} alt="MeuBolso" />
-            </div>
+          </div>
 
-            <button
-            className="sidebar-fechar"
+          <button
+            className={styles["sidebar-fechar"]}
             onClick={fechar}
             aria-label="Fechar menu"
-            >
+          >
             <X size={22} />
-            </button>
+          </button>
         </div>
 
-        <nav className="sidebar-menu" aria-label="Menu principal">
-            {menuItems.map((item) => {
+        <nav className={styles["sidebar-menu"]} aria-label="Menu principal">
+          {menuItems.map((item) => {
             const Icone = item.icone;
 
             return (
-                <NavLink
+              <NavLink
                 key={item.caminho}
                 to={item.caminho}
                 onClick={fechar}
                 className={({ isActive }) =>
-                    `sidebar-link ${isActive ? "sidebar-link-ativo" : ""}`
+                  `${styles["sidebar-link"]} ${
+                    isActive ? styles["sidebar-link-ativo"] : ""
+                  }`
                 }
-                >
+              >
                 <Icone size={20} />
                 <span>{item.nome}</span>
-                </NavLink>
+              </NavLink>
             );
-            })}
+          })}
         </nav>
 
-        <div className="sidebar-rodape">
-            <button className="sidebar-sair" onClick={handleSair}>
+        <div className={styles["sidebar-rodape"]}>
+          <button className={styles["sidebar-sair"]} onClick={handleSair}>
             <LogOut size={20} />
             <span>Sair</span>
-            </button>
+          </button>
         </div>
-        </aside>
+      </aside>
     </>
-    );
+  );
 }
 
 export default Sidebar;
