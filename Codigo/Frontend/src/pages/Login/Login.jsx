@@ -17,7 +17,8 @@ function Login() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    if (email === emailValido && senha === senhaValida) {
+    if (email.trim() === (emailValido ?? "").trim() &&
+        senha.trim() === (senhaValida ?? "").trim()) {
       setErro("");
       navigate("/dashboard");
     } else {

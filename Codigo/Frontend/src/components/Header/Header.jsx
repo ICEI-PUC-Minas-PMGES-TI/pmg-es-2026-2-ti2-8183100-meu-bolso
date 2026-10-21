@@ -1,57 +1,76 @@
-import { Menu, Bell } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 
-const titulos = {
-  "/dashboard": "Dashboard",
-  "/gastos": "Gastos",
-  "/carteiras": "Carteiras",
-  "/metas": "Metas",
-  "/perfil": "Meu perfil"
-};
+// Itens de navegação do topo.
+// Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
+// itens visuais ate as paginas serem criadas.
+const navItems = [
+  { nome: "Visão geral", caminho: "/dashboard" },
+  { nome: "Gastos", caminho: "/gastos", futuro: true },
+  { nome: "Planejamento", caminho: "/planejamento", futuro: true },
+  { nome: "Metas", caminho: "/metas", futuro: true },
+  { nome: "Simulador", caminho: "/simulador", futuro: true },
+  { nome: "Assistente IA", caminho: "/assistente", futuro: true },
+  { nome: "Aprender", caminho: "/aprender", futuro: true },
+];
 
-function Header({ abrirMenu }) {
-  const location = useLocation();
-  const titulo = titulos[location.pathname] || "MeuBolso";
+function Header() {
+  const navigate = useNavigate();
+
+  function handleSair() {
+    // Logout temporário, até existir autenticação no backend
+    navigate("/");
+  }
 
   return (
     <header className={styles.header}>
-      <div className={styles["header-esquerda"]}>
-        <button
-          className={styles["header-menu-button"]}
-          onClick={abrirMenu}
-          aria-label="Abrir menu"
-        >
-          <Menu size={24} />
-        </button>
-
-        <div className={styles["header-titulos"]}>
-          <h1>{titulo}</h1>
-          <p>Seu dinheiro, suas escolhas, seu futuro.</p>
-        </div>
+      {/* Esquerda: marca (pílula) */}
+      <div className={styles.marca}>
+        <span className={styles.logoCirculo}>
+          <img src={logo} alt="" className={styles.logo} />
+        </span>
+        <span className={styles.marcaTexto}>Meu Bolso</span>
       </div>
 
-      <div className={styles["header-direita"]}>
-        <button
-          className={styles["header-icone"]}
-          aria-label="Notificações"
-          title="Notificações em desenvolvimento"
-          disabled
-        >
-          <Bell size={21} />
-        </button>
+      {/* Centro: navegação (pílula) */}
+      <nav className={styles.nav} aria-label="Navegação principal">
+        {navItems.map((item) =>
+          item.futuro ? (
+            <span
+              key={item.nome}
+              className={`${styles.navLink} ${styles.navLinkFuturo}`}
+              aria-disabled="true"
+              title="Em breve"
+            >
+              {item.nome}
+            </span>
+          ) : (
+            <NavLink
+              key={item.nome}
+              to={item.caminho}
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkAtivo : ""}`
+              }
+            >
+              {item.nome}
+            </NavLink>
+          )
+        )}
+      </nav>
 
-        <div className={styles["header-usuario"]}>
-          <img
-            src="/images/abner.do.mal.jpg"
-            alt="foto do usuário"
-            className={styles["header-avatar"]}
-          />
-
-          <div className={styles["header-usuario-info"]}>
-            <strong>Usuário</strong>
-            <span>Minha conta</span>
-          </div>
+      {/* Direita: usuário */}
+      <div className={styles.usuario}>
+        <img
+          src="/images/abner.do.mal.jpg"
+          alt="Foto do usuário"
+          className={styles.avatar}
+        />
+        <div className={styles.usuarioInfo}>
+          <strong>Daniel Tsuruga</strong>
+          <button className={styles.sair} type="button" onClick={handleSair}>
+            Sair
+          </button>
         </div>
       </div>
     </header>
