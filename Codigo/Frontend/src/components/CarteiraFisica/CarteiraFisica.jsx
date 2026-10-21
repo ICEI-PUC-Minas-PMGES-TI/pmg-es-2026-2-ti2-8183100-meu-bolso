@@ -17,50 +17,64 @@ import styles from "./CarteiraFisica.module.css";
  *
  * props:
  *  - manterAberta: boolean
+ *  - indiceSelecionado: índice do cartão selecionado (ou -1 / undefined)
  *  - children: cartões (ItemCarteira)
  */
-function CarteiraFisica({ manterAberta = false, children }) {
+function CarteiraFisica({ manterAberta = false, indiceSelecionado = -1, children }) {
   const [aberta, setAberta] = useState(false);
   const revelada = aberta || manterAberta;
+  const temSelecao = indiceSelecionado >= 0;
 
   const cartoes = Children.toArray(children);
   const total = cartoes.length;
 
   return (
     <div
-      className={`${styles.cena} ${revelada ? styles.aberta : ""}`}
+      className={`${styles.cena} ${revelada ? styles.aberta : ""} ${
+        temSelecao ? styles.comSelecao : ""
+      }`}
       onMouseEnter={() => setAberta(true)}
       onMouseLeave={() => setAberta(false)}
       onClick={() => setAberta((v) => !v)}
     >
-      {/* Camada 1: corpo da carteira (fundo) */}
-      <img
-        className={styles.corpo}
-        src={corpo}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-      />
+      {/* .carteira mantém a proporção das imagens; o espaço para o cartão
+          elevado é reservado pelo padding-top da .cena (layout real). */}
+      <div className={styles.carteira}>
+        {/* Camada 1: corpo da carteira (fundo) */}
+        <img
+          className={styles.corpo}
+          src={corpo}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+        />
 
-      {/* Camada 2: cartões HTML reais, entre o corpo e o bolso.
-          Cada cartão recebe seu índice (--i) e o total (--n) para o CSS
-          calcular o leque de forma adaptável ao número de cartões. */}
-      <div className={styles.leque} style={{ "--n": total }}>
-        {cartoes.map((cartao, i) => (
-          <div key={cartao.key ?? i} className={styles.slot} style={{ "--i": i }}>
-            {cartao}
-          </div>
-        ))}
+        {/* Camada 2: cartões HTML reais, entre o corpo e o bolso.
+            Cada cartão recebe seu índice (--i) e o total (--n) para o CSS
+            calcular o leque de forma adaptável ao número de cartões. */}
+        <div className={styles.leque} style={{ "--n": total }}>
+          {cartoes.map((cartao, i) => (
+            <div
+              key={cartao.key ?? i}
+              className={`${styles.slot} ${
+                i === indiceSelecionado ? styles.slotSelecionado : ""
+              }`}
+              style={{ "--i": i }}
+            >
+              {cartao}
+            </div>
+          ))}
+        </div>
+
+        {/* Camada 3: bolso frontal (cobre a base dos cartões) */}
+        <img
+          className={styles.bolso}
+          src={bolso}
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+        />
       </div>
-
-      {/* Camada 3: bolso frontal (cobre a base dos cartões) */}
-      <img
-        className={styles.bolso}
-        src={bolso}
-        alt=""
-        aria-hidden="true"
-        draggable="false"
-      />
     </div>
   );
 }

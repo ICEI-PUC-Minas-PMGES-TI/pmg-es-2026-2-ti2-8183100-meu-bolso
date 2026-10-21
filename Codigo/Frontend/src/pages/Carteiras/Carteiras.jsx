@@ -197,6 +197,7 @@ function Carteiras() {
         ) : (
           <CarteiraFisica
             manterAberta={cartoes.some((c) => c.id === itemSelecionado?.id)}
+            indiceSelecionado={cartoes.findIndex((c) => c.id === itemSelecionado?.id)}
           >
             {cartoes.map((item) => (
               <ItemCarteira
