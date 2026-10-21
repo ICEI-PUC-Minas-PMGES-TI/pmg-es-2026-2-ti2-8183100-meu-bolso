@@ -1,0 +1,123 @@
+/* ========================================
+   CARTEIRAS
+======================================== */
+
+.carteiras {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* ---------- Cabeçalho ---------- */
+.topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.topo h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.topo p {
+  margin-top: var(--espaco-1);
+}
+
+.botaoNova {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+
+  min-height: 44px;
+  padding: 12px 20px;
+
+  background-color: var(--preto);
+  color: var(--branco);
+
+  border: none;
+  border-radius: var(--radius-redondo);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+
+  transition: background-color var(--transicao-padrao);
+}
+
+.botaoNova:hover {
+  background-color: var(--verde-escuro);
+}
+
+/* ---------- Saldo consolidado ---------- */
+.cardSaldo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.rotulo {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.saldoTotal {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* ---------- Grade de carteiras ---------- */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--espaco-6);
+}
+
+.cardCarteira {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.cartTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iconeCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.tipo {
+  padding: 4px 10px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cinza-100);
+  color: var(--cinza-700);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.nome {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.saldo {
+  font-size: var(--titulo-md);
+  font-weight: 800;
+  color: var(--preto);
+}
+
+.saldoNegativo {
+  color: var(--erro);
+}

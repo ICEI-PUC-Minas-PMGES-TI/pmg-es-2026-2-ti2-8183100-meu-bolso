@@ -6,6 +6,7 @@ import Cadastro from "./pages/Login/Cadastro";
 
 // Importe somente as páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Carteiras from "./pages/Carteiras/Carteiras";
 
 function App() {
   return (
@@ -18,10 +19,10 @@ function App() {
         {/* Páginas com barra de navegação superior */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/carteiras" element={<Carteiras />} />
 
           {/* Adicione quando criar as páginas:
           <Route path="/gastos" element={<Gastos />} />
-          <Route path="/carteiras" element={<Carteiras />} />
           <Route path="/metas" element={<Metas />} />
           <Route path="/perfil" element={<Perfil />} />
           */}
