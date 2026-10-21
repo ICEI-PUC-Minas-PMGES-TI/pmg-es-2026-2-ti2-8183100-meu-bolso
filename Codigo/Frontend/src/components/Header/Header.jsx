@@ -1,60 +1,80 @@
+import { NavLink, useNavigate } from "react-router-dom";
+import logo from "/images/Logo_meu_bolso_clean.png";
+import styles from "./Header.module.css";
 
-    import { Menu, Bell, UserRound } from "lucide-react";
-    import { useLocation } from "react-router-dom";
-    import "./Header.css";
+// Itens de navegação do topo.
+// Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
+// itens visuais ate as paginas serem criadas.
+const navItems = [
+  { nome: "Visão geral", caminho: "/dashboard" },
+  { nome: "Gastos", caminho: "/gastos" },
+  { nome: "Planejamento", caminho: "/planejamento", futuro: true },
+  { nome: "Metas", caminho: "/metas", futuro: true },
+  { nome: "Simulador", caminho: "/simulador", futuro: true },
+  { nome: "Assistente IA", caminho: "/assistente", futuro: true },
+  { nome: "Aprender", caminho: "/aprender", futuro: true },
+];
 
-    const titulos = {
-    "/dashboard": "Dashboard",
-    "/gastos": "Gastos",
-    "/carteiras": "Carteiras",
-    "/metas": "Metas",
-    "/perfil": "Meu perfil"
-    };
+function Header() {
+  const navigate = useNavigate();
 
-    function Header({ abrirMenu }) {
-    const location = useLocation();
-    const titulo = titulos[location.pathname] || "MeuBolso";
+  function handleSair() {
+    // Logout temporário, até existir autenticação no backend
+    navigate("/");
+  }
 
-    return (
-        <header className="header">
-        <div className="header-esquerda">
-            <button
-            className="header-menu-button"
-            onClick={abrirMenu}
-            aria-label="Abrir menu"
+  return (
+    <header className={styles.header}>
+      {/* Esquerda: marca (pílula) */}
+      <div className={styles.marca}>
+        <span className={styles.logoCirculo}>
+          <img src={logo} alt="" className={styles.logo} />
+        </span>
+        <span className={styles.marcaTexto}>Meu Bolso</span>
+      </div>
+
+      {/* Centro: navegação (pílula) */}
+      <nav className={styles.nav} aria-label="Navegação principal">
+        {navItems.map((item) =>
+          item.futuro ? (
+            <span
+              key={item.nome}
+              className={`${styles.navLink} ${styles.navLinkFuturo}`}
+              aria-disabled="true"
+              title="Em breve"
             >
-            <Menu size={24} />
-            </button>
-
-            <div className="header-titulos">
-            <h1>{titulo}</h1>
-            <p>Seu dinheiro, suas escolhas, seu futuro.</p>
-            </div>
-        </div>
-
-        <div className="header-direita">
-            <button
-            className="header-icone"
-            aria-label="Notificações"
-            title="Notificações em desenvolvimento"
-            disabled
+              {item.nome}
+            </span>
+          ) : (
+            <NavLink
+              key={item.nome}
+              to={item.caminho}
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkAtivo : ""}`
+              }
             >
-            <Bell size={21} />
-            </button>
+              {item.nome}
+            </NavLink>
+          )
+        )}
+      </nav>
 
-            <div className="header-usuario">
-            <div className="header-avatar">
-                <UserRound size={20} />
-            </div>
-
-            <div className="header-usuario-info">
-                <strong>Usuário</strong>
-                <span>Minha conta</span>
-            </div>
-            </div>
+      {/* Direita: usuário */}
+      <div className={styles.usuario}>
+        <img
+          src="/images/abner.do.mal.jpg"
+          alt="Foto do usuário"
+          className={styles.avatar}
+        />
+        <div className={styles.usuarioInfo}>
+          <strong>Daniel De sunga</strong>
+          <button className={styles.sair} type="button" onClick={handleSair}>
+            Sair
+          </button>
         </div>
-        </header>
-    );
-    }
+      </div>
+    </header>
+  );
+}
 
-    export default Header;
+export default Header;

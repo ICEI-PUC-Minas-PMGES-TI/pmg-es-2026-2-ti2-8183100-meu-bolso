@@ -1,0 +1,170 @@
+/* ========================================
+   HEADER / BARRA DE NAVEGAÇÃO SUPERIOR
+   Três pílulas flutuantes (marca / nav / usuário)
+======================================== */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+
+  /* Sem fundo: o header é só o distribuidor das pílulas */
+  background-color: transparent;
+  padding: var(--espaco-5) var(--espaco-6) 0;
+}
+
+/* Base comum das pílulas */
+.marca,
+.nav,
+.usuario {
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-redondo);
+  box-shadow: var(--sombra-leve);
+}
+
+/* ---------- Marca (esquerda) ---------- */
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  flex-shrink: 0;
+  padding: 6px 18px 6px 6px;
+}
+
+.logoCirculo {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Imagem já é o ícone redondo (carteira no círculo verde) */
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.marcaTexto {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--preto);
+  white-space: nowrap;
+}
+
+/* ---------- Navegação (centro) ---------- */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.navLink {
+  padding: 8px 16px;
+  border-radius: var(--radius-redondo);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cinza-700);
+  white-space: nowrap;
+
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.navLink:hover {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.navLinkAtivo,
+.navLinkAtivo:hover {
+  background-color: var(--preto);
+  color: var(--branco);
+}
+
+/* Itens de páginas que ainda não existem */
+.navLinkFuturo {
+  color: var(--cinza-500);
+  cursor: default;
+}
+
+.navLinkFuturo:hover {
+  background-color: transparent;
+  color: var(--cinza-500);
+}
+
+/* ---------- Usuário (direita) ---------- */
+.usuario {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  flex-shrink: 0;
+  padding: 6px 18px 6px 6px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--verde-principal);
+}
+
+.usuarioInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.usuarioInfo strong {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+}
+
+.sair {
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+.sair:hover {
+  color: var(--verde-escuro);
+  text-decoration: underline;
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 900px) {
+  .header {
+    flex-wrap: wrap;
+    padding: var(--espaco-4) var(--espaco-4) 0;
+    gap: var(--espaco-3);
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .usuarioInfo {
+    display: none;
+  }
+}

@@ -371,7 +371,7 @@
         flex-direction: column-reverse;
     }
 
-    .gastos-form-acoes .btn {
+    .gastos-form-acoes:global(.btn) {
         width: 100%;
     }
     }

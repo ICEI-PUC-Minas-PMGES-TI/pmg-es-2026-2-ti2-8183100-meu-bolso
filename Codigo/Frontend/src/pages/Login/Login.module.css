@@ -1,0 +1,438 @@
+/* ========================================
+   PÁGINA (fundo + centralização)
+   ======================================== */
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 20px;
+
+  background:
+    radial-gradient(circle at top left, rgba(127, 168, 120, 0.20), transparent 35%),
+    var(--verde-fundo);
+}
+
+/* ========================================
+   LAYOUT EM DUAS COLUNAS (painel + card)
+   ======================================== */
+.login-split {
+  width: 100%;
+  max-width: 1180px;
+
+  display: flex;
+  align-items: center;
+
+  gap: clamp(32px, 8vw, 120px);
+}
+
+/* ========================================
+   CARD DO FORMULÁRIO
+   ======================================== */
+.login-container {
+  width: 100%;
+  max-width: 440px;
+
+  background-color: var(--branco);
+  padding: 36px;
+
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+}
+
+/* Dentro do split, o card fica fixo na direita e centralizado verticalmente */
+.login-split .login-container {
+  flex: 0 0 400px;
+  align-self: center;
+}
+
+/* LOGO (usado no cadastro quando não há painel) */
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.login-logo img {
+  width: 150px;
+  height: auto;
+}
+
+/* ========================================
+   CABEÇALHO DO FORMULÁRIO
+   ======================================== */
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-header h1 {
+  color: var(--preto);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  color: var(--cinza-500);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* No layout em duas colunas, cabeçalho e rodapé alinham à esquerda */
+.login-split .login-header,
+.login-split .login-register {
+  text-align: left;
+}
+
+/* ========================================
+   FORMULÁRIO E CAMPOS
+   ======================================== */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  color: var(--preto-suave);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 13px 16px;
+
+  color: var(--preto);
+  background-color: var(--cinza-50);
+
+  border: 1px solid var(--cinza-100);
+  border-radius: 12px;
+
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-group input::placeholder {
+  color: var(--cinza-500);
+}
+
+.input-group input:focus {
+  border-color: var(--verde-principal);
+  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+}
+
+/* Texto de ajuda abaixo de um campo (ex.: telefone do WhatsApp) */
+.input-ajuda {
+  font-size: 0.8rem;
+  color: var(--cinza-500);
+}
+
+/* ========================================
+   OPÇÕES (esqueci minha senha)
+   ======================================== */
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  margin-top: -4px;
+}
+
+.esqueceu-senha {
+  color: var(--verde-escuro);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.esqueceu-senha:hover {
+  color: var(--verde-principal);
+}
+
+/* ========================================
+   TERMOS (checkbox do cadastro)
+   ======================================== */
+.login-termos {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  color: var(--cinza-500);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.login-termos input {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--verde-principal);
+  flex-shrink: 0;
+}
+
+.login-termos a {
+  color: var(--verde-escuro);
+  font-weight: 600;
+}
+
+.login-termos a:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   BOTÃO
+   ======================================== */
+.login-button {
+  width: 100%;
+  padding: 14px;
+
+  border: none;
+  border-radius: 999px;
+
+  background-color: var(--preto);
+  color: var(--branco);
+
+  font-weight: 600;
+  font-size: 1rem;
+
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.login-button:hover {
+  background-color: var(--verde-escuro);
+}
+
+.login-button:active {
+  transform: scale(0.98);
+}
+
+/* ========================================
+   RODAPÉ (link de troca login/cadastro)
+   ======================================== */
+.login-register {
+  margin-top: 28px;
+  text-align: center;
+  color: var(--cinza-500);
+  font-size: 0.9rem;
+}
+
+.login-register a {
+  color: var(--verde-escuro);
+  font-weight: 600;
+}
+
+.login-register a:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   MENSAGEM DE ERRO
+   ======================================== */
+.login-error {
+  padding: 10px 12px;
+  background-color: #fff0f0;
+  color: var(--erro);
+  border-radius: var(--radius-pequeno);
+  font-size: 0.875rem;
+}
+
+/* ========================================
+   NOTA LGPD
+   ======================================== */
+.login-lgpd {
+  margin-top: 20px;
+  padding: 12px 14px;
+
+  background-color: var(--cinza-50);
+  color: var(--cinza-500);
+
+  border-radius: var(--radius-pequeno);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+/* ========================================
+   PAINEL PRETO (apresentação)
+   ======================================== */
+.login-marketing {
+  flex: 1 1 0;
+  max-width: 640px;
+
+  height: min(740px, calc(100vh - 48px));
+
+  display: flex;
+  flex-direction: column;
+
+  padding: clamp(32px, 4vw, 48px);
+
+  background-color: var(--preto);
+  color: var(--branco);
+
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+}
+
+.login-marketing-topo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.login-marketing-logo {
+  width: 105px;
+  max-width: 100%;
+  height: auto;
+}
+
+.login-marketing-centro {
+  flex: 1 1 auto;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 20px;
+}
+
+.login-marketing-titulo {
+  color: var(--branco);
+  font-size: clamp(2.2rem, 3vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.login-marketing-descricao {
+  max-width: 380px;
+  color: var(--cinza-300);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.login-marketing-lista {
+  margin-top: 48px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  list-style: none;
+}
+
+.login-marketing-lista li {
+  position: relative;
+  padding-left: 22px;
+
+  color: var(--cinza-200);
+  font-size: 0.9rem;
+}
+
+.login-marketing-lista li::before {
+  content: "";
+
+  position: absolute;
+  top: 6px;
+  left: 0;
+
+  width: 8px;
+  height: 8px;
+
+  background-color: var(--verde-principal);
+  border-radius: var(--radius-redondo);
+}
+
+/* Rodapé de texto do painel (ex.: aviso do assistente de IA) */
+.login-marketing-rodape {
+  margin-top: auto;
+  padding-top: 32px;
+
+  color: var(--cinza-500);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* ========================================
+   RESPONSIVO
+   ======================================== */
+
+/* Tablet: empilha painel e card em uma coluna */
+@media (max-width: 900px) {
+  .login-split {
+    flex-direction: column;
+    max-width: 440px;
+    gap: 24px;
+  }
+
+  .login-marketing {
+    height: auto;
+    padding: 32px;
+  }
+
+  .login-marketing-topo {
+    margin-bottom: 32px;
+  }
+
+  .login-marketing-centro {
+    gap: 14px;
+  }
+
+  .login-marketing-lista {
+    margin-top: 28px;
+  }
+
+  .login-split .login-container {
+    flex: 1 1 auto;
+  }
+}
+
+/* Celular: oculta o painel de apresentação, fica só o formulário */
+@media (max-width: 768px) {
+  .login-page {
+    padding: 24px 16px;
+  }
+
+  .login-container {
+    max-width: 400px;
+    padding: 32px 24px;
+  }
+
+  .login-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-marketing {
+    display: none;
+  }
+}
+
+/* Celular pequeno */
+@media (max-width: 480px) {
+  .login-page {
+    padding: 16px;
+  }
+
+  .login-container {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .login-logo img {
+    width: 120px;
+  }
+
+  .input-group input {
+    padding: 12px;
+  }
+}
