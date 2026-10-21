@@ -1,0 +1,86 @@
+/* ========================================
+   CARTEIRA FÍSICA — imagens (corpo + bolso) com cartões HTML entre elas
+======================================== */
+
+.cena {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  /* mesma proporção das imagens (603x414) */
+  aspect-ratio: 603 / 414;
+  cursor: pointer;
+}
+
+/* Camadas de imagem: ocupam exatamente o mesmo box, alinhadas */
+.corpo,
+.bolso {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none; /* cliques passam para os cartões */
+}
+
+.corpo {
+  z-index: 1; /* fundo */
+}
+
+.bolso {
+  z-index: 3; /* frente: cobre a base dos cartões */
+}
+
+/* Cartões (HTML real) na faixa entre corpo e bolso.
+   Cada .slot é posicionado de forma absoluta; a posição vertical é
+   calculada a partir do índice (--i) e do total (--n), adaptando-se a
+   qualquer quantidade de cartões. */
+.leque {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  width: 66%;
+  height: 100%;
+  z-index: 2; /* entre corpo (1) e bolso (3) */
+  pointer-events: none; /* o container não intercepta; os slots sim */
+}
+
+.slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* ancoragem base: os cartões partem da região do bolso */
+  bottom: 14%;
+
+  /* FECHADO: todos quase no mesmo ponto; só uma pequena ponta de cada
+     cartão (mais ao fundo) assoma acima do topo do anterior */
+  transform: translateY(calc(var(--i) * -7px));
+
+  z-index: calc(10 + (var(--n) - var(--i))); /* frente = menor índice */
+  pointer-events: auto;
+  transition: transform var(--transicao-padrao);
+}
+
+/* ABERTO: leque gradual — cada cartão sobe proporcional ao seu índice,
+   revelando nome/instituição de todos. O passo diminui conforme aumenta
+   o número de cartões, para a composição não crescer indefinidamente. */
+.aberta .slot {
+  transform: translateY(
+    calc(var(--i) * (-62% / max(var(--n), 1)) - 8%)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot {
+    transition: none;
+  }
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 420px) {
+  .cena {
+    max-width: 320px;
+  }
+}
