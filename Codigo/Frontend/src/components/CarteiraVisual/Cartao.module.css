@@ -1,0 +1,160 @@
+/* ========================================
+   CARTÃO VISUAL (apenas frente, sem virar)
+======================================== */
+
+.cena {
+  /* proporção de cartão real ~1.586:1 */
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1.586 / 1;
+}
+
+/* Versão compacta (topo do painel de detalhes) */
+.compacto {
+  max-width: 240px;
+}
+
+.cartao {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+}
+
+/* ---------- Face (frente) ---------- */
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 22px;
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(16, 24, 23, 0.28);
+  overflow: hidden;
+}
+
+.frente {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ---------- Temas (gradientes) ---------- */
+.tema-roxo .frente {
+  background: linear-gradient(135deg, #6a3de8 0%, #9d4edd 60%, #c77dff 100%);
+}
+
+.tema-escuro .frente {
+  background: linear-gradient(135deg, #1a1f1e 0%, #2b3a36 60%, #3c524b 100%);
+}
+
+.tema-verde .frente {
+  background: linear-gradient(135deg, #2f6d4f 0%, #4e9c6b 55%, #7fa878 100%);
+}
+
+.tema-azul .frente {
+  background: linear-gradient(135deg, #0b3d91 0%, #1a6bb5 60%, #46a0e0 100%);
+}
+
+/* brilho sutil */
+.face::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 70%;
+  height: 160%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+/* ---------- Topo (apelido + bandeira) ---------- */
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+
+.apelido {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.bandeira {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.95;
+}
+
+/* ---------- Chip ---------- */
+.chip {
+  width: 44px;
+  height: 34px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #e6c86e, #c99a2e);
+  position: relative;
+  z-index: 1;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.chip::before {
+  content: "";
+  position: absolute;
+  inset: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+}
+
+/* ---------- Número ---------- */
+.numero {
+  display: flex;
+  gap: 14px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- Rodapé (titular + validade) ---------- */
+.rodape {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.campo small {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.campo strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,67 @@
+/* Placeholder sóbrio para conta / reserva / dinheiro (sem refino visual) */
+
+.conta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1.586 / 1;
+  padding: var(--espaco-5);
+
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+}
+
+.icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.apelido {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.instituicao {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+/* ---------- Versão compacta (topo do painel) ---------- */
+.compacto {
+  aspect-ratio: auto;
+  max-width: none;
+  padding: var(--espaco-3) var(--espaco-4);
+  gap: var(--espaco-3);
+}
+
+.compacto .icone {
+  width: 42px;
+  height: 42px;
+}
+
+.compacto .apelido {
+  font-size: var(--texto-sm);
+}
+
+.compacto .instituicao {
+  font-size: var(--texto-xs);
+}
