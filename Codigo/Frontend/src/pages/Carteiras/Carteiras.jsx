@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, CreditCard, Landmark, Coins } from "lucide-react";
 
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
+import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
 
@@ -182,24 +183,33 @@ function Carteiras() {
         </div>
       </div>
 
-      {/* Seção: Cartões (carteira que abre e revela os cartões) */}
-      <Secao
-        titulo="Sua carteira"
-        icone={CreditCard}
-        vazio="Nenhum cartão cadastrado."
-        empilhado
-        manterAberta={cartoes.some((c) => c.id === itemSelecionado?.id)}
-      >
-        {cartoes.map((item) => (
-          <ItemCarteira
-            key={item.id}
-            item={item}
-            selecionado={itemSelecionado?.id === item.id}
-            onSelecionar={() => setItemSelecionado(item)}
-            semRodape
-          />
-        ))}
-      </Secao>
+      {/* Seção: Cartões — porta-cartões físico (SVG) com cartões HTML */}
+      <section className={styles.secao}>
+        <div className={styles.secaoTopo}>
+          <CreditCard size={18} />
+          <h2>Sua carteira</h2>
+        </div>
+
+        {cartoes.length === 0 ? (
+          <div className={`card ${styles.vazio}`}>
+            <p className="texto-secundario">Nenhum cartão cadastrado.</p>
+          </div>
+        ) : (
+          <CarteiraFisica
+            manterAberta={cartoes.some((c) => c.id === itemSelecionado?.id)}
+          >
+            {cartoes.map((item) => (
+              <ItemCarteira
+                key={item.id}
+                item={item}
+                selecionado={itemSelecionado?.id === item.id}
+                onSelecionar={() => setItemSelecionado(item)}
+                semRodape
+              />
+            ))}
+          </CarteiraFisica>
+        )}
+      </section>
 
       {/* Seção: Contas */}
       <Secao titulo="Contas" icone={Landmark} vazio="Nenhuma conta cadastrada.">
@@ -260,32 +270,11 @@ function Carteiras() {
   );
 }
 
-/** Seção com título e grade de itens; mostra estado vazio quando não há filhos.
- *  Quando `empilhado`, funciona como uma carteira que abre (hover no desktop,
- *  clique no touch) e revela os cartões. `manterAberta` impede o fechamento
- *  enquanto houver um cartão selecionado (painel aberto). */
-function Secao({
-  titulo,
-  icone: Icone,
-  vazio,
-  empilhado = false,
-  manterAberta = false,
-  children,
-}) {
-  const [aberta, setAberta] = useState(false);
+/** Seção com título e grade de itens; mostra estado vazio quando não há filhos. */
+function Secao({ titulo, icone: Icone, vazio, children }) {
   const temItens = Array.isArray(children)
     ? children.length > 0
     : Boolean(children);
-
-  const revelada = empilhado && (aberta || manterAberta);
-
-  const propsPilha = empilhado
-    ? {
-        onMouseEnter: () => setAberta(true),
-        onMouseLeave: () => setAberta(false),
-        onClick: () => setAberta((v) => !v),
-      }
-    : {};
 
   return (
     <section className={styles.secao}>
@@ -295,16 +284,7 @@ function Secao({
       </div>
 
       {temItens ? (
-        <div
-          className={
-            empilhado
-              ? `${styles.pilha} ${revelada ? styles.pilhaAberta : ""}`
-              : styles.grade
-          }
-          {...propsPilha}
-        >
-          {children}
-        </div>
+        <div className={styles.grade}>{children}</div>
       ) : (
         <div className={`card ${styles.vazio}`}>
           <p className="texto-secundario">{vazio}</p>
