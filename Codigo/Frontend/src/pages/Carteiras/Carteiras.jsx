@@ -182,14 +182,21 @@ function Carteiras() {
         </div>
       </div>
 
-      {/* Seção: Cartões */}
-      <Secao titulo="Cartões" icone={CreditCard} vazio="Nenhum cartão cadastrado.">
+      {/* Seção: Cartões (carteira que abre e revela os cartões) */}
+      <Secao
+        titulo="Sua carteira"
+        icone={CreditCard}
+        vazio="Nenhum cartão cadastrado."
+        empilhado
+        manterAberta={cartoes.some((c) => c.id === itemSelecionado?.id)}
+      >
         {cartoes.map((item) => (
           <ItemCarteira
             key={item.id}
             item={item}
             selecionado={itemSelecionado?.id === item.id}
             onSelecionar={() => setItemSelecionado(item)}
+            semRodape
           />
         ))}
       </Secao>
@@ -253,11 +260,32 @@ function Carteiras() {
   );
 }
 
-/** Seção com título e grade de itens; mostra estado vazio quando não há filhos. */
-function Secao({ titulo, icone: Icone, vazio, children }) {
+/** Seção com título e grade de itens; mostra estado vazio quando não há filhos.
+ *  Quando `empilhado`, funciona como uma carteira que abre (hover no desktop,
+ *  clique no touch) e revela os cartões. `manterAberta` impede o fechamento
+ *  enquanto houver um cartão selecionado (painel aberto). */
+function Secao({
+  titulo,
+  icone: Icone,
+  vazio,
+  empilhado = false,
+  manterAberta = false,
+  children,
+}) {
+  const [aberta, setAberta] = useState(false);
   const temItens = Array.isArray(children)
     ? children.length > 0
     : Boolean(children);
+
+  const revelada = empilhado && (aberta || manterAberta);
+
+  const propsPilha = empilhado
+    ? {
+        onMouseEnter: () => setAberta(true),
+        onMouseLeave: () => setAberta(false),
+        onClick: () => setAberta((v) => !v),
+      }
+    : {};
 
   return (
     <section className={styles.secao}>
@@ -267,7 +295,16 @@ function Secao({ titulo, icone: Icone, vazio, children }) {
       </div>
 
       {temItens ? (
-        <div className={styles.grade}>{children}</div>
+        <div
+          className={
+            empilhado
+              ? `${styles.pilha} ${revelada ? styles.pilhaAberta : ""}`
+              : styles.grade
+          }
+          {...propsPilha}
+        >
+          {children}
+        </div>
       ) : (
         <div className={`card ${styles.vazio}`}>
           <p className="texto-secundario">{vazio}</p>
@@ -277,8 +314,9 @@ function Secao({ titulo, icone: Icone, vazio, children }) {
   );
 }
 
-/** Item clicável da carteira: representação visual + rótulo e saldo. */
-function ItemCarteira({ item, selecionado, onSelecionar }) {
+/** Item clicável da carteira: representação visual + rótulo e saldo.
+ *  `semRodape` oculta o texto abaixo (usado dentro do corpo da carteira). */
+function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
   const valorRodape =
     item.tipo === "reserva"
       ? formatarBRL(item.valorReservado)
@@ -293,7 +331,11 @@ function ItemCarteira({ item, selecionado, onSelecionar }) {
       className={`${styles.item} ${selecionado ? styles.itemSelecionado : ""}`}
       role="button"
       tabIndex={0}
-      onClick={onSelecionar}
+      onClick={(e) => {
+        // evita que o clique no cartão alterne a abertura da carteira
+        e.stopPropagation();
+        onSelecionar();
+      }}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
@@ -313,12 +355,14 @@ function ItemCarteira({ item, selecionado, onSelecionar }) {
         valor={formatarBRL(item.saldo)}
       />
 
-      <div className={styles.itemRodape}>
-        <span className={styles.itemNome}>{item.apelido}</span>
-        {valorRodape ? (
-          <span className={styles.itemValor}>{valorRodape}</span>
-        ) : null}
-      </div>
+      {!semRodape && (
+        <div className={styles.itemRodape}>
+          <span className={styles.itemNome}>{item.apelido}</span>
+          {valorRodape ? (
+            <span className={styles.itemValor}>{valorRodape}</span>
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }

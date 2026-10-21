@@ -128,6 +128,32 @@
   background-color: var(--verde-fundo);
 }
 
+/* ---------- Interações nos cartões (apenas com a carteira aberta) ---------- */
+/* com a carteira aberta (ou foco por teclado), apontar/focar um cartão
+   o traz à frente */
+.pilhaAberta .item:hover,
+.pilha .item:focus-visible {
+  transform: translateY(-6px);
+  z-index: 5;
+}
+
+/* cartão selecionado permanece destacado e acima dos demais */
+.pilha .itemSelecionado,
+.pilha .itemSelecionado:hover {
+  z-index: 6;
+}
+
+.pilha .item:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pilha,
+  .pilha .item {
+    transition: none;
+  }
+}
+
 .itemRodape {
   width: 100%;
   max-width: 340px;
@@ -151,6 +177,109 @@
   white-space: nowrap;
 }
 
+/* ========================================
+   CARTEIRA FÍSICA (porta-cartões premium)
+   .pilha = ABA TRASEIRA da carteira (alta, de couro).
+   .pilha::after = BOLSO FRONTAL, mais baixo, onde os cartões encaixam.
+   Os cartões ficam entre a aba traseira e o bolso frontal.
+======================================== */
+.pilha {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+
+  /* espaço no topo = aba traseira acima dos cartões;
+     espaço na base = altura do bolso frontal */
+  padding: var(--espaco-5) 22px 120px;
+
+  /* couro verde-escuro do MeuBolso (material, não preto) */
+  background:
+    radial-gradient(120% 60% at 50% 0%, rgba(127, 168, 120, 0.18), transparent 60%),
+    linear-gradient(165deg, #38524a 0%, #2b4038 45%, #1f302a 100%);
+  border-radius: 18px 18px 22px 22px;
+
+  /* espessura/relevo do objeto: luz no topo, sombra na base, apoio no chão */
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.04),
+    0 22px 40px -12px rgba(16, 24, 23, 0.45);
+
+  cursor: pointer;
+  transition: padding var(--transicao-padrao);
+}
+
+/* costura da aba traseira (topo da carteira) */
+.pilha::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 12px;
+  right: 12px;
+  height: 26px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 10px 10px 4px 4px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* BOLSO FRONTAL: painel de couro mais claro, com lábio de abertura e costura */
+.pilha::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 96px;
+  z-index: 3; /* à frente dos cartões: eles entram "atrás" do bolso */
+
+  background:
+    /* costura superior do bolso */
+    linear-gradient(90deg, transparent 10px, rgba(255,255,255,0.14) 10px, rgba(255,255,255,0.14) calc(100% - 10px), transparent calc(100% - 10px)) top/100% 1px no-repeat,
+    /* material do bolso, um pouco mais claro que a aba traseira */
+    linear-gradient(180deg, #44615607 0%, #3d584f 10%, #314a41 100%);
+  border-radius: 6px 6px 22px 22px;
+
+  /* lábio/abertura do bolso: sombra interna no topo + luz fininha */
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 -2px 6px rgba(0, 0, 0, 0.20);
+  pointer-events: none;
+}
+
+.pilha .item {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 320px;
+  transition:
+    margin-top var(--transicao-padrao),
+    transform var(--transicao-padrao);
+}
+
+/* fechado: cartões bem inseridos — só a parte superior assoma do bolso */
+.pilha .item + .item {
+  margin-top: calc(var(--espaco-12) * -1);
+}
+
+/* aberto: cartões sobem e saem do bolso, distribuídos; a carteira
+   (aba + bolso) permanece visível como o mesmo objeto */
+.pilhaAberta .item + .item,
+.pilha:focus-within .item + .item {
+  margin-top: var(--espaco-3);
+}
+
+/* aberto: a aba traseira cresce um pouco para acomodar os cartões expostos,
+   mas o bolso frontal (::after) continua ancorado na base */
+.pilhaAberta {
+  padding-bottom: 132px;
+}
+
 /* ---------- Estado vazio ---------- */
 .vazio {
   text-align: center;
@@ -162,5 +291,10 @@
 @media (max-width: 640px) {
   .resumo {
     grid-template-columns: 1fr;
+  }
+
+  .pilha .item + .item {
+    /* em telas estreitas, reduz a sobreposição para manter legibilidade */
+    margin-top: calc(var(--espaco-6) * -1);
   }
 }
