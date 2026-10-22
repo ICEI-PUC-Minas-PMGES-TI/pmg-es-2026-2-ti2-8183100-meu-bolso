@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Gastos from "./pages/Gastos/Gastos";
 import Metas from "./pages/Metas/Metas";
+import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/carteiras" element={<Carteiras />} />
           <Route path="/gastos" element={<Gastos />} />
           <Route path="/metas" element={<Metas />} />
+          <Route path="/evolucao-financeira" element={<EvolucaoFinanceira />} />
 
           {/* Adicione quando criar as páginas:
           <Route path="/perfil" element={<Perfil />} />
