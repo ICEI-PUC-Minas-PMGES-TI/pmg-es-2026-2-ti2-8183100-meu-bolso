@@ -394,6 +394,7 @@ function Metas() {
         metaParaEditar={metaEmEdicao}
         onFechar={fecharModal}
         onSalvar={salvarMeta}
+        onExcluir={excluirMeta}
       />
 
       {/* Modal de movimentação (depósito/retirada) do valor guardado. */}
