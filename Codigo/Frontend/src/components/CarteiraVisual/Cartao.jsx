@@ -1,16 +1,12 @@
-import { bancoDe, corTexto, fundoCartao } from "../../data/bancos";
+import {
+  bancoDe,
+  chaveDoBanco,
+  corTexto,
+  fundoCartao,
+  filtroLogo,
+  LOGO_ICONE,
+} from "../../data/bancos";
 import styles from "./Cartao.module.css";
-
-/** Normaliza o nome do cartão para a chave do mapa de bancos.
- *  "Banco Inter" -> "inter", "Nubank" -> "nubank". */
-function chaveBancoCartao(apelido) {
-  return (apelido || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/^banco\s+/, "")
-    .replace(/\s+/g, "");
-}
 
 /**
  * Cartão visual (carteira tipo "cartao"). Apenas estético.
@@ -19,6 +15,7 @@ function chaveBancoCartao(apelido) {
  *
  * props:
  *  - apelido, bandeira, ultimosDigitos
+ *  - banco (opcional): nome do banco/conta associada
  *  - titular, validade (opcionais)
  *  - tema: "roxo" | "escuro" | "verde" | "azul"
  *  - compacto: versão reduzida (topo do painel)
@@ -29,21 +26,33 @@ function Cartao({
   validade = "",
   bandeira = "",
   apelido = "",
+  banco: bancoTexto = "",
   tema = "roxo",
   subtipo = "",
   compacto = false,
 }) {
-  // Identidade visual do banco (fundo, cor do texto e logo).
-  const banco = bancoDe(chaveBancoCartao(apelido));
+  // Resolve a chave do banco:
+  //  1) chave salva no cartão (bancoTexto), se for um banco válido;
+  //  2) "outro" (ou inválida) -> padrao;
+  //  3) cartões antigos sem banco -> deduz do nome do cartão.
+  const chaveSalva = bancoTexto ? chaveDoBanco(bancoTexto) : null;
+  const chave =
+    chaveSalva ?? (bancoTexto ? null : chaveDoBanco(apelido));
+  const banco = bancoDe(chave);
+  const bancoReconhecido = chave != null;
   const corDoTexto = corTexto(banco.cor);
+  // Ícones opacos (quadrado colorido): cores originais, cantos e anel branco.
+  // Demais bancos: filtro de contraste. Nunca aplica no padrao.png.
+  const ehIcone = bancoReconhecido && LOGO_ICONE.has(chave);
+  const estiloLogo = !bancoReconhecido
+    ? undefined
+    : ehIcone
+    ? { borderRadius: "6px", boxShadow: "0 0 0 2px rgba(255,255,255,.9)" }
+    : { filter: filtroLogo(banco.cor) };
   const estiloFace = {
     background: fundoCartao(banco.cor),
     color: corDoTexto,
   };
-  // Logo branca quando o texto é branco (fundo escuro/colorido).
-  const estiloLogo =
-    corDoTexto === "#FFFFFF" ? { filter: "brightness(0) invert(1)" } : undefined;
-
   function aoErrarLogo(e) {
     if (!e.currentTarget.dataset.fallback) {
       e.currentTarget.dataset.fallback = "1";
@@ -51,35 +60,28 @@ function Cartao({
     }
   }
 
+  // Caixa de tamanho fixo padroniza todas as logos (independe do recorte do PNG).
   const logoImg = (
-    <img
-      src={banco.logo}
-      alt={banco.nome}
-      className={styles.logo}
-      style={estiloLogo}
-      onError={aoErrarLogo}
-    />
+    <span className={styles.logoBox}>
+      <img
+        src={banco.logo}
+        alt={banco.nome}
+        className={styles.logo}
+        style={estiloLogo}
+        onError={aoErrarLogo}
+      />
+    </span>
   );
 
   // Representação compacta (topo do painel): só o essencial para
   // identificar o cartão — tipo, bandeira (se houver) e 4 dígitos.
   if (compacto) {
-    const rotuloTipo =
-      subtipo === "debito"
-        ? "Débito"
-        : subtipo === "credito"
-        ? "Crédito"
-        : "";
-
     return (
       <div className={`${styles.cena} ${styles.compacto}`}>
         <div className={`${styles.cartao} ${styles[`tema-${tema}`]}`}>
           <div className={`${styles.face} ${styles.frente}`} style={estiloFace}>
             <div className={styles.topo}>
-              <span className={styles.marca}>
-                {logoImg}
-                {rotuloTipo && <span className={styles.apelido}>{rotuloTipo}</span>}
-              </span>
+              <span className={styles.marca}>{logoImg}</span>
               {bandeira && <span className={styles.bandeira}>{bandeira}</span>}
             </div>
 
@@ -99,38 +101,14 @@ function Cartao({
         {/* FRENTE */}
         <div className={`${styles.face} ${styles.frente}`} style={estiloFace}>
           <div className={styles.topo}>
-            <span className={styles.marca}>
-              {logoImg}
-              <span className={styles.apelido}>{apelido || "Meu Bolso"}</span>
-            </span>
+            <span className={styles.marca}>{logoImg}</span>
             {bandeira && <span className={styles.bandeira}>{bandeira}</span>}
           </div>
 
-          <div className={styles.chip} aria-hidden="true" />
-
           <div className={styles.numero}>
-            <span>••••</span>
-            <span>••••</span>
             <span>••••</span>
             <span>{ultimosDigitos || "••••"}</span>
           </div>
-
-          {(titular || validade) && (
-            <div className={styles.rodape}>
-              {titular && (
-                <div className={styles.campo}>
-                  <small>Titular</small>
-                  <strong>{titular.toUpperCase()}</strong>
-                </div>
-              )}
-              {validade && (
-                <div className={styles.campo}>
-                  <small>Validade</small>
-                  <strong>{validade}</strong>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

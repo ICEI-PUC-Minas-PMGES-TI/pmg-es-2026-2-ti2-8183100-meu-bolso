@@ -414,6 +414,7 @@ function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
       <CarteiraVisual
         tipo={item.tipo}
         apelido={item.apelido}
+        banco={item.banco}
         instituicao={item.instituicao}
         bandeira={item.bandeira}
         tema={item.tema}

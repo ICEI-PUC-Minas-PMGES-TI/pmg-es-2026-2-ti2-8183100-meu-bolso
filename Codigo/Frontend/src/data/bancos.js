@@ -17,6 +17,35 @@ export const BANCOS = {
   xp: ["XP Investimentos", "#000000"],
 };
 
+/** Normaliza: minúsculas e sem acentos. */
+function normalizar(texto) {
+  return (texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+/**
+ * Descobre a chave do banco a partir de um texto livre
+ * ("Inter Débito", "Banco Inter", "Nubank Mastercard"...).
+ * Retorna a chave de BANCOS contida no texto (ou cujo nome esteja contido),
+ * ou null quando nada combina.
+ */
+export function chaveDoBanco(texto) {
+  const t = normalizar(texto);
+  if (!t) return null;
+
+  // 1) chave de BANCOS contida no texto (ex.: "inter", "nubank")
+  for (const chave of Object.keys(BANCOS)) {
+    if (t.includes(chave)) return chave;
+  }
+  // 2) nome do banco normalizado contido no texto (ex.: "mercado pago")
+  for (const [chave, [nome]] of Object.entries(BANCOS)) {
+    if (t.includes(normalizar(nome))) return chave;
+  }
+  return null;
+}
+
 /** Retorna { nome, cor, logo } para a chave. Fallback: "Outro banco". */
 export function bancoDe(chave) {
   const banco = BANCOS[chave];
@@ -39,5 +68,15 @@ export function corTexto(hex) {
 
 /** Gradiente de fundo do cartão a partir do hex. */
 export function fundoCartao(hex) {
-  return `linear-gradient(135deg, ${hex}, color-mix(in srgb, ${hex} 70%, black))`;
+  return `linear-gradient(135deg, ${hex}, color-mix(in srgb, ${hex} 85%, black))`;
+}
+
+// Bancos cujo PNG é um ícone opaco (quadrado colorido): não aplicar filtro.
+export const LOGO_ICONE = new Set(["itau", "bradesco", "mercadopago", "picpay", "xp"]);
+
+/** Filtro da logo conforme o fundo: branca em fundo escuro, preta em fundo claro. */
+export function filtroLogo(hex) {
+  return corTexto(hex) === "#FFFFFF"
+    ? "brightness(0) invert(1)"
+    : "brightness(0)";
 }
