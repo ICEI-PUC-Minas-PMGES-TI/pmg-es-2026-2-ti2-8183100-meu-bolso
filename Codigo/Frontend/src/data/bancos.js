@@ -74,6 +74,12 @@ export function fundoCartao(hex) {
 // Bancos cujo PNG é um ícone opaco (quadrado colorido): não aplicar filtro.
 export const LOGO_ICONE = new Set(["itau", "bradesco", "mercadopago", "picpay", "xp"]);
 
+// Fundo do círculo da logo nos cards de conta, só para exceções de contraste.
+export const FUNDO_LOGO = {
+  btg: { fundo: "#0A2540" },
+  caixa: { fundo: "#FFFFFF", anel: "#005CA9" },
+};
+
 /** Filtro da logo conforme o fundo: branca em fundo escuro, preta em fundo claro. */
 export function filtroLogo(hex) {
   return corTexto(hex) === "#FFFFFF"

@@ -41,6 +41,7 @@ const formInicial = {
   // conta
   instituicao: "",
   saldo: "",
+  posicao: "",
   // dinheiro / reserva
   valor: "",
   objetivo: "",
@@ -49,6 +50,15 @@ const formInicial = {
 /** Número -> string editável no input (sem forçar formato de moeda). */
 function numParaTexto(n) {
   return n == null ? "" : String(n);
+}
+
+// Posições de destaque das contas (ordem fixa).
+const POSICOES_CONTA = ["principal", "secundaria", "terciaria"];
+
+/** Primeira posição de destaque ainda livre; "" (não destacar) se as 3 ocupadas. */
+function primeiraPosicaoLivre(contas) {
+  const usadas = new Set(contas.map((c) => c.posicao).filter(Boolean));
+  return POSICOES_CONTA.find((p) => !usadas.has(p)) ?? "";
 }
 
 /**
@@ -90,6 +100,7 @@ function formDoItem(item) {
     contaId: item.contaId || "",
     instituicao: item.instituicao || "",
     saldo: numParaTexto(item.saldo),
+    posicao: item.posicao || "",
     valor: numParaTexto(item.valorReservado ?? (item.tipo === "dinheiro" ? item.saldo : undefined)),
     objetivo: numParaTexto(item.objetivo),
   };
@@ -104,9 +115,14 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
     itemEditando ? itemEditando.tipo : tipoInicial
   );
   const [erros, setErros] = useState({});
-  const [form, setForm] = useState(
-    itemEditando ? formDoItem(itemEditando) : formInicial
-  );
+  const [form, setForm] = useState(() => {
+    if (itemEditando) return formDoItem(itemEditando);
+    // Nova conta: já sugere a primeira posição de destaque livre.
+    if ((tipoInicial ?? null) === "conta") {
+      return { ...formInicial, posicao: primeiraPosicaoLivre(contas) };
+    }
+    return formInicial;
+  });
 
   if (!aberto) return null;
 
@@ -160,11 +176,18 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
     }
 
     if (tipoSelecionado === "conta") {
+      // instituicao fica com o nome do banco (compatibilidade com cards antigos)
+      const instituicao =
+        form.banco && form.banco !== "outro"
+          ? bancoDe(form.banco).nome
+          : form.instituicao.trim();
       return {
         ...base,
         apelido: form.apelido.trim() || "Conta",
-        ...(form.instituicao.trim() ? { instituicao: form.instituicao.trim() } : {}),
+        ...(form.banco ? { banco: form.banco } : {}),
+        ...(instituicao ? { instituicao } : {}),
         saldo: converterValor(form.saldo) ?? 0,
+        posicao: form.posicao || null,
       };
     }
 
@@ -200,11 +223,20 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
     return e;
   }
 
+  // Obrigatórios da conta: apelido e banco.
+  function validarConta() {
+    const e = {};
+    if (!form.apelido.trim()) e.apelido = "Informe um apelido.";
+    if (!form.banco) e.banco = "Selecione o banco.";
+    return e;
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
 
-    if (tipoSelecionado === "cartao") {
-      const novosErros = validarCartao();
+    if (tipoSelecionado === "cartao" || tipoSelecionado === "conta") {
+      const novosErros =
+        tipoSelecionado === "cartao" ? validarCartao() : validarConta();
       setErros(novosErros);
       if (Object.keys(novosErros).length > 0) return; // bloqueia o envio
     }
@@ -250,7 +282,15 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
                   key={opcao.tipo}
                   type="button"
                   className={styles.opcao}
-                  onClick={() => setTipoSelecionado(opcao.tipo)}
+                  onClick={() => {
+                    if (opcao.tipo === "conta") {
+                      setForm((f) => ({
+                        ...f,
+                        posicao: primeiraPosicaoLivre(contas),
+                      }));
+                    }
+                    setTipoSelecionado(opcao.tipo);
+                  }}
                 >
                   <span className={styles.opcaoIcone}>
                     <Icone size={22} />
@@ -453,18 +493,42 @@ function CamposPorTipo({ tipo, form, atualizar, contas, erros = {} }) {
 
       {tipo === "conta" && (
         <>
-          <div className={styles.campo}>
-            <label htmlFor="instituicao">Instituição</label>
-            <input
-              id="instituicao"
-              type="text"
-              placeholder="Ex: Banco Inter"
-              value={form.instituicao}
-              onChange={(e) => atualizar("instituicao", e.target.value)}
-            />
+          <div className={cls("banco")}>
+            <label htmlFor="bancoConta">Banco</label>
+            <select
+              id="bancoConta"
+              value={form.banco}
+              onChange={(e) => atualizar("banco", e.target.value)}
+            >
+              <option value="" disabled>
+                Selecione
+              </option>
+              {OPCOES_BANCO.map((b) => (
+                <option key={b.chave} value={b.chave}>
+                  {b.nome}
+                </option>
+              ))}
+              <option value="outro">Outro banco</option>
+            </select>
+            {erros.banco && (
+              <span className={styles.mensagemErro}>{erros.banco}</span>
+            )}
           </div>
           <div className={styles.campo}>
-            <label htmlFor="saldo">Saldo inicial</label>
+            <label htmlFor="posicao">Posição na carteira (opcional)</label>
+            <select
+              id="posicao"
+              value={form.posicao}
+              onChange={(e) => atualizar("posicao", e.target.value)}
+            >
+              <option value="principal">Principal</option>
+              <option value="secundaria">Secundária</option>
+              <option value="terciaria">Terciária</option>
+              <option value="">Não destacar</option>
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="saldo">Saldo inicial (opcional)</label>
             <input
               id="saldo"
               type="text"

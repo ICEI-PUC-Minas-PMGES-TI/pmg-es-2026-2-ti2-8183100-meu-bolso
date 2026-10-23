@@ -11,6 +11,7 @@ import {
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
 import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
+import PainelContas from "../../components/PainelContas/PainelContas";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
 
 import {
@@ -21,7 +22,7 @@ import {
   formatarBRL,
 } from "./carteirasMock";
 
-import { bancoDe } from "../../data/bancos";
+import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
 
 import styles from "./Carteiras.module.css";
 
@@ -50,6 +51,7 @@ function carregarPersistido() {
 function Carteiras() {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const [painelContasAberto, setPainelContasAberto] = useState(false);
   // Quando preenchido, o modal abre direto no formulário desse tipo
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
@@ -86,6 +88,18 @@ function Carteiras() {
     .filter((c) => c.subtipo === "credito")
     .reduce((acc, c) => acc + (c.faturaAtual || 0), 0);
 
+  // Contas em destaque: as 3 posicionadas (principal, secundária, terciária).
+  // Fallback para contas antigas sem posição: as 3 primeiras na ordem atual.
+  const ordemPosicao = ["principal", "secundaria", "terciaria"];
+  const temPosicionadas = contas.some((c) =>
+    ordemPosicao.includes(c.posicao)
+  );
+  const contasDestaque = temPosicionadas
+    ? ordemPosicao
+        .map((p) => contas.find((c) => c.posicao === p))
+        .filter(Boolean)
+    : contas.slice(0, 3);
+
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
 
@@ -95,12 +109,24 @@ function Carteiras() {
     else setDinheiroEReservas(atualizador); // dinheiro e reserva
   }
 
+  // Garante que só uma conta ocupe cada posição: libera a posição de quem já a usa.
+  function liberarPosicao(lista, posicao, excetoId) {
+    if (!posicao) return lista;
+    return lista.map((c) =>
+      c.id !== excetoId && c.posicao === posicao ? { ...c, posicao: null } : c
+    );
+  }
+
   function salvarItem(dados) {
     if (dados.id) {
       // edição: substitui o item existente
-      setListaPorTipo(dados.tipo, (lista) =>
-        lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i))
-      );
+      setListaPorTipo(dados.tipo, (lista) => {
+        let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
+        if (dados.tipo === "conta") {
+          nova = liberarPosicao(nova, dados.posicao, dados.id);
+        }
+        return nova;
+      });
       // mantém o painel refletindo o item editado
       setItemSelecionado((atual) =>
         atual && atual.id === dados.id ? { ...atual, ...dados } : atual
@@ -108,7 +134,12 @@ function Carteiras() {
     } else {
       // novo item
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
-      setListaPorTipo(dados.tipo, (lista) => [...lista, item]);
+      setListaPorTipo(dados.tipo, (lista) => {
+        const base = [...lista, item];
+        return dados.tipo === "conta"
+          ? liberarPosicao(base, item.posicao, item.id)
+          : base;
+      });
     }
     setItemEditando(null);
   }
@@ -265,16 +296,26 @@ function Carteiras() {
           vazio="Nenhuma conta cadastrada."
           className={styles.secaoContas}
           acao={
-            <span className={styles.verTodas}>
+            <span
+              className={styles.verTodas}
+              role="button"
+              tabIndex={0}
+              onClick={() => setPainelContasAberto(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setPainelContasAberto(true);
+                }
+              }}
+            >
               Ver todas <ChevronRight size={14} />
             </span>
           }
         >
-          {contas.map((item, i) => (
+          {contasDestaque.map((item) => (
             <CardConta
               key={item.id}
               item={item}
-              posicao={i}
               selecionado={itemSelecionado?.id === item.id}
               onSelecionar={() => setItemSelecionado(item)}
             />
@@ -328,6 +369,23 @@ function Carteiras() {
         }}
         onEditar={() => abrirEdicao(itemSelecionado)}
         onExcluir={() => excluirItem(itemSelecionado)}
+      />
+
+      {/* Painel lateral com todas as contas */}
+      <PainelContas
+        aberto={painelContasAberto}
+        contas={contas}
+        onFechar={() => setPainelContasAberto(false)}
+        onEditar={(conta) => {
+          setPainelContasAberto(false);
+          abrirEdicao(conta);
+        }}
+        onAdicionar={() => {
+          setPainelContasAberto(false);
+          setItemEditando(null);
+          setTipoAdicionar("conta");
+          setModalAberto(true);
+        }}
       />
 
       {/* Modal de adicionar / editar.
@@ -438,13 +496,9 @@ function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
 /** Normaliza o nome/banco da conta para a chave do mapa de bancos.
  *  Ex.: "Banco Inter" -> "inter", "Nubank" -> "nubank". */
 function chaveBanco(item) {
-  const base = item.banco || item.apelido || item.instituicao || "";
-  return base
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove acentos
-    .replace(/^banco\s+/, "") // tira "banco " inicial
-    .replace(/\s+/g, ""); // remove espaços
+  // conta.banco salvo e válido tem prioridade; senão deduz do texto (contas antigas)
+  if (item.banco && BANCOS[item.banco]) return item.banco;
+  return chaveDoBanco(item.instituicao || item.apelido);
 }
 
 /** Última movimentação (a lista do mock já vem com a mais recente primeiro). */
@@ -458,16 +512,31 @@ function ultimaMovimentacao(id) {
  * logo/ícone circular, nome, subtítulo, valor dentro, seta e rodapé
  * com a última movimentação. Apenas apresentação; não altera dados.
  */
-function CardConta({ item, posicao, selecionado, onSelecionar }) {
+function CardConta({ item, selecionado, onSelecionar }) {
   const ehReserva = item.tipo === "reserva";
-  const banco = ehReserva ? null : bancoDe(chaveBanco(item));
+  const chave = ehReserva ? null : chaveBanco(item);
+  const banco = ehReserva ? null : bancoDe(chave);
   const nomeExibido = item.apelido || item.nome || banco?.nome || "Conta";
 
+  // Fundo do círculo da logo: exceções de contraste (BTG, Caixa) ou tom da cor.
+  const fundoLogo = chave ? FUNDO_LOGO[chave] : null;
+  const estiloLogoCirculo = fundoLogo
+    ? {
+        backgroundColor: fundoLogo.fundo,
+        ...(fundoLogo.anel
+          ? { boxShadow: `inset 0 0 0 1.5px ${fundoLogo.anel}` }
+          : {}),
+      }
+    : { backgroundColor: `${banco?.cor}1A` };
+
+  const rotuloPosicao = {
+    principal: "Conta principal",
+    secundaria: "Conta secundária",
+    terciaria: "Conta terciária",
+  };
   const subtitulo = ehReserva
     ? "Reserva guardada"
-    : posicao === 0
-    ? "Conta principal"
-    : "Conta secundária";
+    : rotuloPosicao[item.posicao] || "Conta";
 
   const valor = ehReserva
     ? formatarBRL(item.valorReservado)
@@ -505,7 +574,7 @@ function CardConta({ item, posicao, selecionado, onSelecionar }) {
         ) : (
           <span
             className={styles.contaLogo}
-            style={{ backgroundColor: `${banco.cor}1A` }}
+            style={estiloLogoCirculo}
           >
             <img
               src={banco.logo}
