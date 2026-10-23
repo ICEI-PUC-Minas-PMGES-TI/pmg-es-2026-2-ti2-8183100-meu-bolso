@@ -114,8 +114,109 @@
   margin-top: 2px;
 }
 
+/* Linha de valor dentro do tooltip de barras (uma por série) */
+.tooltipLinha {
+  display: block;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.tooltipLinha::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.tooltipGastos::before {
+  background-color: var(--erro);
+}
+
+.tooltipGuardado::before {
+  background-color: var(--verde-principal);
+}
+
+/* ========================================
+   GRÁFICO DE BARRAS EMPILHADAS
+======================================== */
+
+.barrasTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.barrasTopo h3 {
+  margin: 0;
+}
+
+/* Legenda */
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.legendaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cinza-700);
+}
+
+.legendaCor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.corGastos {
+  background-color: var(--erro);
+}
+
+.corGuardado {
+  background-color: var(--verde-principal);
+}
+
+/* Barras */
+.barraGastos {
+  fill: var(--erro);
+  transition: opacity var(--transicao-rapida);
+}
+
+.barraGuardado {
+  fill: var(--verde-principal);
+  transition: opacity var(--transicao-rapida);
+}
+
+.barraAtiva {
+  opacity: 0.82;
+}
+
+.rotuloXAtivo {
+  fill: var(--preto);
+  font-weight: 600;
+}
+
+/* Rótulo do total acumulado acima de cada barra */
+.rotuloValor {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  fill: var(--verde-escuro);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .ponto {
+  .ponto,
+  .barraGastos,
+  .barraGuardado {
     transition: none;
   }
 }
