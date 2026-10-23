@@ -152,6 +152,23 @@
   padding: 10px 12px;
 }
 
+/* Validação: borda vermelha e mensagem de erro no campo */
+.campoErro input,
+.campoErro select {
+  border-color: var(--erro, #dc2626);
+}
+
+.campoErro input:focus,
+.campoErro select:focus {
+  border-color: var(--erro, #dc2626);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.mensagemErro {
+  font-size: var(--texto-xs);
+  color: var(--erro, #dc2626);
+}
+
 .formAcoes {
   display: flex;
   justify-content: flex-end;

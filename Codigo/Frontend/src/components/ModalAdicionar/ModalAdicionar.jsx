@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { X, CreditCard, Landmark, Wallet, PiggyBank } from "lucide-react";
+import { BANCOS, bancoDe } from "../../data/bancos";
 import styles from "./ModalAdicionar.module.css";
+
+// Opções do seletor de banco, ordenadas pelo nome (A-Z).
+const OPCOES_BANCO = Object.keys(BANCOS)
+  .map((chave) => ({ chave, nome: bancoDe(chave).nome }))
+  .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
 /**
  * Modal para adicionar OU editar um item da carteira.
@@ -25,6 +31,7 @@ const formInicial = {
   apelido: "",
   // cartão
   subtipo: "credito",
+  banco: "",
   bandeira: "",
   titular: "",
   validade: "",
@@ -34,6 +41,7 @@ const formInicial = {
   // conta
   instituicao: "",
   saldo: "",
+  posicao: "",
   // dinheiro / reserva
   valor: "",
   objetivo: "",
@@ -42,6 +50,15 @@ const formInicial = {
 /** Número -> string editável no input (sem forçar formato de moeda). */
 function numParaTexto(n) {
   return n == null ? "" : String(n);
+}
+
+// Posições de destaque das contas (ordem fixa).
+const POSICOES_CONTA = ["principal", "secundaria", "terciaria"];
+
+/** Primeira posição de destaque ainda livre; "" (não destacar) se as 3 ocupadas. */
+function primeiraPosicaoLivre(contas) {
+  const usadas = new Set(contas.map((c) => c.posicao).filter(Boolean));
+  return POSICOES_CONTA.find((p) => !usadas.has(p)) ?? "";
 }
 
 /**
@@ -74,6 +91,7 @@ function formDoItem(item) {
     ...formInicial,
     apelido: item.apelido || "",
     subtipo: item.subtipo || "credito",
+    banco: item.banco || "",
     bandeira: item.bandeira || "",
     titular: item.titular || "",
     validade: item.validade || "",
@@ -82,6 +100,7 @@ function formDoItem(item) {
     contaId: item.contaId || "",
     instituicao: item.instituicao || "",
     saldo: numParaTexto(item.saldo),
+    posicao: item.posicao || "",
     valor: numParaTexto(item.valorReservado ?? (item.tipo === "dinheiro" ? item.saldo : undefined)),
     objetivo: numParaTexto(item.objetivo),
   };
@@ -95,9 +114,15 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
   const [tipoSelecionado, setTipoSelecionado] = useState(
     itemEditando ? itemEditando.tipo : tipoInicial
   );
-  const [form, setForm] = useState(
-    itemEditando ? formDoItem(itemEditando) : formInicial
-  );
+  const [erros, setErros] = useState({});
+  const [form, setForm] = useState(() => {
+    if (itemEditando) return formDoItem(itemEditando);
+    // Nova conta: já sugere a primeira posição de destaque livre.
+    if ((tipoInicial ?? null) === "conta") {
+      return { ...formInicial, posicao: primeiraPosicaoLivre(contas) };
+    }
+    return formInicial;
+  });
 
   if (!aberto) return null;
 
@@ -109,6 +134,8 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
 
   function atualizar(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }));
+    // limpa a mensagem de erro do campo ao editá-lo
+    setErros((e) => (e[campo] ? { ...e, [campo]: undefined } : e));
   }
 
   function converterValor(texto) {
@@ -133,6 +160,7 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
         ...base,
         apelido: form.apelido.trim() || "Cartão",
         subtipo: form.subtipo,
+        ...(form.banco ? { banco: form.banco } : {}),
         ...(form.bandeira ? { bandeira: form.bandeira } : {}),
         ...(form.titular.trim() ? { titular: form.titular.trim() } : {}),
         ...(form.validade.trim() ? { validade: form.validade.trim() } : {}),
@@ -148,11 +176,18 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
     }
 
     if (tipoSelecionado === "conta") {
+      // instituicao fica com o nome do banco (compatibilidade com cards antigos)
+      const instituicao =
+        form.banco && form.banco !== "outro"
+          ? bancoDe(form.banco).nome
+          : form.instituicao.trim();
       return {
         ...base,
         apelido: form.apelido.trim() || "Conta",
-        ...(form.instituicao.trim() ? { instituicao: form.instituicao.trim() } : {}),
+        ...(form.banco ? { banco: form.banco } : {}),
+        ...(instituicao ? { instituicao } : {}),
         saldo: converterValor(form.saldo) ?? 0,
+        posicao: form.posicao || null,
       };
     }
 
@@ -176,8 +211,36 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
     };
   }
 
+  // Valida os campos obrigatórios do cartão. Retorna um mapa campo->mensagem.
+  function validarCartao() {
+    const e = {};
+    if (!form.apelido.trim()) e.apelido = "Informe um apelido.";
+    if (!form.subtipo) e.subtipo = "Escolha o tipo do cartão.";
+    if (!form.banco) e.banco = "Selecione o banco.";
+    if (!form.bandeira) e.bandeira = "Selecione a bandeira.";
+    if (!/^\d{4}$/.test(form.ultimosDigitos))
+      e.ultimosDigitos = "Informe os 4 últimos dígitos.";
+    return e;
+  }
+
+  // Obrigatórios da conta: apelido e banco.
+  function validarConta() {
+    const e = {};
+    if (!form.apelido.trim()) e.apelido = "Informe um apelido.";
+    if (!form.banco) e.banco = "Selecione o banco.";
+    return e;
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
+
+    if (tipoSelecionado === "cartao" || tipoSelecionado === "conta") {
+      const novosErros =
+        tipoSelecionado === "cartao" ? validarCartao() : validarConta();
+      setErros(novosErros);
+      if (Object.keys(novosErros).length > 0) return; // bloqueia o envio
+    }
+
     if (onSalvar) onSalvar(montarItem());
     fecharResetando();
   }
@@ -219,7 +282,15 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
                   key={opcao.tipo}
                   type="button"
                   className={styles.opcao}
-                  onClick={() => setTipoSelecionado(opcao.tipo)}
+                  onClick={() => {
+                    if (opcao.tipo === "conta") {
+                      setForm((f) => ({
+                        ...f,
+                        posicao: primeiraPosicaoLivre(contas),
+                      }));
+                    }
+                    setTipoSelecionado(opcao.tipo);
+                  }}
                 >
                   <span className={styles.opcaoIcone}>
                     <Icone size={22} />
@@ -240,6 +311,7 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
               form={form}
               atualizar={atualizar}
               contas={contas}
+              erros={erros}
             />
 
             <div className={styles.formAcoes}>
@@ -263,12 +335,15 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
   );
 }
 
-function CamposPorTipo({ tipo, form, atualizar, contas }) {
+function CamposPorTipo({ tipo, form, atualizar, contas, erros = {} }) {
   const temContas = contas.length > 0;
+  // classe do campo (adiciona borda vermelha quando há erro)
+  const cls = (campo) =>
+    `${styles.campo} ${erros[campo] ? styles.campoErro : ""}`;
 
   return (
     <>
-      <div className={styles.campo}>
+      <div className={cls("apelido")}>
         <label htmlFor="apelido">Apelido</label>
         <input
           id="apelido"
@@ -277,11 +352,14 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
           value={form.apelido}
           onChange={(e) => atualizar("apelido", e.target.value)}
         />
+        {erros.apelido && (
+          <span className={styles.mensagemErro}>{erros.apelido}</span>
+        )}
       </div>
 
       {tipo === "cartao" && (
         <>
-          <div className={styles.campo}>
+          <div className={cls("subtipo")}>
             <label htmlFor="subtipo">Tipo do cartão</label>
             <select
               id="subtipo"
@@ -291,6 +369,31 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
               <option value="credito">Crédito</option>
               <option value="debito">Débito</option>
             </select>
+            {erros.subtipo && (
+              <span className={styles.mensagemErro}>{erros.subtipo}</span>
+            )}
+          </div>
+
+          <div className={cls("banco")}>
+            <label htmlFor="banco">Banco</label>
+            <select
+              id="banco"
+              value={form.banco}
+              onChange={(e) => atualizar("banco", e.target.value)}
+            >
+              <option value="" disabled>
+                Selecione
+              </option>
+              {OPCOES_BANCO.map((b) => (
+                <option key={b.chave} value={b.chave}>
+                  {b.nome}
+                </option>
+              ))}
+              <option value="outro">Outro banco</option>
+            </select>
+            {erros.banco && (
+              <span className={styles.mensagemErro}>{erros.banco}</span>
+            )}
           </div>
 
           <div className={styles.campo}>
@@ -304,7 +407,7 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
             />
           </div>
 
-          <div className={styles.campo}>
+          <div className={cls("bandeira")}>
             <label htmlFor="bandeira">Bandeira</label>
             <select
               id="bandeira"
@@ -319,23 +422,13 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
               <option value="elo">Elo</option>
               <option value="outra">Outra</option>
             </select>
+            {erros.bandeira && (
+              <span className={styles.mensagemErro}>{erros.bandeira}</span>
+            )}
           </div>
 
-          <div className={styles.campo}>
-            <label htmlFor="validade">Validade (MM/AA, opcional)</label>
-            <input
-              id="validade"
-              type="text"
-              inputMode="numeric"
-              maxLength={5}
-              placeholder="MM/AA"
-              value={form.validade}
-              onChange={(e) => atualizar("validade", formatarValidade(e.target.value))}
-            />
-          </div>
-
-          <div className={styles.campo}>
-            <label htmlFor="digitos">4 últimos dígitos (opcional)</label>
+          <div className={cls("ultimosDigitos")}>
+            <label htmlFor="digitos">4 últimos dígitos</label>
             <input
               id="digitos"
               type="text"
@@ -343,8 +436,18 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
               maxLength={4}
               placeholder="0000"
               value={form.ultimosDigitos}
-              onChange={(e) => atualizar("ultimosDigitos", e.target.value)}
+              onChange={(e) =>
+                atualizar(
+                  "ultimosDigitos",
+                  e.target.value.replace(/\D/g, "").slice(0, 4)
+                )
+              }
             />
+            {erros.ultimosDigitos && (
+              <span className={styles.mensagemErro}>
+                {erros.ultimosDigitos}
+              </span>
+            )}
           </div>
 
           {/* Limite: apenas para crédito */}
@@ -390,18 +493,42 @@ function CamposPorTipo({ tipo, form, atualizar, contas }) {
 
       {tipo === "conta" && (
         <>
-          <div className={styles.campo}>
-            <label htmlFor="instituicao">Instituição</label>
-            <input
-              id="instituicao"
-              type="text"
-              placeholder="Ex: Banco Inter"
-              value={form.instituicao}
-              onChange={(e) => atualizar("instituicao", e.target.value)}
-            />
+          <div className={cls("banco")}>
+            <label htmlFor="bancoConta">Banco</label>
+            <select
+              id="bancoConta"
+              value={form.banco}
+              onChange={(e) => atualizar("banco", e.target.value)}
+            >
+              <option value="" disabled>
+                Selecione
+              </option>
+              {OPCOES_BANCO.map((b) => (
+                <option key={b.chave} value={b.chave}>
+                  {b.nome}
+                </option>
+              ))}
+              <option value="outro">Outro banco</option>
+            </select>
+            {erros.banco && (
+              <span className={styles.mensagemErro}>{erros.banco}</span>
+            )}
           </div>
           <div className={styles.campo}>
-            <label htmlFor="saldo">Saldo inicial</label>
+            <label htmlFor="posicao">Posição na carteira (opcional)</label>
+            <select
+              id="posicao"
+              value={form.posicao}
+              onChange={(e) => atualizar("posicao", e.target.value)}
+            >
+              <option value="principal">Principal</option>
+              <option value="secundaria">Secundária</option>
+              <option value="terciaria">Terciária</option>
+              <option value="">Não destacar</option>
+            </select>
+          </div>
+          <div className={styles.campo}>
+            <label htmlFor="saldo">Saldo inicial (opcional)</label>
             <input
               id="saldo"
               type="text"
