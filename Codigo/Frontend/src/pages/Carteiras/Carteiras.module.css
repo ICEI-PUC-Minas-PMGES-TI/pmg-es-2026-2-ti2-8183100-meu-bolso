@@ -354,6 +354,7 @@
    CARDS DE CONTA / RESERVA / ADICIONAR (padrão da referência)
 ======================================== */
 .contaCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--espaco-3);
@@ -366,9 +367,19 @@
   border: 1px solid var(--cinza-200);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-leve);
+  overflow: hidden;
 
   cursor: pointer;
   transition: border-color var(--transicao-padrao), box-shadow var(--transicao-padrao);
+}
+
+/* Faixa fina com a cor do banco no topo do card */
+.contaFaixa {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
 }
 
 .contaCard:hover {
@@ -391,7 +402,7 @@
   justify-content: space-between;
 }
 
-/* Logo circular do banco (nu / inter) */
+/* Logo circular do banco (imagem sobre fundo tonal da cor do banco) */
 .contaLogo {
   display: inline-flex;
   align-items: center;
@@ -399,11 +410,13 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  overflow: hidden;
+}
 
-  color: #fff;
-  font-weight: 800;
-  font-size: var(--texto-sm);
-  text-transform: lowercase;
+.contaLogoImg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 /* Ícone circular verde-claro (reserva / adicionar) */
