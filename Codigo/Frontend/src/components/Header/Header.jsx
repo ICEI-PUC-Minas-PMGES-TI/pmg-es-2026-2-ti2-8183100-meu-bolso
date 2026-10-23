@@ -8,6 +8,7 @@ import { obterUsuario, sair } from "../../service/Api";
 // itens visuais ate as paginas serem criadas.
 const navItems = [
   { nome: "Visão geral", caminho: "/dashboard" },
+  { nome: "Evolução", caminho: "/evolucao-financeira" },
   { nome: "Gastos", caminho: "/gastos" },
   { nome: "Planejamento", caminho: "/planejamento", futuro: true },
   { nome: "Carteiras", caminho: "/carteiras" },
