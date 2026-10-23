@@ -1,7 +1,16 @@
 import { useState } from "react";
-import { Plus, Target, PiggyBank, TrendingUp, Pencil } from "lucide-react";
+import {
+  Plus,
+  Target,
+  PiggyBank,
+  TrendingUp,
+  Pencil,
+  ArrowLeftRight,
+} from "lucide-react";
 
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
+import ModalMovimentarMeta from "../../components/ModalMovimentarMeta/ModalMovimentarMeta";
+import { ajustarSaldoCarteira } from "../../service/carteirasStorage";
 
 import styles from "./Metas.module.css";
 
@@ -84,6 +93,33 @@ function Metas() {
   function fecharModal() {
     setModalAberto(false);
     setMetaEmEdicao(null);
+  }
+
+  // Controle do modal de movimentação (depósito/retirada).
+  const [metaEmMovimentacao, setMetaEmMovimentacao] = useState(null);
+
+  function abrirMovimentacao(meta) {
+    setMetaEmMovimentacao(meta);
+  }
+
+  function fecharMovimentacao() {
+    setMetaEmMovimentacao(null);
+  }
+
+  // Aplica a movimentação: atualiza o valorAtual da meta e o saldo da
+  // carteira vinculada. (No back-end isto virará uma transação com metaId
+  // e carteiraId, recalculando os dois saldos numa só operação.)
+  //  - Depósito: sai da carteira (delta negativo), entra na meta.
+  //  - Retirada: entra na carteira (delta positivo), sai da meta.
+  function confirmarMovimentacao(meta, { tipo, valor, novoValorAtual, carteiraId }) {
+    const deltaCarteira = tipo === "deposito" ? -valor : valor;
+    ajustarSaldoCarteira(carteiraId, deltaCarteira);
+
+    setMetas((lista) =>
+      lista.map((m) =>
+        m._id === meta._id ? { ...m, valorAtual: novoValorAtual } : m
+      )
+    );
   }
 
   // Recebe a meta salva pelo modal. Se já tem _id, atualiza a
@@ -222,13 +258,15 @@ function Metas() {
                       Editar
                     </button>
 
-                    {/* TODO: registrar aporte (cria uma transação com metaId) */}
+                    {/* Depósito ou retirada sobre o valor guardado da meta.
+                        No back-end virará uma transação com metaId. */}
                     <button
                       type="button"
                       className="btn btn-secundario"
-                      disabled
+                      onClick={() => abrirMovimentacao(meta)}
                     >
-                      Registrar aporte
+                      <ArrowLeftRight size={16} aria-hidden="true" />
+                      Movimentar
                     </button>
                   </div>
                 </article>
@@ -246,6 +284,15 @@ function Metas() {
         metaParaEditar={metaEmEdicao}
         onFechar={fecharModal}
         onSalvar={salvarMeta}
+      />
+
+      {/* Modal de movimentação (depósito/retirada) do valor guardado. */}
+      <ModalMovimentarMeta
+        key={metaEmMovimentacao?._id ?? "sem-movimentacao"}
+        aberto={Boolean(metaEmMovimentacao)}
+        meta={metaEmMovimentacao}
+        onFechar={fecharMovimentacao}
+        onConfirmar={confirmarMovimentacao}
       />
     </div>
   );
