@@ -4,7 +4,8 @@ import styles from "./EvolucaoFinanceira.module.css";
 import { formatarReal, formatarEixo, calcularEscala } from "./formatacao";
 import { useLarguraGrafico } from "./useLarguraGrafico";
 
-const MARGEM = { topo: 12, direita: 24, base: 28, esquerda: 56 };
+// esquerda maior para caber os rótulos do eixo Y (ex.: "R$ 3 mil")
+const MARGEM = { topo: 12, direita: 24, base: 28, esquerda: 72 };
 const RECUO = 18; // afasta o primeiro e o último ponto das bordas
 const LARGURA_TOOLTIP = 120; // igual a .tooltip no CSS Module
 
