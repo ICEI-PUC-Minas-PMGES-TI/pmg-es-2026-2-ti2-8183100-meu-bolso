@@ -1,0 +1,128 @@
+// Comunicação com o back-end (Spring Boot) e controle da sessão do usuário.
+
+// Endereço da API. Pode ser trocado no arquivo .env (VITE_API_URL).
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
+
+// Chaves usadas no localStorage
+const CHAVE_TOKEN = "token";
+const CHAVE_USUARIO = "usuario";
+
+/* ========================================
+   SESSÃO (token e dados do usuário)
+   ======================================== */
+
+export function obterToken() {
+  return localStorage.getItem(CHAVE_TOKEN);
+}
+
+export function obterUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_USUARIO));
+  } catch {
+    return null;
+  }
+}
+
+function salvarSessao({ token, nome, email }) {
+  localStorage.setItem(CHAVE_TOKEN, token);
+  localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ nome, email }));
+}
+
+export function sair() {
+  localStorage.removeItem(CHAVE_TOKEN);
+  localStorage.removeItem(CHAVE_USUARIO);
+}
+
+// O token JWT carrega a data de expiração ("exp", em segundos) no meio dele.
+export function estaLogado() {
+  const token = obterToken();
+  if (!token) return false;
+
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")),
+    );
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+/* ========================================
+   REQUISIÇÕES
+   ======================================== */
+
+export class ApiError extends Error {
+  constructor(mensagem, status) {
+    super(mensagem);
+    this.status = status;
+  }
+}
+
+function mensagemDeErro(status, dados) {
+  // 400 = validação do back; o detalhe por campo fica em "errors", então usamos uma mensagem simples.
+  if (status === 400) return "Confira os dados informados e tente novamente.";
+  return dados.message || "Algo deu errado. Tente novamente.";
+}
+
+async function requisicao(
+  caminho,
+  { metodo = "GET", corpo, autenticado = false } = {},
+) {
+  const headers = {};
+  if (corpo !== undefined) headers["Content-Type"] = "application/json";
+
+  if (autenticado) {
+    const token = obterToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  let resposta;
+  try {
+    resposta = await fetch(`${API_URL}${caminho}`, {
+      method: metodo,
+      headers,
+      body: corpo !== undefined ? JSON.stringify(corpo) : undefined,
+    });
+  } catch {
+    // fetch só lança erro quando nem chegou ao servidor (back desligado, CORS, sem rede...)
+    throw new ApiError(
+      "Não foi possível conectar ao servidor. Tente novamente.",
+      0,
+    );
+  }
+
+  const dados = await resposta.json().catch(() => ({}));
+
+  if (!resposta.ok) {
+    // Token inválido ou expirado em rota protegida: encerra a sessão local
+    if (resposta.status === 401 && autenticado) sair();
+    throw new ApiError(mensagemDeErro(resposta.status, dados), resposta.status);
+  }
+
+  return dados;
+}
+
+/* ========================================
+   FUNÇÕES QUE AS TELAS USAM
+   ======================================== */
+
+export async function cadastrar({ nome, email, telefone, senha }) {
+  return requisicao("/api/auth/register", {
+    metodo: "POST",
+    corpo: { nome, email, telefone, senha },
+  });
+}
+
+export async function entrar(email, senha) {
+  const dados = await requisicao("/api/auth/login", {
+    metodo: "POST",
+    corpo: { email, senha },
+  });
+  salvarSessao(dados); // dados = { token, tipo, nome, email }
+  return dados;
+}
+
+export async function buscarPerfil() {
+  return requisicao("/api/usuarios/me", { autenticado: true });
+}
