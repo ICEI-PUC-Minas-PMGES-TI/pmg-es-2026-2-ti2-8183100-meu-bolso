@@ -22,7 +22,7 @@ import styles from "./ModalMovimentarMeta.module.css";
  *  - aberto: boolean
  *  - meta: a meta que será movimentada (usa nome e valorAtual)
  *  - onFechar: fecha o modal
- *  - onConfirmar: (meta, { tipo, valor, novoValorAtual, carteiraId }) => void
+ *  - onConfirmar: (meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) => void
  */
 
 /** Converte o texto digitado em número (aceita "1.234,56" ou "1234.56"). */
@@ -48,6 +48,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   // "deposito" soma ao valor guardado; "retirada" subtrai.
   const [tipo, setTipo] = useState("deposito");
   const [valor, setValor] = useState("");
+  const [titulo, setTitulo] = useState("");
   const [carteiraId, setCarteiraId] = useState("");
   const [erro, setErro] = useState("");
 
@@ -63,6 +64,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   function fecharResetando() {
     setTipo("deposito");
     setValor("");
+    setTitulo("");
     setCarteiraId("");
     setErro("");
     onFechar();
@@ -101,7 +103,13 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
       tipo === "deposito" ? valorAtual + valorNum : valorAtual - valorNum;
 
     if (onConfirmar) {
-      onConfirmar(meta, { tipo, valor: valorNum, novoValorAtual, carteiraId });
+      onConfirmar(meta, {
+        tipo,
+        valor: valorNum,
+        titulo: titulo.trim(),
+        novoValorAtual,
+        carteiraId,
+      });
     }
     fecharResetando();
   }
@@ -189,6 +197,19 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
                 ))}
               </select>
             )}
+          </div>
+
+          <div className={styles.campo}>
+            <label htmlFor="tituloMovimento">Título (opcional)</label>
+            <input
+              id="tituloMovimento"
+              type="text"
+              placeholder={
+                tipo === "deposito" ? "Ex: Aporte mensal" : "Ex: Saque emergencial"
+              }
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+            />
           </div>
 
           <div className={styles.campo}>
