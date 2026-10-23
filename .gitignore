@@ -1,15 +1,15 @@
-# Dependencias do Node (nunca devem ir para o Git).
-# Cobre tanto a raiz (instalacao feita por engano) quanto subpastas.
-node_modules/
-**/node_modules/
+# .gitignore da RAIZ do repositorio.
+# Cada subprojeto tem o seu proprio .gitignore com os padroes da stack:
+#   - Codigo/Frontend/.gitignore  (Node/Vite)
+#   - Codigo/Backend/.gitignore   (Java/Maven)
+# Aqui ficam apenas regras especificas da raiz.
 
-# Arquivos de pacote criados por engano na RAIZ do repo.
-# (O projeto Node real fica em Codigo/Frontend, com seu proprio package.json.)
+# Pacotes do Node instalados por engano NA RAIZ.
+# (O projeto Node de verdade fica em Codigo/Frontend.)
+/node_modules/
 /package.json
 /package-lock.json
 
-# Cache do Vite
-**/.vite/
-
-# Arquivos de ambiente com segredos (reforco; cada subprojeto tambem ignora).
+# Rede de seguranca: nunca versionar arquivos de ambiente com segredos,
+# em qualquer pasta (reforca o que os subprojetos ja ignoram).
 **/.env
