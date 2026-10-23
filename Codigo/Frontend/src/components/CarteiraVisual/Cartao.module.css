@@ -85,6 +85,21 @@
   z-index: 1;
 }
 
+/* marca = logo + apelido, no canto superior esquerdo */
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .apelido {
   font-size: 0.85rem;
   font-weight: 600;
