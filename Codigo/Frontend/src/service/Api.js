@@ -126,3 +126,39 @@ export async function entrar(email, senha) {
 export async function buscarPerfil() {
   return requisicao("/api/usuarios/me", { autenticado: true });
 }
+
+/* ========================================
+   METAS
+   ======================================== */
+
+// Lista as metas do usuário logado.
+export async function listarMetas() {
+  return requisicao("/api/metas", { autenticado: true });
+}
+
+// Cria uma meta nova. `dados` = { nome, valorAlvo, prazo, prioridade }.
+// O prazo deve ser "YYYY-MM-DD" ou null.
+export async function criarMeta(dados) {
+  return requisicao("/api/metas", {
+    metodo: "POST",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Atualiza os dados básicos de uma meta existente.
+export async function atualizarMeta(id, dados) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Exclui uma meta pelo id.
+export async function excluirMeta(id) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
