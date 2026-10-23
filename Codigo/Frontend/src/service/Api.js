@@ -162,3 +162,37 @@ export async function excluirMeta(id) {
     autenticado: true,
   });
 }
+
+/* ========================================
+   PERFIL
+   ======================================== */
+
+// Atualiza nome, email e telefone. `dados` = { nome, email, telefone }.
+// O back-end reemite o token (o e-mail pode ter mudado); atualizamos a
+// sessão local para refletir os novos dados em todas as telas.
+export async function atualizarPerfil(dados) {
+  const perfil = await requisicao("/api/usuarios/me", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+
+  if (perfil?.token) {
+    localStorage.setItem(CHAVE_TOKEN, perfil.token);
+  }
+  localStorage.setItem(
+    CHAVE_USUARIO,
+    JSON.stringify({ nome: perfil.nome, email: perfil.email }),
+  );
+
+  return perfil;
+}
+
+// Troca a senha. `dados` = { senhaAtual, novaSenha }.
+export async function trocarSenha(dados) {
+  return requisicao("/api/usuarios/me/senha", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}

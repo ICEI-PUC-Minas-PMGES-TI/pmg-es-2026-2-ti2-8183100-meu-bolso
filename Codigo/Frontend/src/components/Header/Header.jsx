@@ -4,6 +4,7 @@ import { ChevronDown, UserPen, LogOut } from "lucide-react";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
+import ModalPerfil from "../ModalPerfil/ModalPerfil";
 
 // Itens de navegação do topo.
 // Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
@@ -23,14 +24,18 @@ const navItems = [
 function Header() {
   const navigate = useNavigate();
 
-  // Dados do usuário que fez login (guardados em Api.js)
-  const usuario = obterUsuario();
+  // Dados do usuário logado. Mantidos em estado para refletir edições de
+  // perfil na hora (o Header lê do localStorage, que muda ao salvar).
+  const [usuario, setUsuario] = useState(() => obterUsuario());
   const nomeExibido = usuario?.nome || usuario?.email || "Usuário";
   const avatarUrl = usuario?.avatar || "/images/default-avatar.png";
 
   // Controle do menu suspenso do perfil.
   const [menuAberto, setMenuAberto] = useState(false);
   const perfilRef = useRef(null);
+
+  // Controle do modal de editar perfil.
+  const [perfilAberto, setPerfilAberto] = useState(false);
 
   // Fecha o menu ao clicar fora ou apertar Esc.
   useEffect(() => {
@@ -60,7 +65,7 @@ function Header() {
 
   function handleEditarPerfil() {
     setMenuAberto(false);
-    navigate("/perfil");
+    setPerfilAberto(true);
   }
 
   return (
@@ -153,6 +158,13 @@ function Header() {
           </div>
         )}
       </div>
+
+      {/* Modal de edição de perfil (sobrepõe a tela atual) */}
+      <ModalPerfil
+        aberto={perfilAberto}
+        onFechar={() => setPerfilAberto(false)}
+        onAtualizado={() => setUsuario(obterUsuario())}
+      />
     </header>
   );
 }
