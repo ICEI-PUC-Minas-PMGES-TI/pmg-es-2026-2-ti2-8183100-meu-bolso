@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, MoreVertical, Pencil, Trash2, ArrowRight } from "lucide-react";
 import CarteiraVisual from "../CarteiraVisual/CarteiraVisual";
 import { formatarBRL } from "../../pages/Carteiras/carteirasMock";
@@ -25,6 +25,17 @@ function PainelDetalhes({
   onExcluir,
 }) {
   const [menuAberto, setMenuAberto] = useState(false);
+  const [confirmarExclusao, setConfirmarExclusao] = useState(false);
+
+  // Esc fecha o diálogo de confirmação de exclusão sem apagar.
+  useEffect(() => {
+    if (!confirmarExclusao) return;
+    const aoTeclar = (e) => {
+      if (e.key === "Escape") setConfirmarExclusao(false);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [confirmarExclusao]);
   const aberto = Boolean(item);
 
   return (
@@ -89,7 +100,7 @@ function PainelDetalhes({
                       className={styles.menuPerigo}
                       onClick={() => {
                         setMenuAberto(false);
-                        onExcluir?.();
+                        setConfirmarExclusao(true);
                       }}
                     >
                       <Trash2 size={16} />
@@ -106,6 +117,7 @@ function PainelDetalhes({
                 tipo={item.tipo}
                 compacto
                 apelido={item.apelido}
+                banco={item.banco}
                 instituicao={item.instituicao}
                 bandeira={item.bandeira}
                 tema={item.tema}
@@ -168,6 +180,46 @@ function PainelDetalhes({
           </>
         )}
       </aside>
+
+      {/* Confirmação de exclusão (cartão) */}
+      {confirmarExclusao && (
+        <div
+          className={styles.confirmOverlay}
+          onClick={() => setConfirmarExclusao(false)}
+        >
+          <div
+            className={styles.confirmModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Excluir cartão"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={styles.confirmTitulo}>Excluir cartão?</h3>
+            <p className={styles.confirmTexto}>
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className={styles.confirmAcoes}>
+              <button
+                type="button"
+                className={styles.confirmCancelar}
+                onClick={() => setConfirmarExclusao(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.confirmExcluir}
+                onClick={() => {
+                  setConfirmarExclusao(false);
+                  onExcluir?.();
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
