@@ -1,82 +1,37 @@
-import { NavLink, useNavigate } from "react-router-dom";
-import logo from "/images/Logo_meu_bolso_clean.png";
-import styles from "./Header.module.css";
-import { obterUsuario, sair } from "../../service/Api";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-const navItems = [
-  { nome: "Visão geral", caminho: "/dashboard" },
-  { nome: "Gastos", caminho: "/gastos" },
-  { nome: "Planejamento", caminho: "/planejamento", futuro: true },
-  { nome: "Carteiras", caminho: "/carteiras" },
-  { nome: "Metas", caminho: "/metas" },
-  { nome: "Simulador", caminho: "/simulador", futuro: true },
-  { nome: "Assistente IA", caminho: "/assistente", futuro: true },
-  { nome: "Aprender", caminho: "/aprender", futuro: true },
-];
+import Login from "./pages/Login/Login";
+import Cadastro from "./pages/Login/Cadastro";
+import Layout from "./components/Layout/Layout";
+import RotaProtegida from "./components/RotaProtegida/RotaProtegida";
 
-function Header() {
-  const navigate = useNavigate();
+// Páginas que já existem
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Gastos from "./pages/Gastos/Gastos";
+import Carteiras from "./pages/Carteiras/Carteiras";
+import Metas from "./pages/Metas/Metas";
 
-  // Obtém os dados dinâmicos do usuário logado no localStorage
-  const usuario = obterUsuario();
-
-  function handleSair() {
-    sair(); // remove token e dados do usuário
-    navigate("/");
-  }
-
+function App() {
   return (
-    <header className={styles.header}>
-      {/* Esquerda: marca */}
-      <div className={styles.marca}>
-        <span className={styles.logoCirculo}>
-          <img src={logo} alt="Logo Meu Bolso" className={styles.logo} />
-        </span>
-        <span className={styles.marcaTexto}>Meu Bolso</span>
-      </div>
+    <BrowserRouter>
+      <Routes>
+        {/* Páginas públicas, sem barra de navegação */}
+        <Route path="/" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
 
-      {/* Centro: navegação */}
-      <nav className={styles.nav} aria-label="Navegação principal">
-        {navItems.map((item) =>
-          item.futuro ? (
-            <span
-              key={item.nome}
-              className={`${styles.navLink} ${styles.navLinkFuturo}`}
-              aria-disabled="true"
-              title="Em breve"
-            >
-              {item.nome}
-            </span>
-          ) : (
-            <NavLink
-              key={item.nome}
-              to={item.caminho}
-              className={({ isActive }) =>
-                `${styles.navLink} ${isActive ? styles.navLinkAtivo : ""}`
-              }
-            >
-              {item.nome}
-            </NavLink>
-          ),
-        )}
-      </nav>
-
-      {/* Direita: dados do usuário logado */}
-      <div className={styles.usuario}>
-        <img
-          src={usuario?.avatar || "/images/default-avatar.png"}
-          alt="Foto do usuário"
-          className={styles.avatar}
-        />
-        <div className={styles.usuarioInfo}>
-          <strong>{usuario?.nome || usuario?.email || "Usuário"}</strong>
-          <button className={styles.sair} type="button" onClick={handleSair}>
-            Sair
-          </button>
-        </div>
-      </div>
-    </header>
+        {/* Páginas que exigem login */}
+        <Route element={<RotaProtegida />}>
+          {/* Páginas com barra de navegação superior */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/gastos" element={<Gastos />} />
+            <Route path="/carteiras" element={<Carteiras />} />
+            <Route path="/metas" element={<Metas />} />
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
-export default Header;
+export default App;
