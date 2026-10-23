@@ -87,13 +87,13 @@ function formDoItem(item) {
   };
 }
 
-function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando = null }) {
+function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando = null, tipoInicial = null }) {
   const editando = Boolean(itemEditando);
   // Estado inicializado a partir das props. O componente é remontado via
   // `key` no pai sempre que muda o alvo (adicionar x editar um item), então
   // não é preciso sincronizar com useEffect.
   const [tipoSelecionado, setTipoSelecionado] = useState(
-    itemEditando ? itemEditando.tipo : null
+    itemEditando ? itemEditando.tipo : tipoInicial
   );
   const [form, setForm] = useState(
     itemEditando ? formDoItem(itemEditando) : formInicial
@@ -243,7 +243,7 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
             />
 
             <div className={styles.formAcoes}>
-              {!editando && (
+              {!editando && !tipoInicial && (
                 <button
                   type="button"
                   className={styles.btnVoltar}

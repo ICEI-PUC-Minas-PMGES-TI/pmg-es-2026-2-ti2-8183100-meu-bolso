@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Plus, Target, PiggyBank, TrendingUp } from "lucide-react";
+import {
+  Plus,
+  Target,
+  PiggyBank,
+  TrendingUp,
+  Pencil,
+  ArrowLeftRight,
+} from "lucide-react";
+
+import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
+import ModalMovimentarMeta from "../../components/ModalMovimentarMeta/ModalMovimentarMeta";
+import PainelDetalhesMeta from "../../components/PainelDetalhesMeta/PainelDetalhesMeta";
+import { ajustarSaldoCarteira } from "../../service/carteirasStorage";
 
 import styles from "./Metas.module.css";
 
@@ -42,6 +54,28 @@ const metasExemplo = [
   },
 ];
 
+// Histórico fictício de movimentações por meta (mais recente primeiro),
+// indexado por _id da meta. Mesmo espírito do movimentacoesPorItem usado
+// na página Carteiras. Será substituído por transações do back-end.
+const movimentacoesExemplo = {
+  "exemplo-1": [
+    { id: 1, descricao: "Aporte mensal", categoria: "Depósito", data: "05 out", valor: 300, entrada: true },
+    { id: 2, descricao: "Depósito extra", categoria: "Depósito", data: "20 set", valor: 500, entrada: true },
+    { id: 3, descricao: "Saque emergencial", categoria: "Retirada", data: "02 set", valor: 200, entrada: false },
+    { id: 4, descricao: "Aporte inicial", categoria: "Depósito", data: "10 ago", valor: 1200, entrada: true },
+  ],
+  "exemplo-2": [
+    { id: 1, descricao: "Primeiro depósito", categoria: "Depósito", data: "01 out", valor: 750, entrada: true },
+  ],
+};
+
+// Data curta no padrão "05 out" para novas movimentações.
+function dataCurta(d = new Date()) {
+  return d
+    .toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
+    .replace(".", "");
+}
+
 // Formata um número como moeda brasileira (R$).
 function formatarMoeda(valor) {
   return new Intl.NumberFormat("pt-BR", {
@@ -59,7 +93,117 @@ function calcularProgresso(valorAtual, valorAlvo) {
 
 function Metas() {
   // Estado inicial com os dados de exemplo (trocar por fetch na API).
-  const [metas] = useState(metasExemplo);
+  const [metas, setMetas] = useState(metasExemplo);
+
+  // Histórico de movimentações por meta (indexado por _id).
+  const [movimentacoesPorMeta, setMovimentacoesPorMeta] =
+    useState(movimentacoesExemplo);
+
+  // Meta aberta no painel lateral de detalhes (null = painel fechado).
+  const [metaSelecionada, setMetaSelecionada] = useState(null);
+
+  // Controle do modal. metaEmEdicao = null -> modo criação;
+  // metaEmEdicao preenchida -> modo edição.
+  const [modalAberto, setModalAberto] = useState(false);
+  const [metaEmEdicao, setMetaEmEdicao] = useState(null);
+
+  // Abre o modal em branco (criação).
+  function abrirCriacao() {
+    setMetaEmEdicao(null);
+    setModalAberto(true);
+  }
+
+  // Abre o modal preenchido com a meta escolhida (edição).
+  function abrirEdicao(meta) {
+    setMetaEmEdicao(meta);
+    setModalAberto(true);
+  }
+
+  // Fecha o modal e limpa a meta em edição.
+  function fecharModal() {
+    setModalAberto(false);
+    setMetaEmEdicao(null);
+  }
+
+  // Controle do modal de movimentação (depósito/retirada).
+  const [metaEmMovimentacao, setMetaEmMovimentacao] = useState(null);
+
+  function abrirMovimentacao(meta) {
+    setMetaEmMovimentacao(meta);
+  }
+
+  function fecharMovimentacao() {
+    setMetaEmMovimentacao(null);
+  }
+
+  // Aplica a movimentação: atualiza o valorAtual da meta e o saldo da
+  // carteira vinculada. (No back-end isto virará uma transação com metaId
+  // e carteiraId, recalculando os dois saldos numa só operação.)
+  //  - Depósito: sai da carteira (delta negativo), entra na meta.
+  //  - Retirada: entra na carteira (delta positivo), sai da meta.
+  function confirmarMovimentacao(meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) {
+    const deltaCarteira = tipo === "deposito" ? -valor : valor;
+    ajustarSaldoCarteira(carteiraId, deltaCarteira);
+
+    setMetas((lista) =>
+      lista.map((m) =>
+        m._id === meta._id ? { ...m, valorAtual: novoValorAtual } : m
+      )
+    );
+
+    // Registra a movimentação no histórico da meta (mais recente primeiro).
+    // O título informado pelo usuário vira a descrição; sem título, usa um
+    // rótulo padrão conforme o tipo.
+    const ehDeposito = tipo === "deposito";
+    const novaMov = {
+      id: Date.now(),
+      descricao: titulo || (ehDeposito ? "Depósito" : "Retirada"),
+      categoria: ehDeposito ? "Depósito" : "Retirada",
+      data: dataCurta(),
+      valor,
+      entrada: ehDeposito,
+    };
+    setMovimentacoesPorMeta((mapa) => ({
+      ...mapa,
+      [meta._id]: [novaMov, ...(mapa[meta._id] ?? [])],
+    }));
+
+    // Mantém o painel refletindo o novo valor guardado, se estiver aberto.
+    setMetaSelecionada((atual) =>
+      atual && atual._id === meta._id
+        ? { ...atual, valorAtual: novoValorAtual }
+        : atual
+    );
+  }
+
+  // Recebe a meta salva pelo modal. Se já tem _id, atualiza a
+  // existente; senão, cria uma nova (ainda sem back-end).
+  function salvarMeta(meta) {
+    if (meta._id) {
+      setMetas((lista) =>
+        lista.map((m) => (m._id === meta._id ? { ...m, ...meta } : m))
+      );
+      // Reflete a edição no painel aberto, se for a mesma meta.
+      setMetaSelecionada((atual) =>
+        atual && atual._id === meta._id ? { ...atual, ...meta } : atual
+      );
+    } else {
+      setMetas((lista) => [...lista, { ...meta, _id: `meta-${Date.now()}` }]);
+    }
+  }
+
+  // Exclui a meta e limpa seu histórico; fecha o painel se era a aberta.
+  function excluirMeta(meta) {
+    setMetas((lista) => lista.filter((m) => m._id !== meta._id));
+    setMovimentacoesPorMeta((mapa) => {
+      const copia = { ...mapa };
+      delete copia[meta._id];
+      return copia;
+    });
+    setMetaSelecionada((atual) =>
+      atual && atual._id === meta._id ? null : atual
+    );
+  }
 
   // Resumo simples para os cartões de visão geral.
   const totalMetas = metas.length;
@@ -77,8 +221,7 @@ function Metas() {
           </p>
         </div>
 
-        {/* TODO: abrir formulário/modal de nova meta */}
-        <button type="button" className="btn btn-verde" disabled>
+        <button type="button" className="btn btn-verde" onClick={abrirCriacao}>
           <Plus size={18} aria-hidden="true" />
           Nova meta
         </button>
@@ -143,6 +286,16 @@ function Metas() {
                 <article
                   key={meta._id}
                   className={`card card-interativo ${styles.cardMeta}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setMetaSelecionada(meta)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setMetaSelecionada(meta);
+                    }
+                  }}
+                  aria-label={`Abrir detalhes da meta ${meta.nome}`}
                 >
                   <header className={styles.metaTopo}>
                     <h3>{meta.nome}</h3>
@@ -176,20 +329,74 @@ function Metas() {
                     </span>
                   </div>
 
-                  {/* TODO: registrar aporte (cria uma transação com metaId) */}
-                  <button
-                    type="button"
-                    className="btn btn-secundario btn-full"
-                    disabled
-                  >
-                    Registrar aporte
-                  </button>
+                  <div className={styles.metaAcoes}>
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        abrirEdicao(meta);
+                      }}
+                    >
+                      <Pencil size={16} aria-hidden="true" />
+                      Editar
+                    </button>
+
+                    {/* Depósito ou retirada sobre o valor guardado da meta.
+                        No back-end virará uma transação com metaId. */}
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        abrirMovimentacao(meta);
+                      }}
+                    >
+                      <ArrowLeftRight size={16} aria-hidden="true" />
+                      Movimentar
+                    </button>
+                  </div>
                 </article>
               );
             })}
           </div>
         )}
       </section>
+
+      {/* Modal de criação/edição de meta. A key muda conforme a meta em
+          edição, remontando o modal com os valores corretos a cada abertura. */}
+      <ModalNovaMeta
+        key={modalAberto ? metaEmEdicao?._id ?? "nova-meta" : "fechado"}
+        aberto={modalAberto}
+        metaParaEditar={metaEmEdicao}
+        onFechar={fecharModal}
+        onSalvar={salvarMeta}
+      />
+
+      {/* Modal de movimentação (depósito/retirada) do valor guardado. */}
+      <ModalMovimentarMeta
+        key={metaEmMovimentacao?._id ?? "sem-movimentacao"}
+        aberto={Boolean(metaEmMovimentacao)}
+        meta={metaEmMovimentacao}
+        onFechar={fecharMovimentacao}
+        onConfirmar={confirmarMovimentacao}
+      />
+
+      {/* Painel lateral de detalhes da meta: resumo + movimentações.
+          Fica sempre montado e anima pela classe interna (mesmo padrão do
+          PainelDetalhes da página Carteiras), por isso não usa `key`. */}
+      <PainelDetalhesMeta
+        meta={metaSelecionada}
+        movimentacoes={
+          metaSelecionada ? movimentacoesPorMeta[metaSelecionada._id] ?? [] : []
+        }
+        onFechar={() => setMetaSelecionada(null)}
+        onEditar={(meta) => {
+          setMetaSelecionada(null);
+          abrirEdicao(meta);
+        }}
+        onExcluir={excluirMeta}
+      />
     </div>
   );
 }

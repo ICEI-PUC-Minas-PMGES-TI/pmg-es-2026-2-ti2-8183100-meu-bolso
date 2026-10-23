@@ -1,28 +1,34 @@
 import { useState } from "react";
 import logoBranca from "/images/Logo_meu_bolso_branca.png";
 import styles from "./Login.module.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { entrar } from "../../service/Api";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Dados digitados pelo usuário
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  const emailValido = import.meta.env.VITE_EMAIL_TESTE;
-  const senhaValida = import.meta.env.VITE_SENHA_TESTE;
+  // Mensagem enviada pela tela de cadastro ("Cadastro realizado!...")
+  const sucesso = location.state?.mensagem;
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setErro("");
+    setCarregando(true);
 
-    if (email.trim() === (emailValido ?? "").trim() &&
-        senha.trim() === (senhaValida ?? "").trim()) {
-      setErro("");
+    try {
+      await entrar(email.trim(), senha);
       navigate("/dashboard");
-    } else {
-      setErro("E-mail ou senha incorretos.");
+    } catch (e) {
+      setErro(e.message);
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -96,10 +102,18 @@ function Login() {
               </a>
             </div>
 
+            {sucesso && !erro && (
+              <p className={styles["login-sucesso"]}>{sucesso}</p>
+            )}
+
             {erro && <p className={styles["login-error"]}>{erro}</p>}
 
-            <button className={styles["login-button"]} type="submit">
-              Entrar
+            <button
+              className={styles["login-button"]}
+              type="submit"
+              disabled={carregando}
+            >
+              {carregando ? "Entrando..." : "Entrar"}
             </button>
           </form>
 

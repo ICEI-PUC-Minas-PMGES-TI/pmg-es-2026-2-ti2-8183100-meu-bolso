@@ -1,21 +1,51 @@
 import { useState } from "react";
 import logoBranca from "/images/Logo_meu_bolso_branca.png";
 import styles from "./Login.module.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { cadastrar } from "../../service/Api";
 
 function Cadastro() {
+  const navigate = useNavigate();
+
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [erro, setErro] = useState("");
+  const [carregando, setCarregando] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setErro("");
 
-    console.log({
-      email,
-      senha,
-    });
+    // Validações feitas antes de chamar o back (o back também valida)
+    if (senha.length < 8) {
+      setErro("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
+    if (senha !== confirmarSenha) {
+      setErro("As senhas não conferem.");
+      return;
+    }
+
+    setCarregando(true);
+    try {
+      await cadastrar({
+        nome: nome.trim(),
+        email: email.trim(),
+        telefone: telefone.trim(),
+        senha,
+      });
+      // Cadastro ok: vai para o login com uma mensagem de sucesso
+      navigate("/", {
+        state: { mensagem: "Cadastro realizado! Faça login para continuar." },
+      });
+    } catch (e) {
+      setErro(e.message);
+    } finally {
+      setCarregando(false);
+    }
   }
 
   return (
@@ -112,6 +142,8 @@ function Cadastro() {
                 id="confirmarSenha"
                 type="password"
                 placeholder="Repita a senha"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
                 required
               />
             </div>
@@ -124,8 +156,14 @@ function Cadastro() {
               </span>
             </label>
 
-            <button className={styles["login-button"]} type="submit">
-              Criar conta
+            {erro && <p className={styles["login-error"]}>{erro}</p>}
+
+            <button
+              className={styles["login-button"]}
+              type="submit"
+              disabled={carregando}
+            >
+              {carregando ? "Criando conta..." : "Criar conta"}
             </button>
           </form>
 

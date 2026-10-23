@@ -99,7 +99,6 @@
 .cantoBaixo {
   bottom: 48px;
   right: 24px;
-  transform: rotate(180deg);
   opacity: 0.85;
 }
 
