@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Plus, Target, PiggyBank, TrendingUp } from "lucide-react";
 
+import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
+
 import styles from "./Metas.module.css";
 
 // ============================================================
@@ -59,7 +61,16 @@ function calcularProgresso(valorAtual, valorAlvo) {
 
 function Metas() {
   // Estado inicial com os dados de exemplo (trocar por fetch na API).
-  const [metas] = useState(metasExemplo);
+  const [metas, setMetas] = useState(metasExemplo);
+
+  // Controle do modal de nova meta.
+  const [modalAberto, setModalAberto] = useState(false);
+
+  // Adiciona a meta recém-criada à lista (ainda sem back-end).
+  function adicionarMeta(novaMeta) {
+    const meta = { ...novaMeta, _id: `meta-${Date.now()}` };
+    setMetas((lista) => [...lista, meta]);
+  }
 
   // Resumo simples para os cartões de visão geral.
   const totalMetas = metas.length;
@@ -77,8 +88,11 @@ function Metas() {
           </p>
         </div>
 
-        {/* TODO: abrir formulário/modal de nova meta */}
-        <button type="button" className="btn btn-verde" disabled>
+        <button
+          type="button"
+          className="btn btn-verde"
+          onClick={() => setModalAberto(true)}
+        >
           <Plus size={18} aria-hidden="true" />
           Nova meta
         </button>
@@ -190,6 +204,15 @@ function Metas() {
           </div>
         )}
       </section>
+
+      {/* Modal de criação de meta. A key remonta o modal a cada abertura,
+          garantindo os campos em branco. */}
+      <ModalNovaMeta
+        key={modalAberto ? "nova-meta-aberto" : "nova-meta-fechado"}
+        aberto={modalAberto}
+        onFechar={() => setModalAberto(false)}
+        onSalvar={adicionarMeta}
+      />
     </div>
   );
 }
