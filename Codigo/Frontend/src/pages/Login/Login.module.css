@@ -436,3 +436,19 @@
     padding: 12px;
   }
 }
+
+/* ========================================
+   MENSAGEM DE SUCESSO E BOTÃO DESABILITADO
+   ======================================== */
+.login-sucesso {
+  padding: 10px 12px;
+  background-color: var(--verde-fundo);
+  color: var(--verde-escuro);
+  border-radius: var(--radius-pequeno);
+  font-size: 0.875rem;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

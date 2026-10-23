@@ -21,6 +21,8 @@ import {
   formatarBRL,
 } from "./carteirasMock";
 
+import { bancoDe } from "../../data/bancos";
+
 import styles from "./Carteiras.module.css";
 
 // Persistência simples em localStorage (sem backend nesta etapa).
@@ -432,13 +434,16 @@ function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
   );
 }
 
-/** Dados visuais da logo da conta a partir do apelido/instituição. */
-function marcaDaConta(item) {
-  const base = `${item.apelido} ${item.instituicao || ""}`.toLowerCase();
-  if (base.includes("nu")) return { sigla: "nu", cor: "#820ad1" };
-  if (base.includes("inter")) return { sigla: "inter", cor: "#ff7a00" };
-  const sigla = (item.apelido || "?").trim().slice(0, 2).toLowerCase();
-  return { sigla, cor: "var(--verde-escuro)" };
+/** Normaliza o nome/banco da conta para a chave do mapa de bancos.
+ *  Ex.: "Banco Inter" -> "inter", "Nubank" -> "nubank". */
+function chaveBanco(item) {
+  const base = item.banco || item.apelido || item.instituicao || "";
+  return base
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .replace(/^banco\s+/, "") // tira "banco " inicial
+    .replace(/\s+/g, ""); // remove espaços
 }
 
 /** Última movimentação (a lista do mock já vem com a mais recente primeiro). */
@@ -454,7 +459,8 @@ function ultimaMovimentacao(id) {
  */
 function CardConta({ item, posicao, selecionado, onSelecionar }) {
   const ehReserva = item.tipo === "reserva";
-  const marca = ehReserva ? null : marcaDaConta(item);
+  const banco = ehReserva ? null : bancoDe(chaveBanco(item));
+  const nomeExibido = item.apelido || item.nome || banco?.nome || "Conta";
 
   const subtitulo = ehReserva
     ? "Reserva guardada"
@@ -480,8 +486,16 @@ function CardConta({ item, posicao, selecionado, onSelecionar }) {
           onSelecionar();
         }
       }}
-      aria-label={`Abrir detalhes de ${item.apelido}`}
+      aria-label={`Abrir detalhes de ${nomeExibido}`}
     >
+      {banco ? (
+        <span
+          className={styles.contaFaixa}
+          style={{ backgroundColor: banco.cor }}
+          aria-hidden="true"
+        />
+      ) : null}
+
       <div className={styles.contaTopo}>
         {ehReserva ? (
           <span className={styles.contaIcone}>
@@ -490,16 +504,26 @@ function CardConta({ item, posicao, selecionado, onSelecionar }) {
         ) : (
           <span
             className={styles.contaLogo}
-            style={{ backgroundColor: marca.cor }}
+            style={{ backgroundColor: `${banco.cor}1A` }}
           >
-            {marca.sigla}
+            <img
+              src={banco.logo}
+              alt={banco.nome}
+              className={styles.contaLogoImg}
+              onError={(e) => {
+                if (!e.currentTarget.dataset.fallback) {
+                  e.currentTarget.dataset.fallback = "1";
+                  e.currentTarget.src = "/bancos/padrao.png";
+                }
+              }}
+            />
           </span>
         )}
         <ChevronRight size={18} className={styles.contaSeta} />
       </div>
 
       <div className={styles.contaInfo}>
-        <strong className={styles.contaNome}>{item.apelido}</strong>
+        <strong className={styles.contaNome}>{nomeExibido}</strong>
         <span className={styles.contaSub}>{subtitulo}</span>
         <strong className={styles.contaValor}>{valor}</strong>
       </div>

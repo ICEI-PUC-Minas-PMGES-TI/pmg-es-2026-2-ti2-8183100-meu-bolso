@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
-import Layout from "./components/Layout/Layout";
 import Cadastro from "./pages/Login/Cadastro";
+import Layout from "./components/Layout/Layout";
+import RotaProtegida from "./components/RotaProtegida/RotaProtegida";
 
 // Importe somente as páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -14,20 +15,23 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Páginas sem barra de navegação */}
+        {/* Páginas públicas (sem barra de navegação) */}
         <Route path="/" element={<Login />} />
         <Route path="/cadastro" element={<Cadastro />} />
 
-        {/* Páginas com barra de navegação superior */}
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/carteiras" element={<Carteiras />} />
-          <Route path="/gastos" element={<Gastos />} />
-          <Route path="/metas" element={<Metas />} />
+        {/* Páginas protegidas: exigem login (token válido) */}
+        <Route element={<RotaProtegida />}>
+          {/* Páginas com barra de navegação superior */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/carteiras" element={<Carteiras />} />
+            <Route path="/gastos" element={<Gastos />} />
+            <Route path="/metas" element={<Metas />} />
 
-          {/* Adicione quando criar as páginas:
-          <Route path="/perfil" element={<Perfil />} />
-          */}
+            {/* Adicione quando criar as páginas:
+            <Route path="/perfil" element={<Perfil />} />
+            */}
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
+import { obterUsuario, sair } from "../../service/Api";
 
 // Itens de navegação do topo.
 // Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
@@ -19,8 +20,11 @@ const navItems = [
 function Header() {
   const navigate = useNavigate();
 
+  // Dados do usuário que fez login (guardados em Api.js)
+  const usuario = obterUsuario();
+
   function handleSair() {
-    // Logout temporário, até existir autenticação no backend
+    sair(); // apaga o token e os dados do usuário
     navigate("/");
   }
 
@@ -56,19 +60,19 @@ function Header() {
             >
               {item.nome}
             </NavLink>
-          )
+          ),
         )}
       </nav>
 
       {/* Direita: usuário */}
       <div className={styles.usuario}>
         <img
-          src="/images/abner.do.mal.jpg"
+          src={usuario?.avatar || "/images/default-avatar.png"}
           alt="Foto do usuário"
           className={styles.avatar}
         />
         <div className={styles.usuarioInfo}>
-          <strong>Daniel De sunga</strong>
+          <strong>{usuario?.nome || usuario?.email || "Usuário"}</strong>
           <button className={styles.sair} type="button" onClick={handleSair}>
             Sair
           </button>
