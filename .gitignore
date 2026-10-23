@@ -1,0 +1,15 @@
+# Dependencias do Node (nunca devem ir para o Git).
+# Cobre tanto a raiz (instalacao feita por engano) quanto subpastas.
+node_modules/
+**/node_modules/
+
+# Arquivos de pacote criados por engano na RAIZ do repo.
+# (O projeto Node real fica em Codigo/Frontend, com seu proprio package.json.)
+/package.json
+/package-lock.json
+
+# Cache do Vite
+**/.vite/
+
+# Arquivos de ambiente com segredos (reforco; cada subprojeto tambem ignora).
+**/.env
