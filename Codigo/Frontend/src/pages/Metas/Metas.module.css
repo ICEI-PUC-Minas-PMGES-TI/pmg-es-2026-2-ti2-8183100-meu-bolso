@@ -129,3 +129,14 @@
   justify-content: space-between;
   gap: var(--espaco-2);
 }
+
+/* Linha de ações do cartão de meta */
+.metaAcoes {
+  display: flex;
+  gap: var(--espaco-3);
+  margin-top: auto;
+}
+
+.metaAcoes > * {
+  flex: 1;
+}

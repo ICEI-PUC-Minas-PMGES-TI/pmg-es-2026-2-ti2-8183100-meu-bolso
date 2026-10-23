@@ -3,17 +3,24 @@ import { X } from "lucide-react";
 import styles from "./ModalNovaMeta.module.css";
 
 /**
- * Modal para criar uma nova meta.
+ * Modal para criar ou editar uma meta.
  *
  * Segue o modelo de dados (ver Documentacao/ModeloDeDados.md, coleção
  * "metas"): nome, valorAlvo, valorAtual, prazo e prioridade
- * ("alta" | "media" | "baixa"). A meta nova nasce com valorAtual = 0.
+ * ("alta" | "media" | "baixa").
+ *
+ * - Criação: sem `metaParaEditar`. A meta nova nasce com valorAtual = 0.
+ * - Edição: com `metaParaEditar`, o formulário vem preenchido e permite
+ *   alterar os atributos básicos (nome, valor-alvo, prazo, prioridade).
+ *   O valor já guardado (valorAtual) é preservado sem alteração — ele
+ *   só deve mudar via aportes.
  *
  * Ainda sem integração com o back-end: o onSalvar devolve o objeto da
  * meta montado para o componente pai guardar no estado local.
  *
  * props:
  *  - aberto: boolean
+ *  - metaParaEditar: meta | null — quando presente, entra em modo edição
  *  - onFechar: fecha o modal
  *  - onSalvar: (meta) => void — recebe a meta montada
  */
@@ -23,6 +30,17 @@ const formInicial = {
   prazo: "",
   prioridade: "media",
 };
+
+/** Monta o estado inicial do formulário a partir de uma meta existente. */
+function formDaMeta(meta) {
+  if (!meta) return formInicial;
+  return {
+    nome: meta.nome ?? "",
+    valorAlvo: meta.valorAlvo != null ? String(meta.valorAlvo) : "",
+    prazo: meta.prazo ?? "",
+    prioridade: meta.prioridade ?? "media",
+  };
+}
 
 /** Converte o texto digitado em número (aceita "1.234,56" ou "1234.56"). */
 function converterValor(texto) {
@@ -35,8 +53,10 @@ function converterValor(texto) {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function ModalNovaMeta({ aberto, onFechar, onSalvar }) {
-  const [form, setForm] = useState(formInicial);
+function ModalNovaMeta({ aberto, metaParaEditar, onFechar, onSalvar }) {
+  const editando = Boolean(metaParaEditar);
+
+  const [form, setForm] = useState(() => formDaMeta(metaParaEditar));
   const [erro, setErro] = useState("");
 
   if (!aberto) return null;
@@ -66,10 +86,15 @@ function ModalNovaMeta({ aberto, onFechar, onSalvar }) {
       return;
     }
 
+    // O valor já guardado (valorAtual) não é editável por aqui: só muda
+    // via aportes. Na criação nasce 0; na edição, preserva o valor atual.
+    const valorAtual = editando ? metaParaEditar.valorAtual ?? 0 : 0;
+
     const meta = {
+      ...(metaParaEditar ?? {}),
       nome,
       valorAlvo,
-      valorAtual: 0,
+      valorAtual,
       prazo: form.prazo || null,
       prioridade: form.prioridade,
     };
@@ -84,11 +109,11 @@ function ModalNovaMeta({ aberto, onFechar, onSalvar }) {
         className={styles.modal}
         role="dialog"
         aria-modal="true"
-        aria-label="Nova meta"
+        aria-label={editando ? "Editar meta" : "Nova meta"}
         onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.cabecalho}>
-          <h2>Nova meta</h2>
+          <h2>{editando ? "Editar meta" : "Nova meta"}</h2>
           <button
             className={styles.botaoFechar}
             type="button"
@@ -157,7 +182,7 @@ function ModalNovaMeta({ aberto, onFechar, onSalvar }) {
               Cancelar
             </button>
             <button type="submit" className={styles.btnSalvar}>
-              Salvar
+              {editando ? "Salvar alterações" : "Salvar"}
             </button>
           </div>
         </form>

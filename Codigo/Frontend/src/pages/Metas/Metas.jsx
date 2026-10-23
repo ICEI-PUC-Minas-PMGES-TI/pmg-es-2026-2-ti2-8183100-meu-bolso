@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Target, PiggyBank, TrendingUp } from "lucide-react";
+import { Plus, Target, PiggyBank, TrendingUp, Pencil } from "lucide-react";
 
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
 
@@ -63,13 +63,39 @@ function Metas() {
   // Estado inicial com os dados de exemplo (trocar por fetch na API).
   const [metas, setMetas] = useState(metasExemplo);
 
-  // Controle do modal de nova meta.
+  // Controle do modal. metaEmEdicao = null -> modo criação;
+  // metaEmEdicao preenchida -> modo edição.
   const [modalAberto, setModalAberto] = useState(false);
+  const [metaEmEdicao, setMetaEmEdicao] = useState(null);
 
-  // Adiciona a meta recém-criada à lista (ainda sem back-end).
-  function adicionarMeta(novaMeta) {
-    const meta = { ...novaMeta, _id: `meta-${Date.now()}` };
-    setMetas((lista) => [...lista, meta]);
+  // Abre o modal em branco (criação).
+  function abrirCriacao() {
+    setMetaEmEdicao(null);
+    setModalAberto(true);
+  }
+
+  // Abre o modal preenchido com a meta escolhida (edição).
+  function abrirEdicao(meta) {
+    setMetaEmEdicao(meta);
+    setModalAberto(true);
+  }
+
+  // Fecha o modal e limpa a meta em edição.
+  function fecharModal() {
+    setModalAberto(false);
+    setMetaEmEdicao(null);
+  }
+
+  // Recebe a meta salva pelo modal. Se já tem _id, atualiza a
+  // existente; senão, cria uma nova (ainda sem back-end).
+  function salvarMeta(meta) {
+    if (meta._id) {
+      setMetas((lista) =>
+        lista.map((m) => (m._id === meta._id ? { ...m, ...meta } : m))
+      );
+    } else {
+      setMetas((lista) => [...lista, { ...meta, _id: `meta-${Date.now()}` }]);
+    }
   }
 
   // Resumo simples para os cartões de visão geral.
@@ -88,11 +114,7 @@ function Metas() {
           </p>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-verde"
-          onClick={() => setModalAberto(true)}
-        >
+        <button type="button" className="btn btn-verde" onClick={abrirCriacao}>
           <Plus size={18} aria-hidden="true" />
           Nova meta
         </button>
@@ -190,14 +212,25 @@ function Metas() {
                     </span>
                   </div>
 
-                  {/* TODO: registrar aporte (cria uma transação com metaId) */}
-                  <button
-                    type="button"
-                    className="btn btn-secundario btn-full"
-                    disabled
-                  >
-                    Registrar aporte
-                  </button>
+                  <div className={styles.metaAcoes}>
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      onClick={() => abrirEdicao(meta)}
+                    >
+                      <Pencil size={16} aria-hidden="true" />
+                      Editar
+                    </button>
+
+                    {/* TODO: registrar aporte (cria uma transação com metaId) */}
+                    <button
+                      type="button"
+                      className="btn btn-secundario"
+                      disabled
+                    >
+                      Registrar aporte
+                    </button>
+                  </div>
                 </article>
               );
             })}
@@ -205,13 +238,14 @@ function Metas() {
         )}
       </section>
 
-      {/* Modal de criação de meta. A key remonta o modal a cada abertura,
-          garantindo os campos em branco. */}
+      {/* Modal de criação/edição de meta. A key muda conforme a meta em
+          edição, remontando o modal com os valores corretos a cada abertura. */}
       <ModalNovaMeta
-        key={modalAberto ? "nova-meta-aberto" : "nova-meta-fechado"}
+        key={modalAberto ? metaEmEdicao?._id ?? "nova-meta" : "fechado"}
         aberto={modalAberto}
-        onFechar={() => setModalAberto(false)}
-        onSalvar={adicionarMeta}
+        metaParaEditar={metaEmEdicao}
+        onFechar={fecharModal}
+        onSalvar={salvarMeta}
       />
     </div>
   );
