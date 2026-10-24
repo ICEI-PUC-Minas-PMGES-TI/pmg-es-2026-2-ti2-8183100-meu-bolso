@@ -23,6 +23,7 @@ import {
 } from "./carteirasMock";
 
 import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
+import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
 
 import styles from "./Carteiras.module.css";
 
@@ -88,17 +89,12 @@ function Carteiras() {
     .filter((c) => c.subtipo === "credito")
     .reduce((acc, c) => acc + (c.faturaAtual || 0), 0);
 
-  // Contas em destaque: as 3 posicionadas (principal, secundária, terciária).
-  // Fallback para contas antigas sem posição: as 3 primeiras na ordem atual.
-  const ordemPosicao = ["principal", "secundaria", "terciaria"];
-  const temPosicionadas = contas.some((c) =>
-    ordemPosicao.includes(c.posicao)
-  );
-  const contasDestaque = temPosicionadas
-    ? ordemPosicao
-        .map((p) => contas.find((c) => c.posicao === p))
-        .filter(Boolean)
-    : contas.slice(0, 3);
+  // Contas em destaque (principal, secundária, terciária) pela posição efetiva:
+  // posições livres são preenchidas pelas contas sem posição salva.
+  const contasEfetivas = posicaoEfetiva(contas);
+  const contasDestaque = ORDEM_POSICAO.map((p) =>
+    contasEfetivas.find((c) => c.posicaoEfetiva === p)
+  ).filter(Boolean);
 
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
@@ -109,12 +105,25 @@ function Carteiras() {
     else setDinheiroEReservas(atualizador); // dinheiro e reserva
   }
 
-  // Garante que só uma conta ocupe cada posição: libera a posição de quem já a usa.
-  function liberarPosicao(lista, posicao, excetoId) {
-    if (!posicao) return lista;
-    return lista.map((c) =>
-      c.id !== excetoId && c.posicao === posicao ? { ...c, posicao: null } : c
-    );
+  // Troca de posição: a conta `alvoId` passa a ocupar `novaPosicao`. Quem já
+  // ocupava essa posição (pela posição efetiva) assume a posição anterior da
+  // conta alvo (ou null). Persiste a posição efetiva de todas as contas para
+  // que nunca haja duas iguais e as demais não percam o destaque.
+  function reatribuirPosicoes(lista, alvoId, novaPosicao) {
+    const efetivas = posicaoEfetiva(lista);
+    const alvo = efetivas.find((c) => c.id === alvoId);
+    const posAnterior = alvo?.posicaoEfetiva ?? null;
+    const ocupante =
+      novaPosicao &&
+      efetivas.find((c) => c.id !== alvoId && c.posicaoEfetiva === novaPosicao);
+
+    return efetivas.map((c) => {
+      const resto = { ...c };
+      delete resto.posicaoEfetiva;
+      if (c.id === alvoId) resto.posicao = novaPosicao || null;
+      else if (ocupante && c.id === ocupante.id) resto.posicao = posAnterior;
+      return resto;
+    });
   }
 
   function salvarItem(dados) {
@@ -123,7 +132,7 @@ function Carteiras() {
       setListaPorTipo(dados.tipo, (lista) => {
         let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
         if (dados.tipo === "conta") {
-          nova = liberarPosicao(nova, dados.posicao, dados.id);
+          nova = reatribuirPosicoes(nova, dados.id, dados.posicao);
         }
         return nova;
       });
@@ -137,7 +146,7 @@ function Carteiras() {
       setListaPorTipo(dados.tipo, (lista) => {
         const base = [...lista, item];
         return dados.tipo === "conta"
-          ? liberarPosicao(base, item.posicao, item.id)
+          ? reatribuirPosicoes(base, item.id, item.posicao)
           : base;
       });
     }
@@ -536,7 +545,7 @@ function CardConta({ item, selecionado, onSelecionar }) {
   };
   const subtitulo = ehReserva
     ? "Reserva guardada"
-    : rotuloPosicao[item.posicao] || "Conta";
+    : rotuloPosicao[item.posicaoEfetiva ?? item.posicao] || "Conta";
 
   const valor = ehReserva
     ? formatarBRL(item.valorReservado)
