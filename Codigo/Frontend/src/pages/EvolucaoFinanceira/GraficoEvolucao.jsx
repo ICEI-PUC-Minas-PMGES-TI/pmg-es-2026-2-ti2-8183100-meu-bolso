@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 
 import styles from "./EvolucaoFinanceira.module.css";
 import { formatarReal, formatarEixo, calcularEscala } from "./formatacao";
@@ -19,6 +19,11 @@ function GraficoEvolucao({
 }) {
   const { ref, largura } = useLarguraGrafico();
   const [pontoAtivo, setPontoAtivo] = useState(null);
+
+  // Comprimento real da linha (px), para a animação de "desenhar"
+  // ficar suave. Medido do próprio path após renderizar.
+  const linhaRef = useRef(null);
+  const [comprimentoLinha, setComprimentoLinha] = useState(0);
 
   const larguraUtil = Math.max(largura - MARGEM.esquerda - MARGEM.direita, 10);
   const alturaUtil = altura - MARGEM.topo - MARGEM.base;
@@ -48,6 +53,13 @@ function GraficoEvolucao({
   const linha = pontos
     .map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`)
     .join(" ");
+
+  // Mede o comprimento do path sempre que ele muda (dados/largura).
+  useEffect(() => {
+    if (linhaRef.current) {
+      setComprimentoLinha(linhaRef.current.getTotalLength());
+    }
+  }, [linha]);
 
   // Descobre qual ponto está mais perto do mouse
   function handleMouseMove(event) {
@@ -145,8 +157,18 @@ function GraficoEvolucao({
             />
           )}
 
-          {/* Linha do gráfico */}
-          <path className={styles.linha} d={linha} />
+          {/* Linha do gráfico. O comprimento real medido (px) alimenta a
+              animação de "desenhar", definida em .linha no CSS Module. */}
+          <path
+            ref={linhaRef}
+            className={styles.linha}
+            d={linha}
+            style={{
+              "--comprimento-linha": comprimentoLinha,
+              // esconde até medir o comprimento, evitando um flash
+              visibility: comprimentoLinha ? "visible" : "hidden",
+            }}
+          />
 
           {/* Bolinhas de cada mês */}
           {pontos.map((p, i) => (

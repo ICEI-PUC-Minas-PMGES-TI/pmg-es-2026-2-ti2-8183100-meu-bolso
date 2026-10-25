@@ -40,8 +40,11 @@ function EvolucaoFinanceira() {
         </p>
       </div>
 
+      {/* key={graficoAtivo} força a remontagem ao trocar de gráfico,
+          reexecutando as animações de entrada */}
       {graficoAtivo === "acumulado" ? (
         <GraficoEvolucao
+          key="acumulado"
           dados={dadosAcumulado}
           subtitulo={`Dinheiro acumulado nos últimos ${dadosMensais.length} meses`}
           altura={ALTURA_GRAFICO}
@@ -49,6 +52,7 @@ function EvolucaoFinanceira() {
         />
       ) : (
         <GraficoBarras
+          key="mensal"
           dados={dadosMensais}
           altura={ALTURA_GRAFICO}
           acoes={seletor}

@@ -13,7 +13,6 @@
   margin-inline: calc(-1 * var(--espaco-8));
 }
 
-/* ---------- Cabeçalho ---------- */
 .topo {
   display: flex;
   align-items: flex-start;
@@ -78,7 +77,6 @@
   gap: var(--espaco-4);
 }
 
-/* ícone em círculo verde-claro à esquerda do texto */
 .resumoIcone {
   display: inline-flex;
   align-items: center;
@@ -257,9 +255,52 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-/* Dinheiro e reservas: dois cards lado a lado (largura total) */
+/* Dinheiro: card único ocupando a largura inteira da seção */
 .secaoDinheiro .grade {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
+}
+
+/* ---------- Card "Dinheiro na carteira" ---------- */
+.cardDinheiro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.dinheiroAcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-3);
+}
+
+.dinheiroBtn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transicao-padrao), color var(--transicao-padrao);
+}
+
+.dinheiroBtnPreenchido {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  border: 1px solid var(--verde-claro);
+}
+
+.dinheiroBtnPreenchido:hover {
+  background-color: var(--verde-principal);
+}
+
+.dinheiroBtnContorno {
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-200);
+}
+
+.dinheiroBtnContorno:hover {
+  background-color: var(--cinza-50);
 }
 
 /* ---------- Item clicável ---------- */

@@ -13,6 +13,7 @@ import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
 import PainelContas from "../../components/PainelContas/PainelContas";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
+import ModalCedulas from "../../components/ModalCedulas/ModalCedulas";
 
 import {
   contas as contasMock,
@@ -24,6 +25,11 @@ import {
 
 import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
 import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
+import {
+  normalizarDinheiro,
+  saldoDaContagem,
+  totalCentavos,
+} from "../../data/denominacoes";
 
 import styles from "./Carteiras.module.css";
 
@@ -35,7 +41,6 @@ function carregarPersistido() {
     const bruto = localStorage.getItem(CHAVE_STORAGE);
     if (!bruto) return null;
     const dados = JSON.parse(bruto);
-    // só aceita se tiver as três listas no formato esperado
     if (
       Array.isArray(dados?.cartoes) &&
       Array.isArray(dados?.contas) &&
@@ -57,13 +62,13 @@ function Carteiras() {
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
 
-  // Listas em estado. Na primeira carga, usa o que estiver salvo no
-  // localStorage; caso contrário, parte dos dados fictícios.
   const persistido = carregarPersistido();
   const [cartoes, setCartoes] = useState(persistido?.cartoes ?? cartoesMock);
   const [contas, setContas] = useState(persistido?.contas ?? contasMock);
-  const [dinheiroEReservas, setDinheiroEReservas] = useState(
-    persistido?.dinheiroEReservas ?? dinheiroEReservasMock
+  const [dinheiroEReservas, setDinheiroEReservas] = useState(() =>
+    (persistido?.dinheiroEReservas ?? dinheiroEReservasMock).map((item) =>
+      item.tipo === "dinheiro" ? normalizarDinheiro(item) : item
+    )
   );
 
   // Salva as listas sempre que mudarem (edição, exclusão, inclusão).
@@ -99,6 +104,48 @@ function Carteiras() {
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
 
+  // Movimentações do dinheiro em espécie (começam com as do mock e crescem
+  // a cada adicionar/retirar). Só o dinheiro precisa ser dinâmico aqui.
+  const [movsDinheiro, setMovsDinheiro] = useState(
+    () => movimentacoesPorItem["dinheiro-especie"] || []
+  );
+
+  // Modal de cédulas/moedas: { modo, item } ou null.
+  const [modalCedulas, setModalCedulas] = useState(null);
+
+  // Aplica uma contagem escolhida no modal ao item de dinheiro, somando
+  // (adicionar) ou subtraindo (retirar) por denominação, e registra a
+  // movimentação no extrato. Tudo em centavos inteiros.
+  function confirmarCedulas(item, modo, escolhida) {
+    const entrada = modo === "adicionar";
+    const valor = saldoDaContagem(escolhida);
+    if (totalCentavos(escolhida) === 0) return;
+
+    setDinheiroEReservas((lista) =>
+      lista.map((i) => {
+        if (i.id !== item.id) return i;
+        const atual = i.contagem || {};
+        const nova = { ...atual };
+        for (const chave of Object.keys(escolhida)) {
+          const base = Number(nova[chave]) || 0;
+          const delta = Number(escolhida[chave]) || 0;
+          nova[chave] = entrada ? base + delta : Math.max(0, base - delta);
+        }
+        return { ...i, contagem: nova, saldo: saldoDaContagem(nova) };
+      })
+    );
+
+    const mov = {
+      id: Date.now(),
+      descricao: entrada ? "Entrada em dinheiro" : "Retirada em dinheiro",
+      categoria: "Dinheiro",
+      data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+      valor: entrada ? valor : -valor,
+      entrada,
+    };
+    setMovsDinheiro((lista) => [mov, ...lista]);
+  }
+
   function setListaPorTipo(tipo, atualizador) {
     if (tipo === "cartao") setCartoes(atualizador);
     else if (tipo === "conta") setContas(atualizador);
@@ -128,7 +175,6 @@ function Carteiras() {
 
   function salvarItem(dados) {
     if (dados.id) {
-      // edição: substitui o item existente
       setListaPorTipo(dados.tipo, (lista) => {
         let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
         if (dados.tipo === "conta") {
@@ -136,12 +182,10 @@ function Carteiras() {
         }
         return nova;
       });
-      // mantém o painel refletindo o item editado
       setItemSelecionado((atual) =>
         atual && atual.id === dados.id ? { ...atual, ...dados } : atual
       );
     } else {
-      // novo item
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
       setListaPorTipo(dados.tipo, (lista) => {
         const base = [...lista, item];
@@ -187,13 +231,22 @@ function Carteiras() {
       ? contas.find((c) => c.id === itemSelecionado.contaId) || null
       : null;
 
-  const movimentacoes = itemSelecionado
-    ? movimentacoesPorItem[itemSelecionado.id] || []
-    : [];
+  // Item de dinheiro sempre na versão mais recente do estado (saldo/contagem).
+  const dinheiroAtual =
+    itemSelecionado?.tipo === "dinheiro"
+      ? dinheiroEReservas.find((i) => i.id === itemSelecionado.id) || itemSelecionado
+      : null;
+
+  const itemPainel = dinheiroAtual ?? itemSelecionado;
+
+  const movimentacoes = !itemSelecionado
+    ? []
+    : itemSelecionado.tipo === "dinheiro"
+    ? movsDinheiro
+    : movimentacoesPorItem[itemSelecionado.id] || [];
 
   return (
     <div className={styles.carteiras}>
-      {/* Cabeçalho */}
       <div className={styles.topo}>
         <div>
           <span className={styles.rotulo}>CARTEIRA</span>
@@ -209,7 +262,6 @@ function Carteiras() {
       {/* Área principal em duas colunas:
           esquerda = carteira física | direita = resumos + contas */}
       <div className={styles.areaPrincipal}>
-      {/* Coluna esquerda: a carteira física */}
       {/* Seção: Cartões — porta-cartões físico (SVG) com cartões HTML */}
       <section className={`${styles.secao} ${styles.secaoCarteira}`}>
         <div className={styles.secaoTopo}>
@@ -263,9 +315,7 @@ function Carteiras() {
         )}
       </section>
 
-      {/* Coluna direita: resumos financeiros + seção Contas */}
       <div className={styles.colunaDireita}>
-        {/* Resumo financeiro */}
         <div className={styles.resumo}>
           <div className={`card ${styles.cardResumo}`}>
             <span className={styles.resumoIcone}>
@@ -298,7 +348,6 @@ function Carteiras() {
           </div>
         </div>
 
-        {/* Seção: Contas */}
         <Secao
           titulo="Contas"
           icone={Landmark}
@@ -338,38 +387,29 @@ function Carteiras() {
           />
         </Secao>
 
-        {/* Seção: Dinheiro e reservas (abaixo de Contas, na coluna direita) */}
+        {/* Seção: Dinheiro (em espécie) */}
         <Secao
-          titulo="Dinheiro e reservas"
+          titulo="Dinheiro"
           icone={Coins}
-          vazio="Nenhum dinheiro ou reserva cadastrado."
+          vazio="Nenhum dinheiro cadastrado."
           className={styles.secaoDinheiro}
         >
-          {dinheiroEReservas.map((item) =>
-            item.tipo === "reserva" ? (
-              <CardConta
+          {dinheiroEReservas
+            .filter((item) => item.tipo === "dinheiro")
+            .map((item) => (
+              <CardDinheiro
                 key={item.id}
                 item={item}
-                selecionado={itemSelecionado?.id === item.id}
-                onSelecionar={() => setItemSelecionado(item)}
+                onAdicionar={() => setModalCedulas({ modo: "adicionar", item })}
+                onRetirar={() => setModalCedulas({ modo: "retirar", item })}
               />
-            ) : (
-              <ItemCarteira
-                key={item.id}
-                item={item}
-                selecionado={itemSelecionado?.id === item.id}
-                onSelecionar={() => setItemSelecionado(item)}
-                semRodape
-              />
-            )
-          )}
+            ))}
         </Secao>
       </div>
       </div>
 
-      {/* Painel lateral de detalhes */}
       <PainelDetalhes
-        item={itemSelecionado}
+        item={itemPainel}
         movimentacoes={movimentacoes}
         contaAssociada={contaAssociada}
         onFechar={() => setItemSelecionado(null)}
@@ -380,7 +420,6 @@ function Carteiras() {
         onExcluir={() => excluirItem(itemSelecionado)}
       />
 
-      {/* Painel lateral com todas as contas */}
       <PainelContas
         aberto={painelContasAberto}
         contas={contas}
@@ -416,6 +455,21 @@ function Carteiras() {
         contas={contas}
         itemEditando={itemEditando}
         tipoInicial={tipoAdicionar}
+      />
+
+      <ModalCedulas
+        key={modalCedulas ? `${modalCedulas.modo}-${modalCedulas.item.id}` : "cedulas"}
+        aberto={Boolean(modalCedulas)}
+        modo={modalCedulas?.modo}
+        disponivel={
+          modalCedulas
+            ? dinheiroEReservas.find((i) => i.id === modalCedulas.item.id)?.contagem || {}
+            : {}
+        }
+        onFechar={() => setModalCedulas(null)}
+        onConfirmar={(escolhida) =>
+          confirmarCedulas(modalCedulas.item, modalCedulas.modo, escolhida)
+        }
       />
     </div>
   );
@@ -617,6 +671,40 @@ function CardConta({ item, selecionado, onSelecionar }) {
           <ChevronRight size={16} className={styles.contaSeta} />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Card "Dinheiro na carteira" (visual escuro, largura total da seção).
+ * Os botões Adicionar/Retirar abrem o modal de contagem de cédulas/moedas.
+ */
+function CardDinheiro({ item, onAdicionar, onRetirar }) {
+  return (
+    <div className={styles.cardDinheiro}>
+      <CarteiraVisual
+        tipo="dinheiro"
+        apelido={item.apelido}
+        valor={formatarBRL(item.saldo)}
+        contagem={item.contagem}
+      />
+
+      <div className={styles.dinheiroAcoes}>
+        <button
+          type="button"
+          className={`${styles.dinheiroBtn} ${styles.dinheiroBtnPreenchido}`}
+          onClick={onAdicionar}
+        >
+          Adicionar
+        </button>
+        <button
+          type="button"
+          className={`${styles.dinheiroBtn} ${styles.dinheiroBtnContorno}`}
+          onClick={onRetirar}
+        >
+          Retirar
+        </button>
+      </div>
     </div>
   );
 }

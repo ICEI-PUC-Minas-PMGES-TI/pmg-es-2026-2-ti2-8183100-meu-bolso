@@ -128,6 +128,28 @@ export async function buscarPerfil() {
 }
 
 /* ========================================
+   RECUPERAÇÃO DE SENHA (rotas públicas)
+   ======================================== */
+
+// Pede o envio do e-mail com o link de redefinição. O back responde sempre
+// com sucesso, exista o e-mail ou não, para não revelar quem tem conta.
+export async function esqueciSenha(email) {
+  return requisicao("/api/auth/esqueci-senha", {
+    metodo: "POST",
+    corpo: { email },
+  });
+}
+
+// Define a nova senha usando o token que veio no link do e-mail.
+// Token inválido, expirado ou já usado: o back responde 400.
+export async function redefinirSenha(token, novaSenha) {
+  return requisicao("/api/auth/redefinir-senha", {
+    metodo: "POST",
+    corpo: { token, novaSenha },
+  });
+}
+
+/* ========================================
    METAS
    ======================================== */
 
@@ -210,7 +232,11 @@ export const gastosApi = {
     requisicao("/api/gastos", { metodo: "POST", corpo, autenticado: true }),
 
   atualizar: (id, corpo) =>
-    requisicao(`/api/gastos/${id}`, { metodo: "PUT", corpo, autenticado: true }),
+    requisicao(`/api/gastos/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
 
   atualizarComentario: (id, comentario) =>
     requisicao(`/api/gastos/${id}/comentario`, {

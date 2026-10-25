@@ -2,6 +2,47 @@
    EVOLUÇÃO FINANCEIRA
 ======================================== */
 
+/* ---------- Animações ---------- */
+
+/* Entrada do card (na abertura da página e na troca de gráfico) */
+@keyframes cardEntra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A linha do gráfico se desenha da esquerda para a direita */
+@keyframes desenhaLinha {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Fade suave (pontos, rótulos, tooltip) */
+@keyframes aparece {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Barras crescem de baixo para cima */
+@keyframes cresceBarra {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
 .evolucao {
   display: flex;
   flex-direction: column;
@@ -65,6 +106,7 @@
 .card {
   max-width: 800px;
   min-height: 360px;
+  animation: cardEntra 0.4s ease both;
 }
 
 /* Topo do card de linha: título/subtítulo à esquerda, seletor à direita */
@@ -128,6 +170,12 @@
   stroke-width: 2.5;
   stroke-linejoin: round;
   stroke-linecap: round;
+
+  /* desenha da esquerda para a direita usando o comprimento real
+     da linha (medido no JSX e passado em --comprimento-linha) */
+  stroke-dasharray: var(--comprimento-linha, 1000);
+  stroke-dashoffset: var(--comprimento-linha, 1000);
+  animation: desenhaLinha 1s ease forwards;
 }
 
 .ponto {
@@ -135,6 +183,10 @@
   stroke: var(--verde-principal);
   stroke-width: 2.5;
   transition: r var(--transicao-rapida);
+
+  /* aparecem depois que a linha termina de se desenhar */
+  opacity: 0;
+  animation: aparece 0.3s ease 0.9s forwards;
 }
 
 .pontoAtivo {
@@ -246,7 +298,14 @@
   background-color: var(--verde-principal);
 }
 
-/* Barras */
+/* Barras — crescem de baixo para cima na entrada */
+.barraGastos,
+.barraGuardado {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: cresceBarra 0.6s ease both;
+}
+
 .barraGastos {
   fill: var(--erro);
   transition: opacity var(--transicao-rapida);
@@ -271,12 +330,24 @@
   font-size: var(--texto-xs);
   font-weight: 700;
   fill: var(--verde-escuro);
+
+  /* aparece após as barras crescerem */
+  opacity: 0;
+  animation: aparece 0.3s ease 0.6s forwards;
 }
 
+/* Respeita quem prefere menos movimento: sem animações de entrada */
 @media (prefers-reduced-motion: reduce) {
+  .card,
+  .linha,
   .ponto,
   .barraGastos,
-  .barraGuardado {
+  .barraGuardado,
+  .rotuloValor {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
     transition: none;
   }
 }

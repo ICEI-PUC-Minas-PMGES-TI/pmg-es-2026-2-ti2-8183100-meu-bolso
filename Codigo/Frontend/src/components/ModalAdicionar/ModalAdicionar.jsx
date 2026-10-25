@@ -167,7 +167,6 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
         ...(digitos ? { ultimosDigitos: digitos } : {}),
         ...(form.subtipo === "credito" && limite != null ? { limite } : {}),
         ...(form.contaId ? { contaId: form.contaId } : {}),
-        // preserva fatura já existente ao editar
         ...(editando && itemEditando.faturaAtual != null
           ? { faturaAtual: itemEditando.faturaAtual }
           : {}),
