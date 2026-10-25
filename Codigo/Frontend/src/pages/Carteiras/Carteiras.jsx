@@ -35,7 +35,6 @@ function carregarPersistido() {
     const bruto = localStorage.getItem(CHAVE_STORAGE);
     if (!bruto) return null;
     const dados = JSON.parse(bruto);
-    // só aceita se tiver as três listas no formato esperado
     if (
       Array.isArray(dados?.cartoes) &&
       Array.isArray(dados?.contas) &&
@@ -57,8 +56,6 @@ function Carteiras() {
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
 
-  // Listas em estado. Na primeira carga, usa o que estiver salvo no
-  // localStorage; caso contrário, parte dos dados fictícios.
   const persistido = carregarPersistido();
   const [cartoes, setCartoes] = useState(persistido?.cartoes ?? cartoesMock);
   const [contas, setContas] = useState(persistido?.contas ?? contasMock);
@@ -128,7 +125,6 @@ function Carteiras() {
 
   function salvarItem(dados) {
     if (dados.id) {
-      // edição: substitui o item existente
       setListaPorTipo(dados.tipo, (lista) => {
         let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
         if (dados.tipo === "conta") {
@@ -136,12 +132,10 @@ function Carteiras() {
         }
         return nova;
       });
-      // mantém o painel refletindo o item editado
       setItemSelecionado((atual) =>
         atual && atual.id === dados.id ? { ...atual, ...dados } : atual
       );
     } else {
-      // novo item
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
       setListaPorTipo(dados.tipo, (lista) => {
         const base = [...lista, item];
@@ -193,7 +187,6 @@ function Carteiras() {
 
   return (
     <div className={styles.carteiras}>
-      {/* Cabeçalho */}
       <div className={styles.topo}>
         <div>
           <span className={styles.rotulo}>CARTEIRA</span>
@@ -209,7 +202,6 @@ function Carteiras() {
       {/* Área principal em duas colunas:
           esquerda = carteira física | direita = resumos + contas */}
       <div className={styles.areaPrincipal}>
-      {/* Coluna esquerda: a carteira física */}
       {/* Seção: Cartões — porta-cartões físico (SVG) com cartões HTML */}
       <section className={`${styles.secao} ${styles.secaoCarteira}`}>
         <div className={styles.secaoTopo}>
@@ -263,9 +255,7 @@ function Carteiras() {
         )}
       </section>
 
-      {/* Coluna direita: resumos financeiros + seção Contas */}
       <div className={styles.colunaDireita}>
-        {/* Resumo financeiro */}
         <div className={styles.resumo}>
           <div className={`card ${styles.cardResumo}`}>
             <span className={styles.resumoIcone}>
@@ -298,7 +288,6 @@ function Carteiras() {
           </div>
         </div>
 
-        {/* Seção: Contas */}
         <Secao
           titulo="Contas"
           icone={Landmark}
@@ -367,7 +356,6 @@ function Carteiras() {
       </div>
       </div>
 
-      {/* Painel lateral de detalhes */}
       <PainelDetalhes
         item={itemSelecionado}
         movimentacoes={movimentacoes}
@@ -380,7 +368,6 @@ function Carteiras() {
         onExcluir={() => excluirItem(itemSelecionado)}
       />
 
-      {/* Painel lateral com todas as contas */}
       <PainelContas
         aberto={painelContasAberto}
         contas={contas}
