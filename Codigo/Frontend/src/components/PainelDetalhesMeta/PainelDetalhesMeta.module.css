@@ -1,0 +1,356 @@
+/* ========================================
+   PAINEL LATERAL DE DETALHES DA META (abre pela direita)
+   Mesma linha visual do PainelDetalhes usado em Carteiras.
+======================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 23, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transicao-padrao), visibility var(--transicao-padrao);
+  z-index: 200;
+}
+
+.overlayVisivel {
+  opacity: 1;
+  visibility: visible;
+}
+
+.painel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  width: 420px;
+  max-width: 100%;
+
+  background-color: var(--branco);
+  border-left: 1px solid var(--cinza-200);
+  box-shadow: -10px 0 40px rgba(16, 24, 23, 0.12);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+  padding: var(--espaco-6);
+  overflow-y: auto;
+
+  transform: translateX(100%);
+  transition: transform var(--transicao-padrao);
+  z-index: 201;
+}
+
+.painelAberto {
+  transform: translateX(0);
+}
+
+/* ---------- Cabeçalho ---------- */
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+}
+
+.botaoFechar,
+.botaoMenu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-700);
+}
+
+.botaoFechar:hover,
+.botaoMenu:hover {
+  background-color: var(--cinza-100);
+}
+
+.cabecalhoTexto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: var(--espaco-1);
+}
+
+.titulo {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.subtitulo {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.acoes {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-pequeno);
+  box-shadow: var(--sombra-card);
+  overflow: hidden;
+}
+
+.menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: var(--texto-sm);
+  color: var(--preto);
+}
+
+.menu button:hover {
+  background-color: var(--cinza-50);
+}
+
+.menuPerigo {
+  color: var(--erro);
+}
+
+/* ---------- Topo visual (ícone + nome) ---------- */
+.visual {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding: var(--espaco-4);
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+}
+
+.visualIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  flex-shrink: 0;
+}
+
+.visualTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.visualNome {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.tag {
+  align-self: flex-start;
+  padding: 2px 10px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tag-alta {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.tag-media {
+  background-color: var(--alerta-fundo);
+  color: #805b13;
+}
+
+.tag-baixa {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+/* ---------- Progresso ---------- */
+.progresso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.progressoBarra {
+  width: 100%;
+  height: 10px;
+  background-color: var(--cinza-100);
+  border-radius: var(--radius-redondo);
+  overflow: hidden;
+}
+
+.progressoPreenchido {
+  height: 100%;
+  background-color: var(--verde-principal);
+  border-radius: var(--radius-redondo);
+  transition: width var(--transicao-padrao);
+}
+
+.progressoRotulo {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+/* ---------- Resumo financeiro ---------- */
+.resumo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding: var(--espaco-4);
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.linhaRotulo {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.linhaValor {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.linhaDestaque {
+  font-size: var(--titulo-sm);
+  font-weight: 800;
+}
+
+/* ---------- Movimentações ---------- */
+.movimentacoes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.movTopo h3 {
+  font-size: var(--texto-lg);
+  font-weight: 700;
+}
+
+.vazio {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.listaMov {
+  display: flex;
+  flex-direction: column;
+}
+
+.itemMov {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) 0;
+  border-top: 1px solid var(--cinza-100);
+}
+
+.itemMov:first-child {
+  border-top: none;
+}
+
+.movInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.movDescricao {
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--preto);
+}
+
+.movMeta {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+.movValor {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.movEntrada {
+  color: var(--sucesso);
+}
+
+.movSaida {
+  color: var(--preto);
+}
+
+.verTodas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+
+  margin-top: var(--espaco-2);
+  min-height: 42px;
+  padding: 10px 16px;
+
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.verTodas:hover {
+  background-color: var(--cinza-50);
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 480px) {
+  .painel {
+    width: 100%;
+    padding: var(--espaco-4);
+  }
+}

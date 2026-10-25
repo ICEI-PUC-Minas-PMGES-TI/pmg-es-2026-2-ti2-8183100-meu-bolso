@@ -218,3 +218,58 @@ export async function trocarSenha(dados) {
     autenticado: true,
   });
 }
+
+/* ========================================
+   GASTOS, RECORRÊNCIAS E ORÇAMENTO
+   (usados por service/gastosService.js quando VITE_GASTOS_API=true)
+   ======================================== */
+
+export const gastosApi = {
+  // O back-end gera as recorrências que já venceram antes de devolver a lista
+  listar: () => requisicao("/api/gastos", { autenticado: true }),
+
+  criar: (corpo) =>
+    requisicao("/api/gastos", { metodo: "POST", corpo, autenticado: true }),
+
+  atualizar: (id, corpo) =>
+    requisicao(`/api/gastos/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  atualizarComentario: (id, comentario) =>
+    requisicao(`/api/gastos/${id}/comentario`, {
+      metodo: "PATCH",
+      corpo: { comentario },
+      autenticado: true,
+    }),
+
+  excluir: (id) =>
+    requisicao(`/api/gastos/${id}`, { metodo: "DELETE", autenticado: true }),
+
+  listarRecorrentes: () =>
+    requisicao("/api/gastos/recorrentes", { autenticado: true }),
+
+  atualizarRecorrente: (id, corpo) =>
+    requisicao(`/api/gastos/recorrentes/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  excluirRecorrente: (id) =>
+    requisicao(`/api/gastos/recorrentes/${id}`, {
+      metodo: "DELETE",
+      autenticado: true,
+    }),
+
+  obterOrcamento: () => requisicao("/api/orcamento", { autenticado: true }),
+
+  salvarOrcamento: (valorMensal) =>
+    requisicao("/api/orcamento", {
+      metodo: "PUT",
+      corpo: { valorMensal },
+      autenticado: true,
+    }),
+};

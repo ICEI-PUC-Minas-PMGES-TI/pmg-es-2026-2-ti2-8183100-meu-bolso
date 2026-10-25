@@ -1,0 +1,282 @@
+/* ========================================
+   EVOLUÇÃO FINANCEIRA
+======================================== */
+
+.evolucao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* Cabeçalho da página */
+.cabecalho h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.cabecalho p {
+  margin-top: var(--espaco-1);
+}
+
+/* Seletor de gráfico com ícones (dentro do card, canto sup. direito) */
+.seletor {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  flex-shrink: 0;
+
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-pequeno);
+}
+
+.seletorBotao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cinza-500);
+
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.seletorBotao:hover {
+  color: var(--verde-escuro);
+}
+
+.seletorBotaoAtivo,
+.seletorBotaoAtivo:hover {
+  background-color: var(--branco);
+  color: var(--preto);
+  box-shadow: var(--sombra-leve);
+}
+
+/* Cartão do gráfico.
+   min-height mantém os dois gráficos do mesmo tamanho ao alternar,
+   mesmo que os cabeçalhos (legenda x subtítulo) tenham alturas
+   ligeiramente diferentes. */
+.card {
+  max-width: 800px;
+  min-height: 360px;
+}
+
+/* Topo do card de linha: título/subtítulo à esquerda, seletor à direita */
+.topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+}
+
+.cardTopo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.cardTopo h3 {
+  margin: 0;
+}
+
+/* Área do gráfico */
+.grafico {
+  position: relative;
+  margin-top: var(--espaco-4);
+  width: 100%;
+}
+
+.svg {
+  display: block;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+/* Grade e eixos */
+.grade {
+  stroke: var(--cinza-100);
+  stroke-width: 1;
+}
+
+.rotuloY {
+  font-size: var(--texto-xs);
+  fill: var(--cinza-500);
+}
+
+.rotuloX {
+  font-size: var(--texto-xs);
+  fill: var(--cinza-500);
+}
+
+/* Guia vertical do ponto ativo */
+.guia {
+  stroke: var(--cinza-300);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* Linha e marcadores */
+.linha {
+  fill: none;
+  stroke: var(--verde-principal);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.ponto {
+  fill: var(--branco);
+  stroke: var(--verde-principal);
+  stroke-width: 2.5;
+  transition: r var(--transicao-rapida);
+}
+
+.pontoAtivo {
+  stroke: var(--verde-escuro);
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  width: 120px; /* manter igual a larguraTooltip no .jsx */
+  pointer-events: none;
+  background: var(--preto);
+  color: var(--branco);
+  border-radius: var(--radius-pequeno);
+  padding: 7px 10px;
+  text-align: center;
+  box-shadow: var(--sombra-card);
+}
+
+.tooltipMes {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--cinza-300);
+}
+
+.tooltipValor {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Linha de valor dentro do tooltip de barras (uma por série) */
+.tooltipLinha {
+  display: block;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.tooltipLinha::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.tooltipGastos::before {
+  background-color: var(--erro);
+}
+
+.tooltipGuardado::before {
+  background-color: var(--verde-principal);
+}
+
+/* ========================================
+   GRÁFICO DE BARRAS EMPILHADAS
+======================================== */
+
+.barrasTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.barrasTopo h3 {
+  margin: 0;
+}
+
+/* Agrupa legenda + seletor no lado direito do topo das barras */
+.barrasTopoDireita {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+/* Legenda */
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.legendaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cinza-700);
+}
+
+.legendaCor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.corGastos {
+  background-color: var(--erro);
+}
+
+.corGuardado {
+  background-color: var(--verde-principal);
+}
+
+/* Barras */
+.barraGastos {
+  fill: var(--erro);
+  transition: opacity var(--transicao-rapida);
+}
+
+.barraGuardado {
+  fill: var(--verde-principal);
+  transition: opacity var(--transicao-rapida);
+}
+
+.barraAtiva {
+  opacity: 0.82;
+}
+
+.rotuloXAtivo {
+  fill: var(--preto);
+  font-weight: 600;
+}
+
+/* Rótulo do total acumulado acima de cada barra */
+.rotuloValor {
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  fill: var(--verde-escuro);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ponto,
+  .barraGastos,
+  .barraGuardado {
+    transition: none;
+  }
+}

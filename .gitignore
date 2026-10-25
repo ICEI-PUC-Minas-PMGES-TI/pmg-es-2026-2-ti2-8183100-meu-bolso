@@ -1,0 +1,15 @@
+# .gitignore da RAIZ do repositorio.
+# Cada subprojeto tem o seu proprio .gitignore com os padroes da stack:
+#   - Codigo/Frontend/.gitignore  (Node/Vite)
+#   - Codigo/Backend/.gitignore   (Java/Maven)
+# Aqui ficam apenas regras especificas da raiz.
+
+# Pacotes do Node instalados por engano NA RAIZ.
+# (O projeto Node de verdade fica em Codigo/Frontend.)
+/node_modules/
+/package.json
+/package-lock.json
+
+# Rede de seguranca: nunca versionar arquivos de ambiente com segredos,
+# em qualquer pasta (reforca o que os subprojetos ja ignoram).
+**/.env

@@ -1,0 +1,485 @@
+/* ========================================
+   CARTEIRA
+======================================== */
+
+.carteiras {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+
+  /* Recupera o padding lateral do container pai para abrir um pouco mais
+     o conteúdo, SEM usar 100vw (que causava faixa branca e scroll horizontal
+     ao surgir a scrollbar / abrir o painel). Fica dentro da viewport. */
+  margin-inline: calc(-1 * var(--espaco-8));
+}
+
+/* ---------- Cabeçalho ---------- */
+.topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.rotulo {
+  display: block;
+  margin-bottom: var(--espaco-1);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cinza-500);
+}
+
+.topo h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.topo p {
+  margin-top: var(--espaco-1);
+  max-width: 54ch;
+}
+
+.botaoAdicionar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+
+  min-height: 44px;
+  padding: 12px 20px;
+
+  background-color: var(--preto);
+  color: var(--branco);
+  border: none;
+  border-radius: var(--radius-redondo);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+
+  transition: background-color var(--transicao-padrao);
+}
+
+.botaoAdicionar:hover {
+  background-color: var(--verde-escuro);
+}
+
+/* ---------- Resumo financeiro ---------- */
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.cardResumo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+/* ícone em círculo verde-claro à esquerda do texto */
+.resumoIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.resumoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.resumoSeta {
+  color: var(--cinza-500);
+  flex-shrink: 0;
+}
+
+.resumoRotulo {
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.resumoValor {
+  font-size: var(--titulo-lg);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* ---------- Seções ---------- */
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.secaoTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+  color: var(--preto);
+}
+
+.secaoTitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+/* Ícone do título da seção dentro de um círculo verde-claro */
+.secaoTitulo > svg {
+  box-sizing: content-box;
+  width: 18px;
+  height: 18px;
+  padding: 8px;
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+/* Link "Ver todas >" à direita do título da seção */
+.verTodas {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--verde-escuro);
+  cursor: pointer;
+}
+
+.secaoTopo h2 {
+  font-size: var(--titulo-md);
+  font-weight: 700;
+}
+
+/* Contador de cartões ao lado do título da carteira */
+.contador {
+  padding: 2px 10px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+}
+
+/* Botão "Adicionar" exclusivo de cartões (no cabeçalho da seção) */
+.botaoAdicionarCartao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+
+  min-height: 36px;
+  padding: 8px 14px;
+
+  background-color: var(--branco);
+  color: var(--verde-escuro);
+  border: 1px solid var(--verde-principal);
+  border-radius: var(--radius-redondo);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+
+  transition: background-color var(--transicao-padrao), color var(--transicao-padrao);
+}
+
+.botaoAdicionarCartao:hover {
+  background-color: var(--verde-claro);
+}
+
+/* ---------- Área principal em duas colunas ---------- */
+/* Esquerda: "Sua carteira" (~40%) | Direita: resumos + "Contas" (~60%) */
+.areaPrincipal {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--espaco-8);
+  align-items: start;
+}
+
+/* Coluna direita: resumos no topo e, abaixo, a seção Contas */
+.colunaDireita {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+  min-width: 0;
+}
+
+/* A carteira física fica isolada em um único card arredondado.
+   min-height reserva espaço para a expansão dos cartões (hover/abrir)
+   sem empurrar nem sobrepor as seções seguintes. */
+.secaoCarteira {
+  align-items: stretch;
+
+  padding: var(--espaco-6);
+  background-color: #e6f0e8;
+  border: 1px solid var(--verde-claro);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-leve);
+
+  min-height: 600px;
+}
+
+/* a carteira (corpo da seção) ocupa, centralizada, o espaço central livre */
+.secaoCarteira > :not(.secaoTopo):not(.carteiraLegenda) {
+  align-self: center;
+  width: 100%;
+  margin: auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* legenda fixa abaixo da carteira, dentro do card */
+.carteiraLegenda {
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--espaco-5);
+}
+
+/* Contas ocupa a coluna direita: cards de mesmo tamanho, lado a lado */
+.secaoContas .grade {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* Dinheiro e reservas: dois cards lado a lado (largura total) */
+.secaoDinheiro .grade {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* ---------- Item clicável ---------- */
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  align-items: center;
+
+  padding: var(--espaco-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-grande);
+
+  cursor: pointer;
+  transition: border-color var(--transicao-padrao), background-color var(--transicao-padrao);
+}
+
+.item:hover {
+  background-color: var(--cinza-50);
+}
+
+.item:focus-visible {
+  outline: none;
+  border-color: var(--verde-principal);
+}
+
+.itemSelecionado {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-fundo);
+}
+
+.itemRodape {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: 0 var(--espaco-1);
+}
+
+.itemNome {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.itemValor {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--preto);
+  white-space: nowrap;
+}
+
+/* ---------- Estado vazio ---------- */
+.vazio {
+  text-align: center;
+  padding: var(--espaco-8);
+  border-style: dashed;
+}
+
+/* ---------- Responsividade ---------- */
+/* Telas médias/pequenas: colunas empilham (carteira em cima, contas embaixo) */
+@media (max-width: 960px) {
+  .areaPrincipal {
+    grid-template-columns: 1fr;
+    gap: var(--espaco-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .resumo {
+    grid-template-columns: 1fr;
+  }
+
+  .secaoTopo {
+    align-items: flex-start;
+  }
+
+  .botaoAdicionarCartao {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  .grade,
+  .secaoDinheiro .grade {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================
+   CARDS DE CONTA / RESERVA / ADICIONAR (padrão da referência)
+======================================== */
+.contaCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+
+  height: 100%;
+  padding: var(--espaco-5);
+  text-align: left;
+
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-leve);
+  overflow: hidden;
+
+  cursor: pointer;
+  transition: border-color var(--transicao-padrao), box-shadow var(--transicao-padrao);
+}
+
+/* Faixa fina com a cor do banco no topo do card */
+.contaFaixa {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.contaCard:hover {
+  box-shadow: var(--sombra-hover);
+}
+
+.contaCard:focus-visible {
+  outline: none;
+  border-color: var(--verde-principal);
+}
+
+.contaCardSel {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-fundo);
+}
+
+.contaTopo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* Logo circular do banco (imagem sobre fundo tonal da cor do banco) */
+.contaLogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.contaLogoImg {
+  width: 100%;
+  height: 100%;
+  padding: 6px;
+  object-fit: contain;
+}
+
+/* Ícone circular verde-claro (reserva / adicionar) */
+.contaIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.contaSeta {
+  color: var(--cinza-500);
+  flex-shrink: 0;
+}
+
+.contaInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contaNome {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.contaSub {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+.contaValor {
+  margin-top: var(--espaco-2);
+  font-size: var(--titulo-sm);
+  font-weight: 800;
+  color: var(--preto);
+}
+
+.contaRodape {
+  margin-top: auto;
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cinza-100);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.contaRodapeTexto {
+  font-size: var(--texto-xs);
+  line-height: 1.35;
+  color: var(--cinza-500);
+}
+
+/* "Adicionar conta": tracejado e centrado verticalmente */
+.contaAdicionar {
+  border-style: dashed;
+  justify-content: center;
+}

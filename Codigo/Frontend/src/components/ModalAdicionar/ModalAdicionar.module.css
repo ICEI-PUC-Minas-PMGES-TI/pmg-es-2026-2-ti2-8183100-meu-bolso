@@ -1,0 +1,213 @@
+/* ========================================
+   MODAL ADICIONAR À CARTEIRA
+======================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-4);
+  z-index: 210;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  background-color: var(--branco);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  padding: var(--espaco-6);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.cabecalho h2 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.botaoFechar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-700);
+}
+
+.botaoFechar:hover {
+  background-color: var(--cinza-100);
+}
+
+/* ---------- Etapa 1: seleção de tipo ---------- */
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.opcao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--espaco-4);
+  text-align: left;
+
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+
+  transition: border-color var(--transicao-padrao), background-color var(--transicao-padrao);
+}
+
+.opcao:hover {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-fundo);
+}
+
+.opcaoIcone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--espaco-2);
+  border-radius: 50%;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.opcao strong {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+
+.opcaoDescricao {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+/* ---------- Etapa 2: formulário ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo label {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto-suave);
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+  outline: none;
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--verde-principal);
+  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+}
+
+.aviso {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-pequeno);
+  padding: 10px 12px;
+}
+
+/* Validação: borda vermelha e mensagem de erro no campo */
+.campoErro input,
+.campoErro select {
+  border-color: var(--erro, #dc2626);
+}
+
+.campoErro input:focus,
+.campoErro select:focus {
+  border-color: var(--erro, #dc2626);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.mensagemErro {
+  font-size: var(--texto-xs);
+  color: var(--erro, #dc2626);
+}
+
+.formAcoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+}
+
+.btnVoltar,
+.btnSalvar {
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.btnVoltar {
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+}
+
+.btnVoltar:hover {
+  background-color: var(--cinza-50);
+}
+
+.btnSalvar {
+  background-color: var(--preto);
+  color: var(--branco);
+  border: 1px solid transparent;
+}
+
+.btnSalvar:hover {
+  background-color: var(--verde-escuro);
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 480px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+}

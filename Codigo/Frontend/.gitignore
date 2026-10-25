@@ -30,3 +30,6 @@ dist-ssr
 .env.*
 !.env.example
 
+
+# Backup das logos originais (não versionar nem servir)
+_backup_bancos

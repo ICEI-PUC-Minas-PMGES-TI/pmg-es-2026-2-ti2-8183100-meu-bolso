@@ -85,6 +85,14 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Lê variáveis do arquivo .env automaticamente (dev local sem Docker).
+             Se não houver .env, não faz nada: Docker/ambiente seguem normais. -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
         <!-- Testes -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

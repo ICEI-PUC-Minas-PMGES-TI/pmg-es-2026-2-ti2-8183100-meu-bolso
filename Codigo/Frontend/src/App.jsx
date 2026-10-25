@@ -1,14 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
+import Cadastro from "./pages/Login/Cadastro";
 import Layout from "./components/Layout/Layout";
 import RotaProtegida from "./components/RotaProtegida/RotaProtegida";
-import Cadastro from "./pages/Login/Cadastro";
 import EsqueciSenha from "./pages/Login/EsqueciSenha";
 import RedefinirSenha from "./pages/Login/RedefinirSenha";
 
-// Importe somente as páginas que já existem
+// Páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Gastos from "./pages/Gastos/Gastos";
+import Carteiras from "./pages/Carteiras/Carteiras";
+import Metas from "./pages/Metas/Metas";
+import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
 
 function App() {
   return (
@@ -25,11 +29,15 @@ function App() {
           {/* Páginas com barra de navegação superior */}
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-
-            {/* Adicione quando criar as páginas (dentro desta rota protegida):
             <Route path="/gastos" element={<Gastos />} />
             <Route path="/carteiras" element={<Carteiras />} />
             <Route path="/metas" element={<Metas />} />
+            <Route
+              path="/evolucao-financeira"
+              element={<EvolucaoFinanceira />}
+            />
+
+            {/* Adicione quando criar as páginas:
             <Route path="/perfil" element={<Perfil />} />
             */}
           </Route>

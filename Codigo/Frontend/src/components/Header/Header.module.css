@@ -105,12 +105,30 @@
 }
 
 /* ---------- Usuário (direita) ---------- */
+/* A pílula é o container posicionado; o menu suspenso ancora nela. */
 .usuario {
+  position: relative;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+/* Botão que ocupa a pílula inteira e abre o menu */
+.usuarioBotao {
   display: flex;
   align-items: center;
   gap: var(--espaco-3);
-  flex-shrink: 0;
-  padding: 6px 18px 6px 6px;
+  width: 100%;
+  padding: 6px 14px 6px 6px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-redondo);
+  color: var(--preto);
+
+  transition: background-color var(--transicao-rapida);
+}
+
+.usuarioBotao:hover {
+  background-color: var(--cinza-50);
 }
 
 .avatar {
@@ -119,32 +137,126 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--verde-principal);
+  flex-shrink: 0;
 }
 
-.usuarioInfo {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.usuarioInfo strong {
+.usuarioNome {
   font-size: var(--texto-sm);
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.sair {
-  padding: 0;
-  border: none;
-  background: transparent;
-  text-align: left;
+.chevron {
+  color: var(--cinza-500);
+  transition: transform var(--transicao-rapida);
+}
 
+.chevronAberto {
+  transform: rotate(180deg);
+}
+
+/* ---------- Menu suspenso do perfil ---------- */
+.menu {
+  position: absolute;
+  top: calc(100% + var(--espaco-2));
+  right: 0;
+  z-index: 100;
+
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--espaco-2);
+
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-card);
+
+  animation: menuAparece var(--transicao-rapida) ease;
+}
+
+@keyframes menuAparece {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Topo: avatar grande + nome + e-mail, centralizados */
+.menuTopo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: var(--espaco-4) var(--espaco-3) var(--espaco-3);
+}
+
+.menuAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--verde-principal);
+  margin-bottom: var(--espaco-1);
+}
+
+.menuNome {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--preto);
+  text-align: center;
+}
+
+.menuEmail {
   font-size: var(--texto-xs);
   color: var(--cinza-500);
+  text-align: center;
+  word-break: break-all;
 }
 
-.sair:hover {
+.menuSeparador {
+  height: 1px;
+  background-color: var(--cinza-100);
+  margin: var(--espaco-1) 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  width: 100%;
+  padding: 10px 12px;
+
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pequeno);
+  text-align: left;
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cinza-700);
+
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.menuItem:hover {
+  background-color: var(--verde-claro);
   color: var(--verde-escuro);
-  text-decoration: underline;
+}
+
+.menuItemPerigo {
+  color: var(--erro);
+}
+
+.menuItemPerigo:hover {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
 }
 
 /* ---------- Responsividade ---------- */
@@ -164,7 +276,7 @@
 }
 
 @media (max-width: 480px) {
-  .usuarioInfo {
+  .usuarioNome {
     display: none;
   }
 }
