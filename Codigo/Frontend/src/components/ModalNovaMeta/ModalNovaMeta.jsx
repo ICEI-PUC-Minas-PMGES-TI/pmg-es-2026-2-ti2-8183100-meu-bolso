@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import styles from "./ModalNovaMeta.module.css";
 
 /**
@@ -23,6 +23,7 @@ import styles from "./ModalNovaMeta.module.css";
  *  - metaParaEditar: meta | null — quando presente, entra em modo edição
  *  - onFechar: fecha o modal
  *  - onSalvar: (meta) => void — recebe a meta montada
+ *  - onExcluir: (meta) => void — exclui a meta (só aparece no modo edição)
  */
 const formInicial = {
   nome: "",
@@ -53,7 +54,7 @@ function converterValor(texto) {
   return Number.isFinite(n) ? n : undefined;
 }
 
-function ModalNovaMeta({ aberto, metaParaEditar, onFechar, onSalvar }) {
+function ModalNovaMeta({ aberto, metaParaEditar, onFechar, onSalvar, onExcluir }) {
   const editando = Boolean(metaParaEditar);
 
   const [form, setForm] = useState(() => formDaMeta(metaParaEditar));
@@ -69,6 +70,16 @@ function ModalNovaMeta({ aberto, metaParaEditar, onFechar, onSalvar }) {
 
   function atualizar(campo, valor) {
     setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  // Exclui a meta em edição, após confirmação (ação destrutiva).
+  function handleExcluir() {
+    const confirmado = window.confirm(
+      `Excluir a meta "${metaParaEditar.nome}"? Esta ação não pode ser desfeita.`
+    );
+    if (!confirmado) return;
+    if (onExcluir) onExcluir(metaParaEditar);
+    fecharResetando();
   }
 
   function handleSubmit(e) {
@@ -174,16 +185,30 @@ function ModalNovaMeta({ aberto, metaParaEditar, onFechar, onSalvar }) {
           {erro && <p className={styles.erro}>{erro}</p>}
 
           <div className={styles.formAcoes}>
-            <button
-              type="button"
-              className={styles.btnVoltar}
-              onClick={fecharResetando}
-            >
-              Cancelar
-            </button>
-            <button type="submit" className={styles.btnSalvar}>
-              {editando ? "Salvar alterações" : "Salvar"}
-            </button>
+            {/* Excluir só no modo edição; fica à esquerda, separado. */}
+            {editando && onExcluir && (
+              <button
+                type="button"
+                className={styles.btnExcluir}
+                onClick={handleExcluir}
+              >
+                <Trash2 size={16} aria-hidden="true" />
+                Excluir
+              </button>
+            )}
+
+            <div className={styles.formAcoesDireita}>
+              <button
+                type="button"
+                className={styles.btnVoltar}
+                onClick={fecharResetando}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className={styles.btnSalvar}>
+                {editando ? "Salvar alterações" : "Salvar"}
+              </button>
+            </div>
           </div>
         </form>
       </div>

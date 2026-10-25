@@ -126,3 +126,124 @@ export async function entrar(email, senha) {
 export async function buscarPerfil() {
   return requisicao("/api/usuarios/me", { autenticado: true });
 }
+
+/* ========================================
+   METAS
+   ======================================== */
+
+// Lista as metas do usuário logado.
+export async function listarMetas() {
+  return requisicao("/api/metas", { autenticado: true });
+}
+
+// Cria uma meta nova. `dados` = { nome, valorAlvo, prazo, prioridade }.
+// O prazo deve ser "YYYY-MM-DD" ou null.
+export async function criarMeta(dados) {
+  return requisicao("/api/metas", {
+    metodo: "POST",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Atualiza os dados básicos de uma meta existente.
+export async function atualizarMeta(id, dados) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Exclui uma meta pelo id.
+export async function excluirMeta(id) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
+/* ========================================
+   PERFIL
+   ======================================== */
+
+// Atualiza nome, email e telefone. `dados` = { nome, email, telefone }.
+// O back-end reemite o token (o e-mail pode ter mudado); atualizamos a
+// sessão local para refletir os novos dados em todas as telas.
+export async function atualizarPerfil(dados) {
+  const perfil = await requisicao("/api/usuarios/me", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+
+  if (perfil?.token) {
+    localStorage.setItem(CHAVE_TOKEN, perfil.token);
+  }
+  localStorage.setItem(
+    CHAVE_USUARIO,
+    JSON.stringify({ nome: perfil.nome, email: perfil.email }),
+  );
+
+  return perfil;
+}
+
+// Troca a senha. `dados` = { senhaAtual, novaSenha }.
+export async function trocarSenha(dados) {
+  return requisicao("/api/usuarios/me/senha", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+/* ========================================
+   GASTOS, RECORRÊNCIAS E ORÇAMENTO
+   (usados por service/gastosService.js quando VITE_GASTOS_API=true)
+   ======================================== */
+
+export const gastosApi = {
+  // O back-end gera as recorrências que já venceram antes de devolver a lista
+  listar: () => requisicao("/api/gastos", { autenticado: true }),
+
+  criar: (corpo) =>
+    requisicao("/api/gastos", { metodo: "POST", corpo, autenticado: true }),
+
+  atualizar: (id, corpo) =>
+    requisicao(`/api/gastos/${id}`, { metodo: "PUT", corpo, autenticado: true }),
+
+  atualizarComentario: (id, comentario) =>
+    requisicao(`/api/gastos/${id}/comentario`, {
+      metodo: "PATCH",
+      corpo: { comentario },
+      autenticado: true,
+    }),
+
+  excluir: (id) =>
+    requisicao(`/api/gastos/${id}`, { metodo: "DELETE", autenticado: true }),
+
+  listarRecorrentes: () =>
+    requisicao("/api/gastos/recorrentes", { autenticado: true }),
+
+  atualizarRecorrente: (id, corpo) =>
+    requisicao(`/api/gastos/recorrentes/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  excluirRecorrente: (id) =>
+    requisicao(`/api/gastos/recorrentes/${id}`, {
+      metodo: "DELETE",
+      autenticado: true,
+    }),
+
+  obterOrcamento: () => requisicao("/api/orcamento", { autenticado: true }),
+
+  salvarOrcamento: (valorMensal) =>
+    requisicao("/api/orcamento", {
+      metodo: "PUT",
+      corpo: { valorMensal },
+      autenticado: true,
+    }),
+};

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Target,
@@ -12,62 +12,34 @@ import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
 import ModalMovimentarMeta from "../../components/ModalMovimentarMeta/ModalMovimentarMeta";
 import PainelDetalhesMeta from "../../components/PainelDetalhesMeta/PainelDetalhesMeta";
 import { ajustarSaldoCarteira } from "../../service/carteirasStorage";
+import {
+  listarMetas,
+  criarMeta,
+  atualizarMeta,
+  excluirMeta as excluirMetaApi,
+} from "../../service/Api";
 
 import styles from "./Metas.module.css";
 
 // ============================================================
 // METAS (RF-02 / RF-03 — F4: Metas e reserva)
 // ------------------------------------------------------------
-// Esqueleto da página de Metas. A estrutura segue o padrão das
-// demais páginas (componente funcional + CSS Module + classes
-// globais do global.css).
-//
-// O modelo de dados (ver Documentacao/ModeloDeDados.md, coleção
-// "metas") define cada meta com: nome, valorAlvo, valorAtual,
-// prazo e prioridade ("alta" | "media" | "baixa"). A reserva é
-// apenas uma meta com nome próprio. O progresso é calculado por
+// As metas são carregadas e persistidas no back-end (MongoDB),
+// vinculadas ao usuário autenticado (ver src/service/Api.js e
+// Documentacao/ModeloDeDados.md, coleção "metas"). Cada meta tem:
+// nome, valorAlvo, valorAtual, prazo e prioridade. O progresso é
 // valorAtual / valorAlvo.
 //
-// TODO (back-end): substituir os dados de exemplo por chamadas
-// ao serviço de API (src/service/Api.js) e implementar as ações
-// de criar meta e registrar aporte.
+// A movimentação (depósito/retirada) ainda é local: no back-end
+// virará uma transação com metaId. Por isso o histórico de
+// movimentações por meta segue em estado local por enquanto.
 // ============================================================
 
-// Dados de exemplo apenas para visualizar o layout do esqueleto.
-// Serão removidos quando a integração com a API for feita.
-const metasExemplo = [
-  {
-    _id: "exemplo-1",
-    nome: "Reserva de emergência",
-    valorAlvo: 5000,
-    valorAtual: 1800,
-    prazo: "2026-12-31",
-    prioridade: "alta",
-  },
-  {
-    _id: "exemplo-2",
-    nome: "Viagem",
-    valorAlvo: 3000,
-    valorAtual: 750,
-    prazo: "2027-06-30",
-    prioridade: "media",
-  },
-];
-
-// Histórico fictício de movimentações por meta (mais recente primeiro),
-// indexado por _id da meta. Mesmo espírito do movimentacoesPorItem usado
-// na página Carteiras. Será substituído por transações do back-end.
-const movimentacoesExemplo = {
-  "exemplo-1": [
-    { id: 1, descricao: "Aporte mensal", categoria: "Depósito", data: "05 out", valor: 300, entrada: true },
-    { id: 2, descricao: "Depósito extra", categoria: "Depósito", data: "20 set", valor: 500, entrada: true },
-    { id: 3, descricao: "Saque emergencial", categoria: "Retirada", data: "02 set", valor: 200, entrada: false },
-    { id: 4, descricao: "Aporte inicial", categoria: "Depósito", data: "10 ago", valor: 1200, entrada: true },
-  ],
-  "exemplo-2": [
-    { id: 1, descricao: "Primeiro depósito", categoria: "Depósito", data: "01 out", valor: 750, entrada: true },
-  ],
-};
+// O back-end usa "id"; o restante da página usa "_id". Normaliza para _id
+// para não precisar mudar modal, painel e cartões.
+function normalizarMeta(meta) {
+  return { ...meta, _id: meta.id ?? meta._id };
+}
 
 // Data curta no padrão "05 out" para novas movimentações.
 function dataCurta(d = new Date()) {
@@ -92,15 +64,35 @@ function calcularProgresso(valorAtual, valorAlvo) {
 }
 
 function Metas() {
-  // Estado inicial com os dados de exemplo (trocar por fetch na API).
-  const [metas, setMetas] = useState(metasExemplo);
+  // Metas vindas do back-end. Começa vazio e é preenchido no carregamento.
+  const [metas, setMetas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erroCarregar, setErroCarregar] = useState("");
 
   // Histórico de movimentações por meta (indexado por _id).
-  const [movimentacoesPorMeta, setMovimentacoesPorMeta] =
-    useState(movimentacoesExemplo);
+  // Ainda local (depósito/retirada vira transação no back-end depois).
+  const [movimentacoesPorMeta, setMovimentacoesPorMeta] = useState({});
 
   // Meta aberta no painel lateral de detalhes (null = painel fechado).
   const [metaSelecionada, setMetaSelecionada] = useState(null);
+
+  // Carrega as metas do usuário ao abrir a página.
+  useEffect(() => {
+    let ativo = true;
+    (async () => {
+      try {
+        const lista = await listarMetas();
+        if (ativo) setMetas(lista.map(normalizarMeta));
+      } catch (e) {
+        if (ativo) setErroCarregar(e.message || "Não foi possível carregar as metas.");
+      } finally {
+        if (ativo) setCarregando(false);
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   // Controle do modal. metaEmEdicao = null -> modo criação;
   // metaEmEdicao preenchida -> modo edição.
@@ -176,24 +168,46 @@ function Metas() {
     );
   }
 
-  // Recebe a meta salva pelo modal. Se já tem _id, atualiza a
-  // existente; senão, cria uma nova (ainda sem back-end).
-  function salvarMeta(meta) {
-    if (meta._id) {
-      setMetas((lista) =>
-        lista.map((m) => (m._id === meta._id ? { ...m, ...meta } : m))
-      );
-      // Reflete a edição no painel aberto, se for a mesma meta.
-      setMetaSelecionada((atual) =>
-        atual && atual._id === meta._id ? { ...atual, ...meta } : atual
-      );
-    } else {
-      setMetas((lista) => [...lista, { ...meta, _id: `meta-${Date.now()}` }]);
+  // Monta o corpo que o back-end espera a partir da meta do formulário.
+  function corpoParaApi(meta) {
+    return {
+      nome: meta.nome,
+      valorAlvo: meta.valorAlvo,
+      prazo: meta.prazo || null,
+      prioridade: meta.prioridade,
+    };
+  }
+
+  // Recebe a meta salva pelo modal. Com _id, edita; sem _id, cria.
+  // Persiste no back-end e atualiza a lista com a resposta.
+  async function salvarMeta(meta) {
+    try {
+      if (meta._id) {
+        const atualizada = normalizarMeta(await atualizarMeta(meta._id, corpoParaApi(meta)));
+        setMetas((lista) =>
+          lista.map((m) => (m._id === meta._id ? atualizada : m))
+        );
+        setMetaSelecionada((atual) =>
+          atual && atual._id === meta._id ? atualizada : atual
+        );
+      } else {
+        const criada = normalizarMeta(await criarMeta(corpoParaApi(meta)));
+        setMetas((lista) => [...lista, criada]);
+      }
+    } catch (e) {
+      // Mantém simples por enquanto: avisa o usuário sem derrubar a tela.
+      alert(e.message || "Não foi possível salvar a meta.");
     }
   }
 
-  // Exclui a meta e limpa seu histórico; fecha o painel se era a aberta.
-  function excluirMeta(meta) {
+  // Exclui a meta no back-end, limpa o histórico local e fecha o painel.
+  async function excluirMeta(meta) {
+    try {
+      await excluirMetaApi(meta._id);
+    } catch (e) {
+      alert(e.message || "Não foi possível excluir a meta.");
+      return;
+    }
     setMetas((lista) => lista.filter((m) => m._id !== meta._id));
     setMovimentacoesPorMeta((mapa) => {
       const copia = { ...mapa };
@@ -206,9 +220,10 @@ function Metas() {
   }
 
   // Resumo simples para os cartões de visão geral.
+  // Number(...) protege caso os valores venham como string na serialização.
   const totalMetas = metas.length;
-  const totalGuardado = metas.reduce((soma, meta) => soma + meta.valorAtual, 0);
-  const totalAlvo = metas.reduce((soma, meta) => soma + meta.valorAlvo, 0);
+  const totalGuardado = metas.reduce((soma, meta) => soma + Number(meta.valorAtual ?? 0), 0);
+  const totalAlvo = metas.reduce((soma, meta) => soma + Number(meta.valorAlvo ?? 0), 0);
 
   return (
     <div className={styles.metas}>
@@ -268,7 +283,15 @@ function Metas() {
       <section className={styles.lista}>
         <h2>Suas metas</h2>
 
-        {metas.length === 0 ? (
+        {carregando ? (
+          <div className={`card ${styles.vazio}`}>
+            <p className="texto-secundario">Carregando suas metas...</p>
+          </div>
+        ) : erroCarregar ? (
+          <div className={`card ${styles.vazio}`}>
+            <p className="texto-secundario">{erroCarregar}</p>
+          </div>
+        ) : metas.length === 0 ? (
           <div className={`card ${styles.vazio}`}>
             <p className="texto-secundario">
               Você ainda não tem metas. Crie a primeira para começar a planejar.
@@ -371,6 +394,7 @@ function Metas() {
         metaParaEditar={metaEmEdicao}
         onFechar={fecharModal}
         onSalvar={salvarMeta}
+        onExcluir={excluirMeta}
       />
 
       {/* Modal de movimentação (depósito/retirada) do valor guardado. */}

@@ -1,10 +1,13 @@
     /* ========================================
     PÁGINA DE GASTOS
-    Todas as classes usam o prefixo "gastos-"
-    Reaproveita variáveis, .btn e .form-* do global.css
+    Todas as classes usam o prefixo "gastos-".
+    Reaproveita variáveis, .btn, .form-* e .mensagem-* do global.css.
     ======================================== */
 
     .gastos-pagina {
+    /* Curva de saída forte, usada em todas as animações da página */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
     display: flex;
     flex-direction: column;
     gap: var(--espaco-6);
@@ -38,6 +41,28 @@
     flex-wrap: wrap;
     }
 
+    .gastos-contagem {
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-redondo);
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    font-size: var(--texto-xs);
+    font-weight: 700;
+    }
+
+    .gastos-erro-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    flex-wrap: wrap;
+    }
+
     /* ---------- Seletor de mês ---------- */
 
     .gastos-seletor-mes {
@@ -60,14 +85,8 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-pequeno);
-    font-size: var(--titulo-sm);
-    line-height: 1;
     color: var(--preto);
     transition: background-color var(--transicao-rapida);
-    }
-
-    .gastos-seletor-botao:hover {
-    background-color: var(--verde-claro);
     }
 
     .gastos-seletor-texto {
@@ -78,7 +97,7 @@
     color: var(--preto-suave);
     }
 
-    /* ---------- Card da tabela ---------- */
+    /* ---------- Card base (tabela, orçamento, categorias) ---------- */
 
     .gastos-card {
     background-color: var(--branco);
@@ -88,13 +107,381 @@
     overflow: hidden;
     }
 
+    /* ========================================
+    CARDS DE RESUMO
+    Uma única entrada escalonada ao carregar a página.
+    ======================================== */
+
+    .gastos-resumo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--espaco-4);
+    }
+
+    .gastos-resumo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: var(--espaco-5);
+    background-color: var(--branco);
+    border: var(--borda-padrao);
+    border-radius: var(--radius-medio);
+    box-shadow: var(--sombra-leve);
+    animation: gastos-entra 260ms var(--ease-out) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+    }
+
+    /* O total é o número principal da página: único card escuro */
+    .gastos-resumo-destaque {
+    background-color: var(--preto);
+    border-color: var(--preto);
+    }
+
+    .gastos-resumo-icone {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--espaco-3);
+    border-radius: var(--radius-redondo);
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    }
+
+    .gastos-resumo-destaque .gastos-resumo-icone {
+    background-color: var(--verde-principal);
+    color: var(--preto);
+    }
+
+    .gastos-resumo-rotulo {
+    font-size: var(--texto-sm);
+    font-weight: 500;
+    color: var(--cinza-700);
+    }
+
+    .gastos-resumo-valor {
+    font-size: var(--titulo-md);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--preto);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+    }
+
+    .gastos-resumo-detalhe {
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
+    .gastos-resumo-destaque .gastos-resumo-rotulo {
+    color: rgba(255, 255, 255, 0.78);
+    }
+
+    .gastos-resumo-destaque .gastos-resumo-valor {
+    color: var(--branco);
+    }
+
+    .gastos-resumo-destaque .gastos-resumo-detalhe {
+    color: rgba(255, 255, 255, 0.72);
+    }
+
+    /* ========================================
+    PAINEL: ORÇAMENTO + CATEGORIAS
+    ======================================== */
+
+    .gastos-painel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: var(--espaco-4);
+    align-items: stretch;
+    }
+
+    .gastos-orcamento,
+    .gastos-distribuicao {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-4);
+    padding: var(--espaco-6);
+    }
+
+    .gastos-painel-cabecalho {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    }
+
+    .gastos-painel-titulo {
+    font-size: var(--texto-lg);
+    }
+
+    .gastos-painel-legenda {
+    margin-top: 2px;
+    font-size: var(--texto-sm);
+    color: var(--cinza-700);
+    }
+
+    .gastos-painel-vazio {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaco-3);
+    padding: var(--espaco-4) 0;
+    text-align: center;
+    font-size: var(--texto-sm);
+    color: var(--cinza-700);
+    }
+
+    .gastos-painel-vazio svg {
+    color: var(--verde-principal);
+    }
+
+    /* ---------- Barra (usada no orçamento e nas categorias) ---------- */
+
+    .gastos-barra-trilho {
+    position: relative;
+    display: block;
+    height: 10px;
+    border-radius: var(--radius-redondo);
+    background-color: var(--cinza-100);
+    overflow: hidden;
+    }
+
+    /* O preenchimento tem sempre 100% de largura e é "recortado" até --p (0 a 1).
+    Assim a animação usa só clip-path, sem recalcular layout. */
+    .gastos-barra-preenchimento {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-redondo);
+    background-color: var(--cor, var(--verde-principal));
+    clip-path: inset(0 calc((1 - var(--p, 0)) * 100%) 0 0 round 999px);
+    transition: clip-path 400ms var(--ease-out);
+    animation: gastos-barra-cresce 450ms var(--ease-out) backwards;
+    }
+
+    .gastos-barra-marca {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background-color: var(--branco);
+    }
+
+    /* ---------- Status do orçamento ---------- */
+
+    .gastos-orcamento-ok {
+    --cor: var(--sucesso);
+    --cor-texto: var(--verde-escuro);
+    --cor-fundo: var(--sucesso-fundo);
+    }
+
+    .gastos-orcamento-atencao {
+    --cor: var(--alerta);
+    --cor-texto: #805b13;
+    --cor-fundo: var(--alerta-fundo);
+    }
+
+    .gastos-orcamento-critico {
+    --cor: var(--erro);
+    --cor-texto: #a93232;
+    --cor-fundo: var(--erro-fundo);
+    }
+
+    .gastos-orcamento-percentual {
+    font-size: var(--titulo-lg);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--cor-texto);
+    font-variant-numeric: tabular-nums;
+    }
+
+    .gastos-orcamento-percentual-legenda {
+    font-size: var(--texto-sm);
+    font-weight: 500;
+    color: var(--cinza-700);
+    }
+
+    .gastos-orcamento-valores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--espaco-3);
+    }
+
+    .gastos-orcamento-valores dt {
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    }
+
+    .gastos-orcamento-valores dd {
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+    }
+
+    .gastos-orcamento-restante {
+    color: var(--cor-texto);
+    }
+
+    .gastos-orcamento-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-2);
+    padding: 10px 12px;
+    border-radius: var(--radius-pequeno);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-size: var(--texto-sm);
+    font-weight: 500;
+    }
+
+    .gastos-orcamento-aviso svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    }
+
+    /* ---------- Distribuição por categoria ---------- */
+
+    .gastos-distribuicao-lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-1);
+    }
+
+    .gastos-distribuicao-item {
+    --cor: var(--verde-principal);
+
+    width: 100%;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--espaco-3);
+    padding: var(--espaco-2) var(--espaco-3);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pequeno);
+    text-align: left;
+    color: inherit;
+    transition:
+        background-color var(--transicao-rapida),
+        border-color var(--transicao-rapida);
+    }
+
+    /* A categoria que mais pesa ganha o verde mais escuro */
+    .gastos-distribuicao-lider {
+    --cor: var(--verde-escuro);
+    }
+
+    .gastos-distribuicao-item[aria-pressed="true"] {
+    background-color: var(--verde-claro);
+    border-color: var(--verde-principal);
+    }
+
+    .gastos-distribuicao-icone {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pequeno);
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    }
+
+    .gastos-distribuicao-item[aria-pressed="true"] .gastos-distribuicao-icone {
+    background-color: var(--branco);
+    }
+
+    .gastos-distribuicao-meio {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    }
+
+    .gastos-distribuicao-nome {
+    display: flex;
+    align-items: baseline;
+    gap: var(--espaco-2);
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    color: var(--preto);
+    }
+
+    .gastos-distribuicao-qtd {
+    font-size: var(--texto-xs);
+    font-weight: 400;
+    color: var(--cinza-700);
+    }
+
+    .gastos-distribuicao-numeros {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    font-variant-numeric: tabular-nums;
+    }
+
+    .gastos-distribuicao-numeros strong {
+    font-size: var(--texto-base);
+    color: var(--preto);
+    }
+
+    /* ========================================
+    FILTROS E ORDENAÇÃO
+    ======================================== */
+
+    .gastos-filtros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    align-items: end;
+    gap: var(--espaco-4);
+    padding: var(--espaco-5) var(--espaco-6);
+    border-bottom: var(--borda-padrao);
+    }
+
+    .gastos-filtro-busca {
+    grid-column: 1 / -1;
+    }
+
+    .gastos-busca-campo {
+    position: relative;
+    }
+
+    .gastos-busca-campo svg {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--cinza-500);
+    pointer-events: none;
+    }
+
+    .gastos-busca-campo input {
+    padding-left: 36px;
+    }
+
+    /* ========================================
+    TABELA
+    ======================================== */
+
     .gastos-tabela-wrapper {
     width: 100%;
     overflow-x: auto;
     }
 
     .gastos-tabela {
-    min-width: 640px;
+    min-width: 720px;
     }
 
     .gastos-tabela th {
@@ -126,10 +513,6 @@
     transition: background-color var(--transicao-rapida);
     }
 
-    .gastos-tabela tbody tr:hover {
-    background-color: var(--verde-fundo);
-    }
-
     .gastos-celula-descricao {
     font-weight: 500;
     color: var(--preto);
@@ -140,20 +523,92 @@
     white-space: nowrap;
     }
 
+    /* ---------- Cabeçalho ordenável ---------- */
+
+    .gastos-th-botao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    background: none;
+    border: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    }
+
+    .gastos-th-botao svg {
+    opacity: 0.5;
+    transition: opacity var(--transicao-rapida);
+    }
+
+    .gastos-th-ativo {
+    color: var(--preto);
+    }
+
+    .gastos-th-ativo svg {
+    opacity: 1;
+    }
+
+    /* ---------- Linhas: entrada, saída e hover ---------- */
+
+    .gastos-linha {
+    animation: gastos-linha-entra 220ms var(--ease-out) backwards;
+    animation-delay: calc(min(var(--i, 0), 8) * 30ms);
+    }
+
+    .gastos-linha-saindo {
+    animation: gastos-linha-sai 180ms var(--ease-out) forwards;
+    animation-delay: 0s;
+    pointer-events: none;
+    }
+
+    /* ---------- Descrição, selo e comentário ---------- */
+
+    .gastos-descricao {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--espaco-2);
+    }
+
+    .gastos-selo-recorrente {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 6px;
+    border-radius: var(--radius-redondo);
+    background-color: var(--cinza-100);
+    color: var(--cinza-700);
+    }
+
+    .gastos-botao-comentario {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-pequeno);
+    background-color: var(--verde-claro);
+    color: var(--verde-escuro);
+    transition: background-color var(--transicao-rapida);
+    }
+
     /* ---------- Etiqueta de categoria ---------- */
 
-.gastos-etiqueta {
-	display: inline-flex;
-	align-items: center;
-	gap: var(--espaco-2);
-	padding: 4px 10px;
-	font-size: var(--texto-xs);
-	font-weight: 500;
-	color: var(--verde-escuro);
-	background-color: var(--verde-claro);
-	border-radius: var(--radius-redondo);
-	white-space: nowrap;
-}
+    .gastos-etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--espaco-2);
+    padding: 4px 10px;
+    font-size: var(--texto-xs);
+    font-weight: 500;
+    color: var(--verde-escuro);
+    background-color: var(--verde-claro);
+    border-radius: var(--radius-redondo);
+    white-space: nowrap;
+    }
 
     /* ---------- Valores ---------- */
 
@@ -161,6 +616,43 @@
     font-weight: 600;
     color: var(--erro);
     font-variant-numeric: tabular-nums;
+    }
+
+    /* ---------- Ações da linha ---------- */
+
+    .gastos-col-acoes {
+    width: 112px;
+    text-align: right;
+    }
+
+    .gastos-acoes {
+    display: inline-flex;
+    gap: var(--espaco-1);
+    }
+
+    .gastos-botao-icone {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-pequeno);
+    color: var(--cinza-500);
+    transition:
+        background-color var(--transicao-rapida),
+        color var(--transicao-rapida);
+    }
+
+    .gastos-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
     }
 
     /* ---------- Rodapé ---------- */
@@ -196,12 +688,41 @@
     margin-bottom: var(--espaco-2);
     }
 
+    .gastos-vazio-svg {
+    margin-bottom: var(--espaco-2);
+    color: var(--cinza-500);
+    }
+
     .gastos-vazio p {
     max-width: 360px;
+    margin-bottom: var(--espaco-2);
     font-size: var(--texto-sm);
     }
 
-    /* ---------- Modal ---------- */
+    /* ---------- Carregamento (esqueleto) ---------- */
+
+    .gastos-esqueleto {
+    background-color: var(--cinza-100);
+    border-color: transparent;
+    box-shadow: none;
+    animation: gastos-pulso 1.2s ease-in-out infinite;
+    }
+
+    .gastos-esqueleto-lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-3);
+    padding: var(--espaco-6);
+    }
+
+    .gastos-esqueleto-lista .gastos-esqueleto {
+    height: 44px;
+    border-radius: var(--radius-pequeno);
+    }
+
+    /* ========================================
+    MODAIS E FORMULÁRIOS
+    ======================================== */
 
     .gastos-modal-overlay {
     position: fixed;
@@ -213,6 +734,7 @@
     padding: var(--espaco-4);
     background-color: rgba(16, 24, 23, 0.5);
     overflow-y: auto;
+    animation: gastos-overlay-entra 160ms ease-out backwards;
     }
 
     .gastos-modal {
@@ -224,6 +746,7 @@
     background-color: var(--branco);
     border-radius: var(--radius-grande);
     box-shadow: var(--sombra-card);
+    animation: gastos-modal-entra 200ms var(--ease-out) backwards;
     }
 
     .gastos-modal-cabecalho {
@@ -242,20 +765,19 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-pequeno);
-    font-size: 1.5rem;
-    line-height: 1;
     color: var(--cinza-500);
     transition: background-color var(--transicao-rapida);
-    }
-
-    .gastos-modal-fechar:hover {
-    background-color: var(--cinza-100);
-    color: var(--preto);
     }
 
     .gastos-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--espaco-4);
+    }
+
+    .gastos-form-coluna {
+    display: flex;
+    flex-direction: column;
     gap: var(--espaco-4);
     }
 
@@ -275,14 +797,287 @@
     margin-top: var(--espaco-2);
     }
 
+    .gastos-acao-esquerda {
+    margin-right: auto;
+    }
+
+    .gastos-textarea {
+    min-height: 88px;
+    resize: vertical;
+    line-height: 1.4;
+    }
+
+    .gastos-contador {
+    align-self: flex-end;
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    }
+
+    .gastos-nota {
+    font-size: var(--texto-sm);
+    }
+
+    .gastos-comentario-contexto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: var(--espaco-4);
+    padding: var(--espaco-3) var(--espaco-4);
+    border-radius: var(--radius-pequeno);
+    background-color: var(--cinza-50);
+    font-size: var(--texto-sm);
+    }
+
+    /* ---------- Caixa de marcar "Repetir todo mês" ---------- */
+
+    .gastos-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-3);
+    padding: var(--espaco-3) var(--espaco-4);
+    border: 1px solid var(--cinza-200);
+    border-radius: var(--radius-pequeno);
+    cursor: pointer;
+    transition:
+        background-color var(--transicao-rapida),
+        border-color var(--transicao-rapida);
+    }
+
+    .gastos-check input {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    accent-color: var(--verde-escuro);
+    }
+
+    .gastos-check > span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--texto-sm);
+    }
+
+    .gastos-check small {
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    }
+
+    .gastos-check:has(input:checked) {
+    background-color: var(--verde-fundo);
+    border-color: var(--verde-principal);
+    }
+
+    /* ---------- Lista de recorrências ---------- */
+
+    .gastos-recorrencias-intro {
+    margin-bottom: var(--espaco-4);
+    }
+
+    .gastos-recorrencias-lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-2);
+    margin-top: var(--espaco-3);
+    }
+
+    .gastos-recorrencia {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--espaco-3);
+    padding: var(--espaco-3);
+    border: var(--borda-padrao);
+    border-radius: var(--radius-medio);
+    }
+
+    .gastos-recorrencia-pausada {
+    background-color: var(--cinza-50);
+    }
+
+    .gastos-recorrencia-pausada .gastos-recorrencia-info strong {
+    color: var(--cinza-700);
+    }
+
+    .gastos-recorrencia-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    }
+
+    .gastos-recorrencia-info strong {
+    font-size: var(--texto-sm);
+    overflow-wrap: anywhere;
+    }
+
+    .gastos-recorrencia-info span {
+    font-size: var(--texto-xs);
+    color: var(--cinza-700);
+    }
+
+    .gastos-recorrencia-proximo {
+    font-weight: 500;
+    }
+
+    .gastos-recorrencia-acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--espaco-1);
+    }
+
+    .gastos-switch {
+    position: relative;
+    width: 44px;
+    height: 26px;
+    flex-shrink: 0;
+    margin-right: var(--espaco-2);
+    border: none;
+    border-radius: var(--radius-redondo);
+    background-color: var(--cinza-300);
+    transition: background-color var(--transicao-padrao);
+    }
+
+    .gastos-switch[aria-checked="true"] {
+    background-color: var(--verde-escuro);
+    }
+
+    .gastos-switch-bolinha {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--branco);
+    transition: transform 150ms var(--ease-out);
+    }
+
+    .gastos-switch[aria-checked="true"] .gastos-switch-bolinha {
+    transform: translateX(18px);
+    }
+
+    /* ========================================
+    HOVER (só em dispositivos com mouse)
+    ======================================== */
+
+    @media (hover: hover) and (pointer: fine) {
+    .gastos-seletor-botao:hover {
+        background-color: var(--verde-claro);
+    }
+
+    .gastos-tabela tbody tr:hover {
+        background-color: var(--verde-fundo);
+    }
+
+    .gastos-th-botao:hover {
+        color: var(--preto);
+    }
+
+    .gastos-botao-comentario:hover {
+        background-color: var(--verde-principal);
+        color: var(--preto);
+    }
+
+    .gastos-botao-icone:hover {
+        background-color: var(--cinza-100);
+        color: var(--preto);
+    }
+
+    /* Vem depois do hover genérico para vencer */
+    .gastos-botao-excluir:hover {
+        background-color: var(--erro-fundo);
+        color: var(--erro);
+    }
+
+    .gastos-modal-fechar:hover {
+        background-color: var(--cinza-100);
+        color: var(--preto);
+    }
+
+    .gastos-distribuicao-item:hover {
+        background-color: var(--verde-fundo);
+    }
+
+    .gastos-distribuicao-item[aria-pressed="true"]:hover {
+        background-color: var(--verde-claro);
+    }
+
+    .gastos-check:hover {
+        border-color: var(--verde-principal);
+    }
+    }
+
+    /* ========================================
+    ANIMAÇÕES
+    Só transform, opacity e clip-path (não recalculam layout).
+    ======================================== */
+
+    @keyframes gastos-entra {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    }
+
+    @keyframes gastos-linha-entra {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    }
+
+    @keyframes gastos-linha-sai {
+    to {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    }
+
+    @keyframes gastos-barra-cresce {
+    from {
+        clip-path: inset(0 100% 0 0 round 999px);
+    }
+    }
+
+    @keyframes gastos-overlay-entra {
+    from {
+        opacity: 0;
+    }
+    }
+
+    @keyframes gastos-modal-entra {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    }
+
+    @keyframes gastos-pulso {
+    50% {
+        opacity: 0.55;
+    }
+    }
+
     /* ========================================
     RESPONSIVIDADE
     ======================================== */
 
     @media (max-width: 1024px) {
+    .gastos-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .gastos-painel {
+        grid-template-columns: 1fr;
+    }
+
     .gastos-tabela th,
     .gastos-tabela td {
         padding: var(--espaco-3) var(--espaco-4);
+    }
+
+    .gastos-filtros {
+        padding: var(--espaco-4);
     }
     }
 
@@ -303,6 +1098,11 @@
 
     .gastos-botao-adicionar {
         width: 100%;
+    }
+
+    .gastos-orcamento,
+    .gastos-distribuicao {
+        padding: var(--espaco-4);
     }
 
     /* Tabela vira lista de cartões */
@@ -351,16 +1151,59 @@
         text-align: left;
     }
 
+    .gastos-descricao {
+        justify-content: flex-end;
+    }
+
     .gastos-col-valor {
         text-align: right !important;
+    }
+
+    .gastos-col-acoes {
+        width: 100%;
     }
 
     .gastos-rodape {
         padding: var(--espaco-3) var(--espaco-4);
     }
+
+    .gastos-recorrencia {
+        grid-template-columns: 36px minmax(0, 1fr);
+    }
+
+    .gastos-recorrencia-acoes {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
     }
 
     @media (max-width: 480px) {
+    .gastos-resumo {
+        gap: var(--espaco-3);
+    }
+
+    .gastos-resumo-card {
+        padding: var(--espaco-4);
+    }
+
+    .gastos-resumo-valor {
+        font-size: var(--titulo-sm);
+    }
+
+    .gastos-resumo-destaque {
+        grid-column: 1 / -1;
+    }
+
+    .gastos-orcamento-valores {
+        grid-template-columns: 1fr;
+    }
+
+    .gastos-orcamento-valores > div {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--espaco-3);
+    }
+
     .gastos-modal {
         padding: var(--espaco-4);
     }
@@ -373,51 +1216,60 @@
         flex-direction: column-reverse;
     }
 
-    .gastos-form-acoes:global(.btn) {
+    .gastos-form-acoes :global(.btn) {
         width: 100%;
+    }
+
+    .gastos-acao-esquerda {
+        margin-right: 0;
+    }
+    }
+
+    /* ========================================
+    MOVIMENTO REDUZIDO
+    Fica só o fade (ajuda a entender a mudança); somem deslocamentos e crescimento.
+    ======================================== */
+
+    @keyframes gastos-aparece {
+    from {
+        opacity: 0;
+    }
+    }
+
+    @keyframes gastos-some {
+    to {
+        opacity: 0;
     }
     }
 
     @media (prefers-reduced-motion: reduce) {
+    .gastos-resumo-card,
+    .gastos-linha,
+    .gastos-modal,
+    .gastos-modal-overlay {
+        animation-name: gastos-aparece;
+        animation-duration: 150ms;
+        animation-delay: 0s;
+    }
+
+    .gastos-linha-saindo {
+        animation-name: gastos-some;
+    }
+
+    .gastos-barra-preenchimento {
+        animation: none;
+        transition: none;
+    }
+
+    .gastos-esqueleto {
+        animation: none;
+    }
+
+    .gastos-switch-bolinha,
+    .gastos-switch,
     .gastos-tabela tbody tr,
     .gastos-seletor-botao,
     .gastos-modal-fechar {
         transition: none;
     }
-    }
-    /* ---------- Ações (excluir) ---------- */
-
-    .gastos-col-acoes {
-    width: 56px;
-    text-align: center;
-    }
-
-    .gastos-botao-excluir {
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-pequeno);
-    font-size: var(--texto-base);
-    color: var(--cinza-500);
-    transition:
-        background-color var(--transicao-rapida),
-        color var(--transicao-rapida);
-    }
-
-    .gastos-botao-excluir:hover {
-    background-color: var(--erro-fundo);
-    color: var(--erro);
-    }
-
-    .gastos-sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
     }

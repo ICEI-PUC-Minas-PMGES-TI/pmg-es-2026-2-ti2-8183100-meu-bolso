@@ -11,6 +11,7 @@ import {
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
 import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
+import PainelContas from "../../components/PainelContas/PainelContas";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
 
 import {
@@ -21,7 +22,8 @@ import {
   formatarBRL,
 } from "./carteirasMock";
 
-import { bancoDe } from "../../data/bancos";
+import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
+import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
 
 import styles from "./Carteiras.module.css";
 
@@ -50,6 +52,7 @@ function carregarPersistido() {
 function Carteiras() {
   const [itemSelecionado, setItemSelecionado] = useState(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const [painelContasAberto, setPainelContasAberto] = useState(false);
   // Quando preenchido, o modal abre direto no formulário desse tipo
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
@@ -86,6 +89,13 @@ function Carteiras() {
     .filter((c) => c.subtipo === "credito")
     .reduce((acc, c) => acc + (c.faturaAtual || 0), 0);
 
+  // Contas em destaque (principal, secundária, terciária) pela posição efetiva:
+  // posições livres são preenchidas pelas contas sem posição salva.
+  const contasEfetivas = posicaoEfetiva(contas);
+  const contasDestaque = ORDEM_POSICAO.map((p) =>
+    contasEfetivas.find((c) => c.posicaoEfetiva === p)
+  ).filter(Boolean);
+
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
 
@@ -95,12 +105,37 @@ function Carteiras() {
     else setDinheiroEReservas(atualizador); // dinheiro e reserva
   }
 
+  // Troca de posição: a conta `alvoId` passa a ocupar `novaPosicao`. Quem já
+  // ocupava essa posição (pela posição efetiva) assume a posição anterior da
+  // conta alvo (ou null). Persiste a posição efetiva de todas as contas para
+  // que nunca haja duas iguais e as demais não percam o destaque.
+  function reatribuirPosicoes(lista, alvoId, novaPosicao) {
+    const efetivas = posicaoEfetiva(lista);
+    const alvo = efetivas.find((c) => c.id === alvoId);
+    const posAnterior = alvo?.posicaoEfetiva ?? null;
+    const ocupante =
+      novaPosicao &&
+      efetivas.find((c) => c.id !== alvoId && c.posicaoEfetiva === novaPosicao);
+
+    return efetivas.map((c) => {
+      const resto = { ...c };
+      delete resto.posicaoEfetiva;
+      if (c.id === alvoId) resto.posicao = novaPosicao || null;
+      else if (ocupante && c.id === ocupante.id) resto.posicao = posAnterior;
+      return resto;
+    });
+  }
+
   function salvarItem(dados) {
     if (dados.id) {
       // edição: substitui o item existente
-      setListaPorTipo(dados.tipo, (lista) =>
-        lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i))
-      );
+      setListaPorTipo(dados.tipo, (lista) => {
+        let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
+        if (dados.tipo === "conta") {
+          nova = reatribuirPosicoes(nova, dados.id, dados.posicao);
+        }
+        return nova;
+      });
       // mantém o painel refletindo o item editado
       setItemSelecionado((atual) =>
         atual && atual.id === dados.id ? { ...atual, ...dados } : atual
@@ -108,7 +143,12 @@ function Carteiras() {
     } else {
       // novo item
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
-      setListaPorTipo(dados.tipo, (lista) => [...lista, item]);
+      setListaPorTipo(dados.tipo, (lista) => {
+        const base = [...lista, item];
+        return dados.tipo === "conta"
+          ? reatribuirPosicoes(base, item.id, item.posicao)
+          : base;
+      });
     }
     setItemEditando(null);
   }
@@ -265,16 +305,26 @@ function Carteiras() {
           vazio="Nenhuma conta cadastrada."
           className={styles.secaoContas}
           acao={
-            <span className={styles.verTodas}>
+            <span
+              className={styles.verTodas}
+              role="button"
+              tabIndex={0}
+              onClick={() => setPainelContasAberto(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setPainelContasAberto(true);
+                }
+              }}
+            >
               Ver todas <ChevronRight size={14} />
             </span>
           }
         >
-          {contas.map((item, i) => (
+          {contasDestaque.map((item) => (
             <CardConta
               key={item.id}
               item={item}
-              posicao={i}
               selecionado={itemSelecionado?.id === item.id}
               onSelecionar={() => setItemSelecionado(item)}
             />
@@ -328,6 +378,23 @@ function Carteiras() {
         }}
         onEditar={() => abrirEdicao(itemSelecionado)}
         onExcluir={() => excluirItem(itemSelecionado)}
+      />
+
+      {/* Painel lateral com todas as contas */}
+      <PainelContas
+        aberto={painelContasAberto}
+        contas={contas}
+        onFechar={() => setPainelContasAberto(false)}
+        onEditar={(conta) => {
+          setPainelContasAberto(false);
+          abrirEdicao(conta);
+        }}
+        onAdicionar={() => {
+          setPainelContasAberto(false);
+          setItemEditando(null);
+          setTipoAdicionar("conta");
+          setModalAberto(true);
+        }}
       />
 
       {/* Modal de adicionar / editar.
@@ -438,13 +505,9 @@ function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
 /** Normaliza o nome/banco da conta para a chave do mapa de bancos.
  *  Ex.: "Banco Inter" -> "inter", "Nubank" -> "nubank". */
 function chaveBanco(item) {
-  const base = item.banco || item.apelido || item.instituicao || "";
-  return base
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove acentos
-    .replace(/^banco\s+/, "") // tira "banco " inicial
-    .replace(/\s+/g, ""); // remove espaços
+  // conta.banco salvo e válido tem prioridade; senão deduz do texto (contas antigas)
+  if (item.banco && BANCOS[item.banco]) return item.banco;
+  return chaveDoBanco(item.instituicao || item.apelido);
 }
 
 /** Última movimentação (a lista do mock já vem com a mais recente primeiro). */
@@ -458,16 +521,31 @@ function ultimaMovimentacao(id) {
  * logo/ícone circular, nome, subtítulo, valor dentro, seta e rodapé
  * com a última movimentação. Apenas apresentação; não altera dados.
  */
-function CardConta({ item, posicao, selecionado, onSelecionar }) {
+function CardConta({ item, selecionado, onSelecionar }) {
   const ehReserva = item.tipo === "reserva";
-  const banco = ehReserva ? null : bancoDe(chaveBanco(item));
+  const chave = ehReserva ? null : chaveBanco(item);
+  const banco = ehReserva ? null : bancoDe(chave);
   const nomeExibido = item.apelido || item.nome || banco?.nome || "Conta";
 
+  // Fundo do círculo da logo: exceções de contraste (BTG, Caixa) ou tom da cor.
+  const fundoLogo = chave ? FUNDO_LOGO[chave] : null;
+  const estiloLogoCirculo = fundoLogo
+    ? {
+        backgroundColor: fundoLogo.fundo,
+        ...(fundoLogo.anel
+          ? { boxShadow: `inset 0 0 0 1.5px ${fundoLogo.anel}` }
+          : {}),
+      }
+    : { backgroundColor: `${banco?.cor}1A` };
+
+  const rotuloPosicao = {
+    principal: "Conta principal",
+    secundaria: "Conta secundária",
+    terciaria: "Conta terciária",
+  };
   const subtitulo = ehReserva
     ? "Reserva guardada"
-    : posicao === 0
-    ? "Conta principal"
-    : "Conta secundária";
+    : rotuloPosicao[item.posicaoEfetiva ?? item.posicao] || "Conta";
 
   const valor = ehReserva
     ? formatarBRL(item.valorReservado)
@@ -505,7 +583,7 @@ function CardConta({ item, posicao, selecionado, onSelecionar }) {
         ) : (
           <span
             className={styles.contaLogo}
-            style={{ backgroundColor: `${banco.cor}1A` }}
+            style={estiloLogoCirculo}
           >
             <img
               src={banco.logo}

@@ -10,6 +10,15 @@ Os documentos consolidados do projeto estão na pasta [`/Documentacao`](../Docum
 * **MiniMundo.pdf** — descrição do minimundo (entidades, atributos, relacionamentos e regras de negócio).
 * **ModeloDeDados.md** — modelo de dados de objetos (coleções, atributos, relacionamentos e JSONs) para MongoDB.
 
+## Implementação
+
+O código-fonte do MVP fica em [`/Codigo`](../Codigo), dividido em back-end e front-end:
+
+* **Back-end** ([`/Codigo/Backend`](../Codigo/Backend/Readme.md)) — API REST em Spring Boot com autenticação JWT e MongoDB.
+* **Front-end** ([`/Codigo/Frontend`](../Codigo/Frontend/README.md)) — aplicação web em React + Vite.
+
+As instruções de instalação e execução estão no [README principal do repositório](../README.md).
+
 ## Artefatos de Design Thinking (Miro)
 
 Produzidos na etapa de empatia, definição e ideação:

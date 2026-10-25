@@ -18,9 +18,61 @@
   margin-top: var(--espaco-1);
 }
 
-/* Cartão do gráfico */
+/* Seletor de gráfico com ícones (dentro do card, canto sup. direito) */
+.seletor {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  flex-shrink: 0;
+
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-pequeno);
+}
+
+.seletorBotao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cinza-500);
+
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.seletorBotao:hover {
+  color: var(--verde-escuro);
+}
+
+.seletorBotaoAtivo,
+.seletorBotaoAtivo:hover {
+  background-color: var(--branco);
+  color: var(--preto);
+  box-shadow: var(--sombra-leve);
+}
+
+/* Cartão do gráfico.
+   min-height mantém os dois gráficos do mesmo tamanho ao alternar,
+   mesmo que os cabeçalhos (legenda x subtítulo) tenham alturas
+   ligeiramente diferentes. */
 .card {
   max-width: 800px;
+  min-height: 360px;
+}
+
+/* Topo do card de linha: título/subtítulo à esquerda, seletor à direita */
+.topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-4);
 }
 
 .cardTopo {
@@ -154,6 +206,14 @@
 
 .barrasTopo h3 {
   margin: 0;
+}
+
+/* Agrupa legenda + seletor no lado direito do topo das barras */
+.barrasTopoDireita {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
 }
 
 /* Legenda */

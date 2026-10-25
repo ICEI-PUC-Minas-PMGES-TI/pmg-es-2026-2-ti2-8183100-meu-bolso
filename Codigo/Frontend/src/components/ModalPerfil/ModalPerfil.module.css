@@ -1,0 +1,277 @@
+/* ========================================
+   MODAL EDITAR PERFIL
+======================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-4);
+  z-index: 220;
+}
+
+.modal {
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  background-color: var(--branco);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  padding: var(--espaco-6);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.cabecalho h2 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.botaoFechar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-700);
+}
+
+.botaoFechar:hover {
+  background-color: var(--cinza-100);
+}
+
+/* ---------- Avatar ---------- */
+.avatarArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+/* Botão redondo com a foto; mostra o lápis no hover. */
+.avatarBotao {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 2px solid var(--verde-principal);
+  padding: 0;
+  overflow: hidden;
+  background: var(--cinza-100);
+  cursor: pointer;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Camada escura com o ícone de lápis, aparece ao passar o mouse. */
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--branco);
+  background: rgba(16, 24, 23, 0.45);
+  opacity: 0;
+  transition: opacity var(--transicao-rapida);
+}
+
+.avatarBotao:hover .avatarOverlay,
+.avatarBotao:focus-visible .avatarOverlay {
+  opacity: 1;
+}
+
+.avatarDica {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+/* ---------- Formulário ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.secaoTitulo {
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  color: var(--preto);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Dois campos lado a lado em telas largas. */
+.linha {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo label {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto-suave);
+}
+
+.campo input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+  outline: none;
+}
+
+.campo input:focus {
+  border-color: var(--verde-principal);
+  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+}
+
+.separador {
+  height: 1px;
+  background-color: var(--cinza-100);
+}
+
+.dica {
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+/* Botão que revela os campos de troca de senha. */
+.btnAlterarSenha {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  align-self: flex-start;
+
+  min-height: 42px;
+  padding: 10px 16px;
+
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+
+  font-size: var(--texto-sm);
+  font-weight: 600;
+
+  transition: background-color var(--transicao-rapida);
+}
+
+.btnAlterarSenha:hover:not(:disabled) {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  border-color: var(--verde-principal);
+}
+
+/* Link para recolher os campos de senha. */
+.btnCancelarSenha {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--cinza-500);
+}
+
+.btnCancelarSenha:hover {
+  color: var(--erro);
+  text-decoration: underline;
+}
+
+.erro {
+  font-size: var(--texto-sm);
+  color: var(--erro);
+  background-color: var(--erro-fundo);
+  border-radius: var(--radius-pequeno);
+  padding: 10px 12px;
+}
+
+.sucesso {
+  font-size: var(--texto-sm);
+  color: var(--sucesso);
+  background-color: var(--sucesso-fundo);
+  border-radius: var(--radius-pequeno);
+  padding: 10px 12px;
+}
+
+.formAcoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+}
+
+.btnVoltar,
+.btnSalvar {
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.btnVoltar {
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-300);
+}
+
+.btnVoltar:hover {
+  background-color: var(--cinza-50);
+}
+
+.btnSalvar {
+  background-color: var(--preto);
+  color: var(--branco);
+  border: 1px solid transparent;
+}
+
+.btnSalvar:hover:not(:disabled) {
+  background-color: var(--verde-escuro);
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 560px) {
+  .linha {
+    grid-template-columns: 1fr;
+  }
+}
