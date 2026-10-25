@@ -1,759 +1,339 @@
+    import { useCallback, useEffect, useMemo, useState } from "react";
+    import { ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
 
-    import { useEffect, useMemo, useState } from "react";
+    import gastosService from "../../service/gastosService";
+    import {
+    FILTROS_INICIAIS,
+    ORDENACAO_INICIAL,
+    calcularDistribuicao,
+    calcularResumo,
+    calcularStatusOrcamento,
+    diasNoMes,
+    filtrarGastos,
+    formatarMesExtenso,
+    mesAtualChave,
+    mudarMes,
+    ordenarGastos,
+    temFiltroAtivo,
+    } from "../../utils/Gastosutils";
+
+    import DistribuicaoCategorias from "../../components/Gastos/DistribuicaoCategorias";
+    import FiltrosGastos from "../../components/Gastos/FiltrosGastos";
+    import ModalComentario from "../../components/Gastos/ModalComentario";
+    import ModalGasto from "../../components/Gastos/ModalGasto";
+    import ModalOrcamento from "../../components/Gastos/ModalOrcamento";
+    import ModalRecorrencias from "../../components/Gastos/ModalRecorrencia";
+    import ResumoCards from "../../components/Gastos/ResumoCards";
+    import StatusOrcamento from "../../components/Gastos/StatusOrcamento";
+    import TabelaGastos from "../../components/Gastos/TabelaGastos";
+
     import styles from "./Gastos.module.css";
-    import{
-        Utensils,
-        CarFront,
-        Gamepad2,
-        House,
-        GraduationCap,
-        HeartPulse,
-        Clapperboard,
-    } from "lucide-react";
-    // ========================================
-    // DADOS FICTÍCIOS (SPRINT 1)
-    // ========================================
 
-    const CHAVE_STORAGE = "meubolso:gastos";
+    // Tempo da animação de saída da linha (precisa bater com .gastos-linha-saindo no CSS)
+    const DURACAO_SAIDA_MS = 180;
 
-    const CATEGORIAS = [
-    "Alimentação",
-    "Transporte",
-    "Lazer",
-    "Moradia",
-    "Educação",
-    "Saúde",
-    "Assinaturas",
-    "Outros",
-    ];
-    const CARTEIRAS = [
-    "Carteira",
-    "Nubank",
-    "Itaú",
-    "Inter",
-    "Cartão de crédito",
-    ];
-    const ICONES_CATEGORIAS= {
-        "Alimentação" : Utensils,
-        "Transporte" : CarFront,
-        "Lazer": Gamepad2,
-        "Moradia": House,
-        "Educação": GraduationCap,
-        "Saúde": HeartPulse,
-        "Assinaturas": Clapperboard,
-    }
-
-    function dataRelativa(mesesAtras, dia) {
-    const hoje = new Date();
-    const data = new Date(
-        hoje.getFullYear(),
-        hoje.getMonth() - mesesAtras,
-        dia
-    );
-
-    const mes = String(data.getMonth() + 1).padStart(2, "0");
-    const diaStr = String(data.getDate()).padStart(2, "0");
-
-    return `${data.getFullYear()}-${mes}-${diaStr}`;
-    }
-    function IconeCategoria({categoria}){
-        const Icone = ICONES_CATEGORIAS[categoria];
-        if (!Icone){
-            return null;
-        }
-        return <Icone size={18} stokeWidth={2} />;
-    }
-    const GASTOS_FICTICIOS = [
-    {
-        id: 1,
-        descricao: "Almoço no restaurante",
-        categoria: "Alimentação",
-        carteira: "Nubank",
-        data: dataRelativa(0, 3),
-        valor: 38.9,
-    },
-    {
-        id: 2,
-        descricao: "Uber para a faculdade",
-        categoria: "Transporte",
-        carteira: "Carteira",
-        data: dataRelativa(0, 5),
-        valor: 22.5,
-    },
-    {
-        id: 3,
-        descricao: "Netflix",
-        categoria: "Assinaturas",
-        carteira: "Cartão de crédito",
-        data: dataRelativa(0, 8),
-        valor: 44.9,
-    },
-    {
-        id: 4,
-        descricao: "Cinema com amigos",
-        categoria: "Lazer",
-        carteira: "Inter",
-        data: dataRelativa(0, 12),
-        valor: 56,
-    },
-    {
-        id: 5,
-        descricao: "Aluguel",
-        categoria: "Moradia",
-        carteira: "Itaú",
-        data: dataRelativa(0, 1),
-        valor: 850,
-    },
-    {
-        id: 6,
-        descricao: "Curso de inglês",
-        categoria: "Educação",
-        carteira: "Nubank",
-        data: dataRelativa(1, 10),
-        valor: 120,
-    },
-    {
-        id: 7,
-        descricao: "Farmácia",
-        categoria: "Saúde",
-        carteira: "Carteira",
-        data: dataRelativa(1, 18),
-        valor: 47.3,
-    },
-    {
-        id: 8,
-        descricao: "Supermercado",
-        categoria: "Alimentação",
-        carteira: "Inter",
-        data: dataRelativa(1, 22),
-        valor: 213.75,
-    },
-    ];
-
-    function carregarGastos() {
-    try {
-        const salvo = localStorage.getItem(CHAVE_STORAGE);
-
-        if (salvo) {
-        return JSON.parse(salvo);
-        }
-    } catch {
-        // Utiliza os dados fictícios em caso de erro.
-    }
-
-    return GASTOS_FICTICIOS;
-    }
-
-    function salvarGastos(gastos) {
-    try {
-        localStorage.setItem(CHAVE_STORAGE, JSON.stringify(gastos));
-    } catch {
-        // Ignora falhas no armazenamento local.
-    }
-    }
-
-    // ========================================
-    // FUNÇÕES AUXILIARES
-    // ========================================
-
-    const NOMES_MESES = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-    ];
-
-    function mesAtualChave() {
-    const hoje = new Date();
-
-    return `${hoje.getFullYear()}-${String(
-        hoje.getMonth() + 1
-    ).padStart(2, "0")}`;
-    }
-
-    function formatarMesExtenso(chave) {
-    const [ano, mes] = chave.split("-");
-    return `${NOMES_MESES[Number(mes) - 1]} de ${ano}`;
-    }
-
-    function mudarMes(chave, delta) {
-    const [ano, mes] = chave.split("-").map(Number);
-    const data = new Date(ano, mes - 1 + delta, 1);
-
-    return `${data.getFullYear()}-${String(
-        data.getMonth() + 1
-    ).padStart(2, "0")}`;
-    }
-
-    function formatarData(dataISO) {
-    const [ano, mes, dia] = dataISO.split("-");
-    return `${dia}/${mes}/${ano}`;
-    }
-
-    function formatarMoeda(valor) {
-    return valor.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-    });
-    }
-
-    function converterValor(texto) {
-    const limpo = texto
-        .replace(/\./g, "")
-        .replace(",", ".")
-        .trim();
-
-    return Number(limpo);
-    }
-
-    const FORM_INICIAL = {
-    descricao: "",
-    categoria: "",
-    carteira: "",
-    valor: "",
-    data: "",
-    };
-
-    // ========================================
-    // MODAL DE ADICIONAR GASTO
-    // ========================================
-
-    function ModalAdicionarGasto({
-    mesSelecionado,
-    onFechar,
-    onSalvar,
-    }) {
-    const [form, setForm] = useState({
-        ...FORM_INICIAL,
-        data: `${mesSelecionado}-01`,
-    });
-
-    const [erros, setErros] = useState({});
-
-    useEffect(() => {
-        function aoPressionarTecla(event) {
-        if (event.key === "Escape") {
-            onFechar();
-        }
-        }
-
-        document.addEventListener("keydown", aoPressionarTecla);
-
-        return () => {
-        document.removeEventListener("keydown", aoPressionarTecla);
-        };
-    }, [onFechar]);
-
-    function alterarCampo(event) {
-        const { name, value } = event.target;
-
-        setForm((atual) => ({
-        ...atual,
-        [name]: value,
-        }));
-
-        setErros((atual) => ({
-        ...atual,
-        [name]: undefined,
-        }));
-    }
-
-    function validar() {
-        const novosErros = {};
-
-        if (!form.descricao.trim()) {
-        novosErros.descricao = "Informe a descrição.";
-        }
-
-        if (!form.categoria) {
-        novosErros.categoria = "Selecione a categoria.";
-        }
-
-        if (!form.carteira) {
-        novosErros.carteira = "Selecione a carteira.";
-        }
-
-        if (!form.data) {
-        novosErros.data = "Informe a data.";
-        }
-
-        const valorNumerico = converterValor(form.valor);
-
-        if (!form.valor.trim()) {
-        novosErros.valor = "Informe o valor.";
-        } else if (
-        !Number.isFinite(valorNumerico) ||
-        valorNumerico <= 0
-        ) {
-        novosErros.valor = "Informe um valor maior que zero.";
-        }
-
-        return novosErros;
-    }
-
-    function enviar(event) {
-        event.preventDefault();
-
-        const novosErros = validar();
-
-        setErros(novosErros);
-
-        if (Object.keys(novosErros).length > 0) {
-        return;
-        }
-
-        onSalvar({
-        id: Date.now(),
-        descricao: form.descricao.trim(),
-        categoria: form.categoria,
-        carteira: form.carteira,
-        data: form.data,
-        valor: converterValor(form.valor),
-        });
-    }
-
-    return (
-        <div
-        className={styles["gastos-modal-overlay"]}
-        onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-            onFechar();
-            }
-        }}
-        >
-        <div
-            className={styles["gastos-modal"]}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="gastos-modal-titulo"
-        >
-            <div className={styles["gastos-modal-cabecalho"]}>
-            <h2 id="gastos-modal-titulo">
-                Adicionar gasto
-            </h2>
-
-            <button
-                type="button"
-                className={styles["gastos-modal-fechar"]}
-                onClick={onFechar}
-                aria-label="Fechar"
-            >
-                ×
-            </button>
-            </div>
-
-            <form
-            className={styles["gastos-form"]}
-            onSubmit={enviar}
-            noValidate
-            >
-            <div
-                className={`form-group ${
-                styles["gastos-form-campo-largo"]
-                }`}
-            >
-                <label
-                className="form-label"
-                htmlFor="gasto-descricao"
-                >
-                Descrição
-                </label>
-
-                <input
-                id="gasto-descricao"
-                name="descricao"
-                className="form-input"
-                placeholder="Ex.: Almoço no restaurante"
-                value={form.descricao}
-                onChange={alterarCampo}
-                autoFocus
-                />
-
-                {erros.descricao && (
-                <span className={styles["gastos-erro-campo"]}>
-                    {erros.descricao}
-                </span>
-                )}
-            </div>
-
-            <div className="form-group">
-                <label
-                className="form-label"
-                htmlFor="gasto-categoria"
-                >
-                Categoria
-                </label>
-
-                <select
-                id="gasto-categoria"
-                name="categoria"
-                className="form-input"
-                value={form.categoria}
-                onChange={alterarCampo}
-                >
-                <option value="">Selecione</option>
-
-                {CATEGORIAS.map((categoria) => (
-                    <option key={categoria} value={categoria}>
-                    {categoria}
-                    </option>
-                ))}
-                </select>
-
-                {erros.categoria && (
-                <span className={styles["gastos-erro-campo"]}>
-                    {erros.categoria}
-                </span>
-                )}
-            </div>
-
-            <div className="form-group">
-                <label
-                className="form-label"
-                htmlFor="gasto-carteira"
-                >
-                Carteira
-                </label>
-
-                <select
-                id="gasto-carteira"
-                name="carteira"
-                className="form-input"
-                value={form.carteira}
-                onChange={alterarCampo}
-                >
-                <option value="">Selecione</option>
-
-                {CARTEIRAS.map((carteira) => (
-                    <option key={carteira} value={carteira}>
-                    {carteira}
-                    </option>
-                ))}
-                </select>
-
-                {erros.carteira && (
-                <span className={styles["gastos-erro-campo"]}>
-                    {erros.carteira}
-                </span>
-                )}
-            </div>
-
-            <div className="form-group">
-                <label
-                className="form-label"
-                htmlFor="gasto-valor"
-                >
-                Valor (R$)
-                </label>
-
-                <input
-                id="gasto-valor"
-                name="valor"
-                className="form-input"
-                inputMode="decimal"
-                placeholder="0,00"
-                value={form.valor}
-                onChange={alterarCampo}
-                />
-
-                {erros.valor && (
-                <span className={styles["gastos-erro-campo"]}>
-                    {erros.valor}
-                </span>
-                )}
-            </div>
-
-            <div className="form-group">
-                <label
-                className="form-label"
-                htmlFor="gasto-data"
-                >
-                Data
-                </label>
-
-                <input
-                id="gasto-data"
-                name="data"
-                type="date"
-                className="form-input"
-                value={form.data}
-                onChange={alterarCampo}
-                />
-
-                {erros.data && (
-                <span className={styles["gastos-erro-campo"]}>
-                    {erros.data}
-                </span>
-                )}
-            </div>
-
-            <div
-                className={`${
-                styles["gastos-form-acoes"]
-                } ${styles["gastos-form-campo-largo"]}`}
-            >
-                <button
-                type="button"
-                className="btn btn-secundario"
-                onClick={onFechar}
-                >
-                Cancelar
-                </button>
-
-                <button
-                type="submit"
-                className="btn btn-primario"
-                >
-                Adicionar
-                </button>
-            </div>
-            </form>
-        </div>
-        </div>
-    );
-    }
-
-    // ========================================
-    // PÁGINA DE GASTOS
-    // ========================================
+    const esperar = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
 
     export default function Gastos() {
-    const [gastos, setGastos] = useState(carregarGastos);
-    const [mesSelecionado, setMesSelecionado] =
-        useState(mesAtualChave);
-    const [modalAberto, setModalAberto] = useState(false);
+    // { gastos, recorrencias, orcamento } — null enquanto carrega
+    const [dados, setDados] = useState(null);
+    const [erro, setErro] = useState("");
 
+    const [mesSelecionado, setMesSelecionado] = useState(mesAtualChave);
+    const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
+    const [ordenacao, setOrdenacao] = useState(ORDENACAO_INICIAL);
+
+    // Qual modal está aberto: { tipo: "gasto" | "comentario" | "recorrencias" | "orcamento", gasto? }
+    const [modal, setModal] = useState(null);
+    // IDs das linhas que estão fazendo a animação de saída
+    const [removendo, setRemovendo] = useState(() => new Set());
+
+    /* ---------- Carregamento ---------- */
+
+    const carregar = useCallback(async () => {
+        try {
+        setDados(await gastosService.carregarTudo());
+        setErro("");
+        } catch (e) {
+        setErro(e.message || "Não foi possível carregar os gastos.");
+        }
+    }, []);
+
+    // Carga inicial. O "ativo" evita atualizar o estado se a página for fechada antes
+    // da resposta (e também o disparo duplicado do StrictMode em desenvolvimento).
     useEffect(() => {
-        salvarGastos(gastos);
-    }, [gastos]);
+        let ativo = true;
 
-    const gastosDoMes = useMemo(() => {
-        return gastos
-        .filter((gasto) =>
-            gasto.data.startsWith(mesSelecionado)
-        )
-        .sort((a, b) => b.data.localeCompare(a.data));
-    }, [gastos, mesSelecionado]);
+        gastosService
+        .carregarTudo()
+        .then((carregados) => {
+            if (!ativo) return;
+            setDados(carregados);
+            setErro("");
+        })
+        .catch((e) => {
+            if (ativo) setErro(e.message || "Não foi possível carregar os gastos.");
+        });
 
-    const totalDoMes = useMemo(() => {
-        return gastosDoMes.reduce(
-        (soma, gasto) => soma + gasto.valor,
-        0
-        );
-    }, [gastosDoMes]);
+        return () => {
+        ativo = false;
+        };
+    }, []);
 
-    function adicionarGasto(novoGasto) {
-        setGastos((atual) => [novoGasto, ...atual]);
+    /* ---------- Dados derivados ---------- */
 
-        setMesSelecionado(novoGasto.data.slice(0, 7));
-        setModalAberto(false);
+    const gastosDoMes = useMemo(
+        () => (dados?.gastos ?? []).filter((gasto) => gasto.data.startsWith(mesSelecionado)),
+        [dados, mesSelecionado],
+    );
+
+    // Cards, orçamento e categorias olham para o mês inteiro, sem os filtros da lista
+    const resumo = useMemo(
+        () => calcularResumo(gastosDoMes, mesSelecionado),
+        [gastosDoMes, mesSelecionado],
+    );
+
+    const distribuicao = useMemo(() => calcularDistribuicao(gastosDoMes), [gastosDoMes]);
+
+    const statusOrcamento = useMemo(
+        () => calcularStatusOrcamento(resumo.total, dados?.orcamento ?? 0),
+        [resumo.total, dados],
+    );
+
+    const gastosVisiveis = useMemo(
+        () => ordenarGastos(filtrarGastos(gastosDoMes, filtros), ordenacao),
+        [gastosDoMes, filtros, ordenacao],
+    );
+
+    const carregando = dados === null && !erro;
+    const recorrenciasAtivas = (dados?.recorrencias ?? []).filter((rec) => rec.ativa).length;
+
+    /* ---------- Navegação entre meses ---------- */
+
+    function irParaMes(mes) {
+        setMesSelecionado(mes);
+        // O período "de/até" só faz sentido dentro de um mês
+        setFiltros((atual) => ({ ...atual, de: "", ate: "" }));
     }
 
-    function excluirGasto(id) {
-        if (!window.confirm("Deseja excluir este gasto?")) {
-        return;
+    /* ---------- Ações ---------- */
+
+    const fecharModal = useCallback(() => setModal(null), []);
+
+    async function salvarGasto(dadosForm, gastoEditado) {
+        if (gastoEditado) {
+        await gastosService.atualizarGasto(gastoEditado.id, dadosForm);
+        } else {
+        await gastosService.criarGasto(dadosForm);
+        setFiltros(FILTROS_INICIAIS); // garante que o gasto novo apareça na lista
         }
 
-        setGastos((atual) =>
-        atual.filter((gasto) => gasto.id !== id)
-        );
+        await carregar();
+
+        const mesDoGasto = dadosForm.data.slice(0, 7);
+        if (mesDoGasto !== mesSelecionado) irParaMes(mesDoGasto);
+        setModal(null);
     }
+
+    async function salvarComentario(gasto, comentario) {
+        await gastosService.atualizarComentario(gasto.id, comentario);
+        await carregar();
+        setModal(null);
+    }
+
+    async function salvarOrcamento(valor) {
+        await gastosService.salvarOrcamento(valor);
+        await carregar();
+        setModal(null);
+    }
+
+    async function atualizarRecorrencia(id, alteracoes) {
+        await gastosService.atualizarRecorrencia(id, alteracoes);
+        await carregar();
+    }
+
+    async function excluirRecorrencia(id) {
+        await gastosService.excluirRecorrencia(id);
+        await carregar();
+    }
+
+    async function excluirGasto(gasto) {
+        if (!window.confirm(`Deseja excluir "${gasto.descricao}"?`)) return;
+
+        // 1) toca a animação de saída; 2) só então apaga de verdade
+        setRemovendo((atual) => new Set(atual).add(gasto.id));
+        await esperar(DURACAO_SAIDA_MS);
+
+        try {
+        await gastosService.excluirGasto(gasto.id);
+        await carregar();
+        } catch (e) {
+        setErro(e.message || "Não foi possível excluir o gasto.");
+        } finally {
+        setRemovendo((atual) => {
+            const proximo = new Set(atual);
+            proximo.delete(gasto.id);
+            return proximo;
+        });
+        }
+    }
+
+    /* ---------- Tela ---------- */
 
     return (
         <section className={styles["gastos-pagina"]}>
         <header className={styles["gastos-topo"]}>
             <div>
-            <h1 className={styles["gastos-titulo"]}>
-                Gastos
-            </h1>
-
-            <p className={styles["gastos-subtitulo"]}>
-                {formatarMesExtenso(mesSelecionado)}
-            </p>
+            <h1 className={styles["gastos-titulo"]}>Gastos</h1>
+            <p className={styles["gastos-subtitulo"]}>{formatarMesExtenso(mesSelecionado)}</p>
             </div>
 
             <div className={styles["gastos-topo-acoes"]}>
-            <div
-                className={styles["gastos-seletor-mes"]}
-                aria-label="Selecionar mês"
-            >
+            <div className={styles["gastos-seletor-mes"]} role="group" aria-label="Selecionar mês">
                 <button
                 type="button"
                 className={styles["gastos-seletor-botao"]}
-                onClick={() =>
-                    setMesSelecionado((mes) =>
-                    mudarMes(mes, -1)
-                    )
-                }
+                onClick={() => irParaMes(mudarMes(mesSelecionado, -1))}
                 aria-label="Mês anterior"
                 >
-                ‹
+                <ChevronLeft size={20} aria-hidden="true" />
                 </button>
 
-                <span className={styles["gastos-seletor-texto"]}>
+                <span className={styles["gastos-seletor-texto"]} aria-live="polite">
                 {formatarMesExtenso(mesSelecionado)}
                 </span>
 
                 <button
                 type="button"
                 className={styles["gastos-seletor-botao"]}
-                onClick={() =>
-                    setMesSelecionado((mes) =>
-                    mudarMes(mes, 1)
-                    )
-                }
+                onClick={() => irParaMes(mudarMes(mesSelecionado, 1))}
                 aria-label="Próximo mês"
                 >
-                ›
+                <ChevronRight size={20} aria-hidden="true" />
                 </button>
             </div>
 
             <button
                 type="button"
-                className={`btn btn-primario ${
-                styles["gastos-botao-adicionar"]
-                }`}
-                onClick={() => setModalAberto(true)}
+                className="btn btn-secundario"
+                onClick={() => setModal({ tipo: "recorrencias" })}
+                disabled={!dados}
             >
-                + Adicionar Gasto
+                <Repeat size={16} aria-hidden="true" />
+                Recorrentes
+                {recorrenciasAtivas > 0 && (
+                <span className={styles["gastos-contagem"]}>{recorrenciasAtivas}</span>
+                )}
+            </button>
+
+            <button
+                type="button"
+                className={`btn btn-primario ${styles["gastos-botao-adicionar"]}`}
+                onClick={() => setModal({ tipo: "gasto" })}
+                disabled={!dados}
+            >
+                <Plus size={16} aria-hidden="true" />
+                Adicionar Gasto
             </button>
             </div>
         </header>
 
-        <div className={styles["gastos-card"]}>
-            {gastosDoMes.length === 0 ? (
-            <div className={styles["gastos-vazio"]}>
-                <span
-                className={styles["gastos-vazio-icone"]}
-                aria-hidden="true"
-                >
-                🧾
-                </span>
-
-                <h3>Nenhum gasto neste mês</h3>
-
-                <p className="texto-secundario">
-                Não há gastos em{" "}
-                {formatarMesExtenso(mesSelecionado)}.
-                Clique em “Adicionar Gasto” para registrar
-                o primeiro.
-                </p>
+        {erro && (
+            <div className={`mensagem mensagem-erro ${styles["gastos-erro-banner"]}`} role="alert">
+            <span>{erro}</span>
+            <button type="button" className="btn btn-secundario" onClick={carregar}>
+                Tentar novamente
+            </button>
             </div>
-            ) : (
+        )}
+
+        {(dados || carregando) && (
             <>
-                <div className={styles["gastos-tabela-wrapper"]}>
-                <table className={styles["gastos-tabela"]}>
-                    <thead>
-                    <tr>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>Carteira</th>
-                        <th>Data</th>
+            <ResumoCards
+                resumo={resumo}
+                mesSelecionado={mesSelecionado}
+                carregando={carregando}
+            />
 
-                        <th className={styles["gastos-col-valor"]}>
-                        Valor
-                        </th>
+            <div className={styles["gastos-painel"]}>
+                <StatusOrcamento
+                totalGasto={resumo.total}
+                orcamento={dados?.orcamento ?? 0}
+                status={statusOrcamento}
+                carregando={carregando}
+                onEditar={() => setModal({ tipo: "orcamento" })}
+                />
 
-                        <th className={styles["gastos-col-acoes"]}>
-                        <span className={styles["gastos-sr-only"]}>
-                            Ações
-                        </span>
-                        </th>
-                    </tr>
-                    </thead>
+                <DistribuicaoCategorias
+                itens={distribuicao}
+                selecionada={filtros.categoria}
+                onSelecionar={(categoria) => setFiltros((atual) => ({ ...atual, categoria }))}
+                carregando={carregando}
+                />
+            </div>
 
-                    <tbody>
-                    {gastosDoMes.map((gasto) => (
-                        <tr key={gasto.id}>
-                        <td
-                            data-label="Descrição"
-                            className={
-                            styles["gastos-celula-descricao"]
-                            }
-                        >
-                            {gasto.descricao}
-                        </td>
+            <div className={styles["gastos-card"]}>
+                {!carregando && (
+                <FiltrosGastos
+                    filtros={filtros}
+                    onAlterar={setFiltros}
+                    onLimpar={() => setFiltros(FILTROS_INICIAIS)}
+                    ordenacao={ordenacao}
+                    onOrdenar={setOrdenacao}
+                    mesSelecionado={mesSelecionado}
+                    diasDoMes={diasNoMes(mesSelecionado)}
+                />
+                )}
 
-                        <td data-label="Categoria">
-                            <span className={styles["gastos-etiqueta"]}>
-                            <IconeCategoria categoria={gasto.categoria}/>
-                            {gasto.categoria}
-                            </span>
-                        </td>
-
-                        <td data-label="Carteira">
-                            {gasto.carteira}
-                        </td>
-
-                        <td data-label="Data">
-                            {formatarData(gasto.data)}
-                        </td>
-
-                        <td
-                            data-label="Valor"
-                            className={styles["gastos-col-valor"]}
-                        >
-                            <span className={styles["gastos-valor"]}>
-                            − {formatarMoeda(gasto.valor)}
-                            </span>
-                        </td>
-
-                        <td
-                            data-label="Ações"
-                            className={styles["gastos-col-acoes"]}
-                        >
-                            <button
-                            type="button"
-                            className={
-                                styles["gastos-botao-excluir"]
-                            }
-                            onClick={() =>
-                                excluirGasto(gasto.id)
-                            }
-                            aria-label={`Excluir gasto ${gasto.descricao}`}
-                            title="Excluir"
-                            >
-                            🗑
-                            </button>
-                        </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-                </div>
-
-                <footer className={styles["gastos-rodape"]}>
-                <span className="texto-secundario texto-pequeno">
-                    {gastosDoMes.length}{" "}
-                    {gastosDoMes.length === 1
-                    ? "gasto"
-                    : "gastos"}
-                </span>
-
-                <span className={styles["gastos-total"]}>
-                    Total:{" "}
-                    <strong className={styles["gastos-valor"]}>
-                    − {formatarMoeda(totalDoMes)}
-                    </strong>
-                </span>
-                </footer>
+                <TabelaGastos
+                gastos={gastosVisiveis}
+                quantidadeDoMes={gastosDoMes.length}
+                filtrando={temFiltroAtivo(filtros)}
+                carregando={carregando}
+                removendo={removendo}
+                ordenacao={ordenacao}
+                onOrdenar={setOrdenacao}
+                onEditar={(gasto) => setModal({ tipo: "gasto", gasto })}
+                onExcluir={excluirGasto}
+                onComentario={(gasto) => setModal({ tipo: "comentario", gasto })}
+                onLimparFiltros={() => setFiltros(FILTROS_INICIAIS)}
+                mesExtenso={formatarMesExtenso(mesSelecionado)}
+                />
+            </div>
             </>
-            )}
-        </div>
+        )}
 
-        {modalAberto && (
-            <ModalAdicionarGasto
+        {modal?.tipo === "gasto" && (
+            <ModalGasto
+            gasto={modal.gasto}
             mesSelecionado={mesSelecionado}
-            onFechar={() => setModalAberto(false)}
-            onSalvar={adicionarGasto}
+            onFechar={fecharModal}
+            onSalvar={(dadosForm) => salvarGasto(dadosForm, modal.gasto)}
+            />
+        )}
+
+        {modal?.tipo === "comentario" && (
+            <ModalComentario
+            gasto={modal.gasto}
+            onFechar={fecharModal}
+            onSalvar={(comentario) => salvarComentario(modal.gasto, comentario)}
+            />
+        )}
+
+        {modal?.tipo === "orcamento" && (
+            <ModalOrcamento
+            orcamentoAtual={dados?.orcamento ?? 0}
+            onFechar={fecharModal}
+            onSalvar={salvarOrcamento}
+            />
+        )}
+
+        {modal?.tipo === "recorrencias" && (
+            <ModalRecorrencias
+            recorrencias={dados?.recorrencias ?? []}
+            onAtualizar={atualizarRecorrencia}
+            onExcluir={excluirRecorrencia}
+            onFechar={fecharModal}
             />
         )}
         </section>
