@@ -50,8 +50,8 @@ function Login() {
               Seu dinheiro, do seu jeito.
             </h2>
             <p className={styles["login-marketing-descricao"]}>
-              Registre o que você gasta, defina metas e teste decisões antes
-              de tomá-las.
+              Registre o que você gasta, defina metas e teste decisões antes de
+              tomá-las.
             </p>
           </div>
 
@@ -97,7 +97,7 @@ function Login() {
             </div>
 
             <div className={styles["login-options"]}>
-              <a href="#" className={styles["esqueceu-senha"]}>
+              <a href="/esqueci-senha" className={styles["esqueceu-senha"]}>
                 Esqueci minha senha
               </a>
             </div>

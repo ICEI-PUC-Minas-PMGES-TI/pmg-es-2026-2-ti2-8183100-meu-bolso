@@ -126,3 +126,95 @@ export async function entrar(email, senha) {
 export async function buscarPerfil() {
   return requisicao("/api/usuarios/me", { autenticado: true });
 }
+
+/* ========================================
+   RECUPERAÇÃO DE SENHA (rotas públicas)
+   ======================================== */
+
+// Pede o envio do e-mail com o link de redefinição. O back responde sempre
+// com sucesso, exista o e-mail ou não, para não revelar quem tem conta.
+export async function esqueciSenha(email) {
+  return requisicao("/api/auth/esqueci-senha", {
+    metodo: "POST",
+    corpo: { email },
+  });
+}
+
+// Define a nova senha usando o token que veio no link do e-mail.
+// Token inválido, expirado ou já usado: o back responde 400.
+export async function redefinirSenha(token, novaSenha) {
+  return requisicao("/api/auth/redefinir-senha", {
+    metodo: "POST",
+    corpo: { token, novaSenha },
+  });
+}
+
+/* ========================================
+   METAS
+   ======================================== */
+
+// Lista as metas do usuário logado.
+export async function listarMetas() {
+  return requisicao("/api/metas", { autenticado: true });
+}
+
+// Cria uma meta nova. `dados` = { nome, valorAlvo, prazo, prioridade }.
+// O prazo deve ser "YYYY-MM-DD" ou null.
+export async function criarMeta(dados) {
+  return requisicao("/api/metas", {
+    metodo: "POST",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Atualiza os dados básicos de uma meta existente.
+export async function atualizarMeta(id, dados) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Exclui uma meta pelo id.
+export async function excluirMeta(id) {
+  return requisicao(`/api/metas/${id}`, {
+    metodo: "DELETE",
+    autenticado: true,
+  });
+}
+
+/* ========================================
+   PERFIL
+   ======================================== */
+
+// Atualiza nome, email e telefone. `dados` = { nome, email, telefone }.
+// O back-end reemite o token (o e-mail pode ter mudado); atualizamos a
+// sessão local para refletir os novos dados em todas as telas.
+export async function atualizarPerfil(dados) {
+  const perfil = await requisicao("/api/usuarios/me", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+
+  if (perfil?.token) {
+    localStorage.setItem(CHAVE_TOKEN, perfil.token);
+  }
+  localStorage.setItem(
+    CHAVE_USUARIO,
+    JSON.stringify({ nome: perfil.nome, email: perfil.email }),
+  );
+
+  return perfil;
+}
+
+// Troca a senha. `dados` = { senhaAtual, novaSenha }.
+export async function trocarSenha(dados) {
+  return requisicao("/api/usuarios/me/senha", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
