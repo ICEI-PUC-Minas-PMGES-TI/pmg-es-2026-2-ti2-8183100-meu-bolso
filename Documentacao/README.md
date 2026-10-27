@@ -16,11 +16,11 @@
 
 ## 🚧 Status do Projeto
 
-![Status](https://img.shields.io/badge/Status-Em%20concepção%20e%20início%20de%20desenvolvimento-yellow?style=for-the-badge)
-![Etapa](https://img.shields.io/badge/Etapa-Design%20Thinking%20concluído-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-MVP%20em%20desenvolvimento-green?style=for-the-badge)
+![Etapa](https://img.shields.io/badge/Etapa-Implementação-blue?style=for-the-badge)
 ![Disciplina](https://img.shields.io/badge/PUC%20Minas-Trabalho%20Interdisciplinar-007ec6?style=for-the-badge)
 
-> As etapas de **Empatizar**, **Definir** e **Idear** estão concluídas. A **Prototipação** está em andamento e a **Implementação** do MVP está em início. As seções técnicas (tecnologias, instalação, execução) serão preenchidas conforme o desenvolvimento avançar.
+> As etapas de **Empatizar**, **Definir** e **Idear** estão concluídas e a **Prototipação** foi entregue. A **Implementação** do MVP está em andamento: já existem autenticação de usuários (cadastro, login e perfil) com JWT, persistência em MongoDB, as metas financeiras integradas à API e as telas de dashboard, gastos, carteiras, metas e evolução financeira. As instruções de instalação e execução estão no [README principal](../README.md) e nos READMEs de [`Codigo/Backend`](../Codigo/Backend/Readme.md) e [`Codigo/Frontend`](../Codigo/Frontend/README.md).
 
 ---
 
@@ -228,8 +228,8 @@ O projeto combina **Design Thinking** na concepção (compreender as pessoas ant
 | Empatizar | Matriz CSD, mapa de stakeholders, roteiros de entrevista e entrevistas qualitativas. | ✅ Concluída |
 | Definir | Enunciado do problema, personas, mapas de empatia e propostas de valor. | ✅ Concluída |
 | Idear | Requisitos funcionais e não funcionais e priorização das funcionalidades. | ✅ Concluída |
-| Prototipar | Wireframes, fluxo de navegação e protótipo interativo. | 🔄 Em andamento |
-| Implementar | Desenvolvimento do MVP (F1 a F4), começando pelo repositório e pelo quadro de tarefas. | 🚧 Em início |
+| Prototipar | Wireframes, fluxo de navegação e protótipo interativo. | ✅ Concluída |
+| Implementar | Desenvolvimento do MVP (F1 a F4): autenticação, metas e telas principais. | 🔄 Em andamento |
 | Testar | Validação do protótipo e do MVP com o público-alvo e ajustes. | ⏳ Prevista |
 
 ## 5.2 Organização da equipe e divisão de papéis
@@ -267,18 +267,18 @@ As tarefas do projeto são controladas no **GitHub Projects**, vinculado ao repo
 
 ---
 
-# 6. Tecnologias (planejadas)
+# 6. Tecnologias
 
-> [!NOTE]
-> A stack tecnológica ainda **não foi definida** — essa é uma das primeiras issues do quadro de tarefas. Esta seção será preenchida na etapa de implementação com as tecnologias efetivamente adotadas (front-end, back-end, banco de dados, provedor de IA e infraestrutura), junto das instruções de instalação e execução.
+Stack adotada na implementação do MVP. As instruções de instalação e execução
+estão no [README principal](../README.md).
 
 | Camada | Tecnologia | Situação |
 |---|---|---|
-| Front-end | `<a definir>` | ⏳ A definir |
-| Back-end | `<a definir>` | ⏳ A definir |
-| Banco de dados | `<a definir>` | ⏳ A definir |
+| Front-end | React 19, Vite, React Router, lucide-react | ✅ Em uso |
+| Back-end | Java 21, Spring Boot 3.3, Spring Security, JWT (jjwt) | ✅ Em uso |
+| Banco de dados | MongoDB 7 (Spring Data MongoDB) | ✅ Em uso |
 | Assistente de IA | `<a definir>` | ⏳ A definir |
-| Infraestrutura / Deploy | `<a definir>` | ⏳ A definir |
+| Infraestrutura / Deploy | Docker e Docker Compose | ✅ Em uso (ambiente local) |
 
 ---
 

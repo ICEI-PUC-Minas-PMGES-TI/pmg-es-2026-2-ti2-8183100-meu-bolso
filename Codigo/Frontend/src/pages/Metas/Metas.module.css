@@ -120,7 +120,67 @@
   height: 100%;
   background-color: var(--verde-principal);
   border-radius: var(--radius-redondo);
-  transition: width var(--transicao-padrao);
+  transition: width var(--transicao-padrao), background-color var(--transicao-padrao);
+}
+
+/* Barra quando a meta está concluída (100%) */
+.progressoBarraConcluida {
+  background-color: var(--sucesso);
+}
+
+/* ---------- Meta concluída ---------- */
+
+/* Destaque sutil do cartão concluído */
+.cardConcluida {
+  border-color: var(--sucesso);
+  background-color: var(--sucesso-fundo);
+}
+
+/* Selo "Concluída" no topo do cartão */
+.badgeConcluida {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: 3px 10px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  background-color: var(--sucesso);
+  color: var(--branco);
+  white-space: nowrap;
+}
+
+/* Animação disparada no momento em que a meta chega a 100% */
+.cardCelebrar {
+  animation: metaCelebrar 1.2s ease;
+}
+
+@keyframes metaCelebrar {
+  0% {
+    transform: scale(1);
+    box-shadow: var(--sombra-leve);
+  }
+  25% {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 4px rgba(50, 138, 82, 0.25), var(--sombra-hover);
+  }
+  55% {
+    transform: scale(0.995);
+    box-shadow: 0 0 0 8px rgba(50, 138, 82, 0.12), var(--sombra-card);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: var(--sombra-leve);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardCelebrar {
+    animation: none;
+  }
+  .progressoBarra {
+    transition: none;
+  }
 }
 
 .metaValores {

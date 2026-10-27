@@ -105,18 +105,41 @@
 
 .formAcoes {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--espaco-3);
   margin-top: var(--espaco-2);
 }
 
+/* Grupo da direita (Cancelar + Salvar). */
+.formAcoesDireita {
+  display: flex;
+  gap: var(--espaco-3);
+  margin-left: auto;
+}
+
 .btnVoltar,
-.btnSalvar {
+.btnSalvar,
+.btnExcluir {
   min-height: 44px;
   padding: 12px 20px;
   border-radius: var(--radius-pequeno);
   font-size: var(--texto-sm);
   font-weight: 600;
+}
+
+/* Botão de excluir (ação destrutiva), à esquerda. */
+.btnExcluir {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  background-color: var(--branco);
+  color: var(--erro);
+  border: 1px solid var(--erro);
+}
+
+.btnExcluir:hover {
+  background-color: var(--erro-fundo);
 }
 
 .btnVoltar {

@@ -1,4 +1,12 @@
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    ports:
+      - "1025:1025" # Porta do servidor SMTP (para o envio de e-mails da sua app)
+      - "8025:8025" # Porta do painel Web (para você visualizar os e-mails no navegador)
+    restart: unless-stopped
+
   mongodb:
     image: mongo:7
     container_name: meubolso-mongodb

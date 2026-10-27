@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { X, Plus, ChevronRight } from "lucide-react";
 
-import { bancoDe, chaveDoBanco, BANCOS } from "../../data/bancos";
+import { bancoDe, chaveDoBanco, BANCOS, FUNDO_LOGO } from "../../data/bancos";
+import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
 import { formatarBRL } from "../../pages/Carteiras/carteirasMock";
 import styles from "./PainelContas.module.css";
 
@@ -37,6 +38,15 @@ function PainelContas({ aberto, contas = [], onFechar, onEditar, onAdicionar }) 
     return () => window.removeEventListener("keydown", aoTeclar);
   }, [aberto, onFechar]);
 
+  // Posição efetiva primeiro (principal, secundária, terciária) e demais depois.
+  const efetivas = posicaoEfetiva(contas);
+  const contasOrdenadas = [
+    ...ORDEM_POSICAO.map((p) =>
+      efetivas.find((c) => c.posicaoEfetiva === p)
+    ).filter(Boolean),
+    ...efetivas.filter((c) => !c.posicaoEfetiva),
+  ];
+
   return (
     <>
       <div
@@ -67,9 +77,19 @@ function PainelContas({ aberto, contas = [], onFechar, onEditar, onAdicionar }) 
           {contas.length === 0 ? (
             <p className={styles.vazio}>Nenhuma conta cadastrada.</p>
           ) : (
-            contas.map((conta) => {
-              const banco = bancoDe(chaveDaConta(conta));
-              const rotulo = ROTULO_POSICAO[conta.posicao];
+            contasOrdenadas.map((conta) => {
+              const chave = chaveDaConta(conta);
+              const banco = bancoDe(chave);
+              const rotulo = ROTULO_POSICAO[conta.posicaoEfetiva];
+              const fundoLogo = chave ? FUNDO_LOGO[chave] : null;
+              const estiloLogo = fundoLogo
+                ? {
+                    backgroundColor: fundoLogo.fundo,
+                    ...(fundoLogo.anel
+                      ? { boxShadow: `inset 0 0 0 1.5px ${fundoLogo.anel}` }
+                      : {}),
+                  }
+                : undefined;
               return (
                 <button
                   key={conta.id}
@@ -77,7 +97,7 @@ function PainelContas({ aberto, contas = [], onFechar, onEditar, onAdicionar }) 
                   className={styles.linha}
                   onClick={() => onEditar?.(conta)}
                 >
-                  <span className={styles.logo}>
+                  <span className={styles.logo} style={estiloLogo}>
                     <img
                       src={banco.logo}
                       alt={banco.nome}
