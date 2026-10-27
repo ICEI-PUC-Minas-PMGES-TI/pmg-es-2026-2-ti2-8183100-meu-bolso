@@ -3,7 +3,7 @@ package Projeto.MeuBolso.service;
 import Projeto.MeuBolso.model.Gasto;
 import Projeto.MeuBolso.model.GastoDtos.ComentarioRequest;
 import Projeto.MeuBolso.model.GastoDtos.GastoRequest;
-import Projeto.MeuBolso.model.GastoDtos.RecorrenteRequest;
+import Projeto.MeuBolso.model.GastoDtos.RecorrenciaRequest;
 import Projeto.MeuBolso.model.GastoRecorrente;
 import Projeto.MeuBolso.model.Orcamento;
 import Projeto.MeuBolso.repository.GastoRecorrenteRepository;
@@ -50,7 +50,7 @@ public class GastoService {
         preencher(gasto, req);
         gasto = gastos.save(gasto);
 
-        if (Boolean.TRUE.equals(req.recorrente())) {
+        if (req.recorrente()) {
             gasto = vincularNovaRecorrencia(usuarioId, gasto);
         }
         return gasto;
@@ -83,10 +83,10 @@ public class GastoService {
         return recorrentes.findByUsuarioIdOrderByDescricaoAsc(usuarioId);
     }
 
-    public GastoRecorrente atualizarRecorrente(String usuarioId, String id, RecorrenteRequest req) {
+    public GastoRecorrente atualizarRecorrente(String usuarioId, String id, RecorrenciaRequest req) {
         GastoRecorrente rec = buscarRecorrente(usuarioId, id);
         boolean estavaPausada = !rec.isAtiva();
-        boolean ficaAtiva = req.ativa() == null || req.ativa();
+        boolean ficaAtiva = req.ativa();
 
         rec.setDescricao(req.descricao().trim());
         rec.setCategoria(req.categoria());
@@ -110,7 +110,8 @@ public class GastoService {
         GastoRecorrente rec = buscarRecorrente(usuarioId, id);
 
         // Os gastos já lançados continuam, só perdem o vínculo com a regra
-        List<Gasto> lancados = gastos.findByRecorrenciaIdAndUsuarioId(id, usuarioId);
+        List<Gasto> lancados = gastos.findByUsuarioIdAndRecorrenciaId(id, usuarioId);
+        
         lancados.forEach(g -> g.setRecorrenciaId(null));
         gastos.saveAll(lancados);
 
@@ -175,22 +176,24 @@ public class GastoService {
 
     /* ---------- Auxiliares ---------- */
 
-    private Gasto vincularNovaRecorrencia(String usuarioId, Gasto gasto) {
-        GastoRecorrente rec = new GastoRecorrente();
-        rec.setUsuarioId(usuarioId);
-        rec.setDescricao(gasto.getDescricao());
-        rec.setCategoria(gasto.getCategoria());
-        rec.setCarteira(gasto.getCarteira());
-        rec.setValor(gasto.getValor());
-        rec.setComentario(gasto.getComentario());
-        rec.setDiaDoMes(gasto.getData().getDayOfMonth());
-        rec.setAtiva(true);
-        rec.setUltimoMes(YearMonth.from(gasto.getData()).toString());
-        rec = recorrentes.save(rec);
+private Gasto vincularNovaRecorrencia(String usuarioId, Gasto gasto) {
+    LocalDate dataGasto = LocalDate.parse(gasto.getData());   // <- linha nova
 
-        gasto.setRecorrenciaId(rec.getId());
-        return gastos.save(gasto);
-    }
+    GastoRecorrente rec = new GastoRecorrente();
+    rec.setUsuarioId(usuarioId);
+    rec.setDescricao(gasto.getDescricao());
+    rec.setCategoria(gasto.getCategoria());
+    rec.setCarteira(gasto.getCarteira());
+    rec.setValor(gasto.getValor());
+    rec.setComentario(gasto.getComentario());
+    rec.setDiaDoMes(dataGasto.getDayOfMonth());
+    rec.setAtiva(true);
+    rec.setUltimoMes(YearMonth.from(dataGasto).toString());
+    rec = recorrentes.save(rec);
+
+    gasto.setRecorrenciaId(rec.getId());
+    return gastos.save(gasto);
+}
 
     private Gasto gastoDaRecorrencia(GastoRecorrente rec, LocalDate data) {
         Gasto g = new Gasto();
@@ -199,7 +202,7 @@ public class GastoService {
         g.setCategoria(rec.getCategoria());
         g.setCarteira(rec.getCarteira());
         g.setValor(rec.getValor());
-        g.setData(data);
+        g.setData(data.toString());
         g.setComentario(rec.getComentario());
         g.setRecorrenciaId(rec.getId());
         return g;

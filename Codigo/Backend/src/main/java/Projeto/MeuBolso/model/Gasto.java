@@ -1,29 +1,6 @@
 package Projeto.MeuBolso.model;
 
 import java.math.BigDecimal;
-<<<<<<< HEAD
-import java.time.LocalDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-
-@Document(collection = "gastos")
-@CompoundIndex(name = "usuario_data", def = "{'usuarioId': 1, 'data': -1}")
-public class Gasto {
-    @Id
-    private String id;
-    private String usuarioId;
-    private String descricao;
-    private String categoria;
-    private String carteira;
-    @Field(targetType = FieldType.DECIMAL128)
-    private BigDecimal valor;
-    private LocalDate data;
-    private String comentario;
-    // Preenchido quando o gasto foi lançado por uma recorrência
-=======
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -56,13 +33,10 @@ public class Gasto {
     private String comentario = "";
 
     // Preenchido quando o gasto nasceu de uma recorrência; null se for avulso.
->>>>>>> 3af0db57f8043fc8f226b9843d3e51f60f9c7aae
     private String recorrenciaId;
 
     public Gasto() {}
 
-<<<<<<< HEAD
-=======
     public Gasto(String usuarioId, String descricao, String categoria, String carteira,
                 String data, BigDecimal valor, String comentario, String recorrenciaId) {
         this.usuarioId = usuarioId;
@@ -75,19 +49,13 @@ public class Gasto {
         this.recorrenciaId = recorrenciaId;
     }
 
->>>>>>> 3af0db57f8043fc8f226b9843d3e51f60f9c7aae
     public String getId() { return id; }
     public String getUsuarioId() { return usuarioId; }
     public String getDescricao() { return descricao; }
     public String getCategoria() { return categoria; }
     public String getCarteira() { return carteira; }
-<<<<<<< HEAD
-    public BigDecimal getValor() { return valor; }
-    public LocalDate getData() { return data; }
-=======
     public String getData() { return data; }
     public BigDecimal getValor() { return valor; }
->>>>>>> 3af0db57f8043fc8f226b9843d3e51f60f9c7aae
     public String getComentario() { return comentario; }
     public String getRecorrenciaId() { return recorrenciaId; }
 
@@ -96,16 +64,8 @@ public class Gasto {
     public void setDescricao(String descricao) { this.descricao = descricao; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
     public void setCarteira(String carteira) { this.carteira = carteira; }
-<<<<<<< HEAD
-    public void setValor(BigDecimal valor) { this.valor = valor; }
-    public void setData(LocalDate data) { this.data = data; }
-    public void setComentario(String comentario) { this.comentario = comentario; }
-    public void setRecorrenciaId(String recorrenciaId) { this.recorrenciaId = recorrenciaId; }
-}
-=======
     public void setData(String data) { this.data = data; }
     public void setValor(BigDecimal valor) { this.valor = valor; }
     public void setComentario(String comentario) { this.comentario = comentario == null ? "" : comentario; }
     public void setRecorrenciaId(String recorrenciaId) { this.recorrenciaId = recorrenciaId; }
 }
->>>>>>> 3af0db57f8043fc8f226b9843d3e51f60f9c7aae
