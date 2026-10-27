@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Plus,
   Target,
@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Pencil,
   ArrowLeftRight,
+  CheckCircle2,
 } from "lucide-react";
 
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
@@ -76,6 +77,40 @@ function Metas() {
   // Meta aberta no painel lateral de detalhes (null = painel fechado).
   const [metaSelecionada, setMetaSelecionada] = useState(null);
 
+  // Ids de metas recém-concluídas (passaram de <100% para 100% agora),
+  // para disparar a animação só na transição — não ao abrir a página com
+  // metas já concluídas. Preenchido pela ação de movimentação.
+  const [recemConcluidas, setRecemConcluidas] = useState(() => new Set());
+  const timersConclusao = useRef(new Map());
+
+  // Marca uma meta como recém-concluída e a remove após a animação (~1.2s).
+  function celebrarConclusao(metaId) {
+    setRecemConcluidas((atual) => new Set(atual).add(metaId));
+
+    const timers = timersConclusao.current;
+    if (timers.has(metaId)) clearTimeout(timers.get(metaId));
+    timers.set(
+      metaId,
+      setTimeout(() => {
+        setRecemConcluidas((atual) => {
+          const prox = new Set(atual);
+          prox.delete(metaId);
+          return prox;
+        });
+        timers.delete(metaId);
+      }, 1200)
+    );
+  }
+
+  // Limpa timers pendentes ao desmontar.
+  useEffect(() => {
+    const timers = timersConclusao.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
+
   // Carrega as metas do usuário ao abrir a página.
   useEffect(() => {
     let ativo = true;
@@ -136,6 +171,14 @@ function Metas() {
   function confirmarMovimentacao(meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) {
     const deltaCarteira = tipo === "deposito" ? -valor : valor;
     ajustarSaldoCarteira(carteiraId, deltaCarteira);
+
+    // Detecta a transição para "concluída" (cruzou de <100% para 100%)
+    // para disparar a animação de celebração.
+    const progressoAntes = calcularProgresso(meta.valorAtual, meta.valorAlvo);
+    const progressoDepois = calcularProgresso(novoValorAtual, meta.valorAlvo);
+    if (progressoAntes < 100 && progressoDepois >= 100) {
+      celebrarConclusao(meta._id);
+    }
 
     setMetas((lista) =>
       lista.map((m) =>
@@ -304,11 +347,15 @@ function Metas() {
                 meta.valorAtual,
                 meta.valorAlvo
               );
+              const concluida = progresso >= 100;
+              const animar = recemConcluidas.has(meta._id);
 
               return (
                 <article
                   key={meta._id}
-                  className={`card card-interativo ${styles.cardMeta}`}
+                  className={`card card-interativo ${styles.cardMeta} ${
+                    concluida ? styles.cardConcluida : ""
+                  } ${animar ? styles.cardCelebrar : ""}`}
                   role="button"
                   tabIndex={0}
                   onClick={() => setMetaSelecionada(meta)}
@@ -318,23 +365,34 @@ function Metas() {
                       setMetaSelecionada(meta);
                     }
                   }}
-                  aria-label={`Abrir detalhes da meta ${meta.nome}`}
+                  aria-label={`Abrir detalhes da meta ${meta.nome}${
+                    concluida ? " (concluída)" : ""
+                  }`}
                 >
                   <header className={styles.metaTopo}>
                     <h3>{meta.nome}</h3>
-                    <span
-                      className={`${styles.tag} ${
-                        styles[`tag-${meta.prioridade}`]
-                      }`}
-                    >
-                      {meta.prioridade}
-                    </span>
+                    {concluida ? (
+                      <span className={styles.badgeConcluida}>
+                        <CheckCircle2 size={14} aria-hidden="true" />
+                        Concluída
+                      </span>
+                    ) : (
+                      <span
+                        className={`${styles.tag} ${
+                          styles[`tag-${meta.prioridade}`]
+                        }`}
+                      >
+                        {meta.prioridade}
+                      </span>
+                    )}
                   </header>
 
                   {/* Barra de progresso */}
                   <div className={styles.progresso}>
                     <div
-                      className={styles.progressoBarra}
+                      className={`${styles.progressoBarra} ${
+                        concluida ? styles.progressoBarraConcluida : ""
+                      }`}
                       style={{ width: `${progresso}%` }}
                     />
                   </div>
