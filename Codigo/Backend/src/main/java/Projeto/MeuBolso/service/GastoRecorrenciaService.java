@@ -96,7 +96,7 @@ public class GastoRecorrenciaService {
     }
 
     // Soma (ou subtrai) meses de uma chave "AAAA-MM".
-    static String mudarMes(String chave, int delta) {
+    public static String mudarMes(String chave, int delta) {
         int ano = Integer.parseInt(chave.substring(0, 4));
         int mes = Integer.parseInt(chave.substring(5, 7));
         LocalDate base = LocalDate.of(ano, mes, 1).plusMonths(delta);
