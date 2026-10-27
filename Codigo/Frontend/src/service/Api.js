@@ -126,3 +126,15 @@ export async function entrar(email, senha) {
 export async function buscarPerfil() {
   return requisicao("/api/usuarios/me", { autenticado: true });
 }
+
+/* ========================================
+   CARTEIRAS
+   ======================================== */
+
+export async function obterCarteiras() {
+  return requisicao("/api/carteiras", { autenticado: true });
+}
+
+export async function salvarCarteiras(dados) {
+  return requisicao("/api/carteiras", { metodo: "PUT", corpo: dados, autenticado: true });
+}
