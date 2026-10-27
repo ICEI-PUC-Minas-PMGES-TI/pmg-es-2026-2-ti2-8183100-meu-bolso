@@ -273,3 +273,15 @@ export const gastosApi = {
       autenticado: true,
     }),
 };
+
+/* ========================================
+   CARTEIRAS
+   ======================================== */
+
+export async function obterCarteiras() {
+  return requisicao("/api/carteiras", { autenticado: true });
+}
+
+export async function salvarCarteiras(dados) {
+  return requisicao("/api/carteiras", { metodo: "PUT", corpo: dados, autenticado: true });
+}

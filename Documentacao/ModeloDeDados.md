@@ -1,135 +1,105 @@
 # Modelo de Dados de Objetos — Meu Bolso
 
 > Modelagem orientada a documentos (**MongoDB**). O vocabulário segue o padrão NoSQL: **coleções** (conjunto de documentos), **documentos** (objetos JSON) e relacionamentos por **referência** (guarda-se o `_id` de outro documento) ou **embutido** (o subdocumento é aninhado dentro do documento).
+>
+> Este documento reflete o modelo **efetivamente implementado** no back-end (Spring Boot + Spring Data MongoDB, pacote `Projeto.MeuBolso.model`). As coleções ainda não implementadas estão listadas à parte, na seção [7. Planejado](#7-planejado-ainda-não-implementado).
 
 ## 1. Minimundo (resumo)
 
-O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz login com e-mail e senha e tem um **telefone** (usado para identificá-lo no WhatsApp). O usuário mantém uma ou mais **carteiras** (ex.: "dinheiro em espécie", "cartão banco X"), cria suas **categorias** e registra **transações** (gasto ou entrada) que alteram o saldo da carteira. Define **metas** (a reserva é apenas uma meta com nome próprio) e pode fazer **aportes** nelas. Monta **planejamentos mensais** com **itens** por categoria. Faz **simulações** (não alteram saldo) e recebe **orientações da IA**. Há ainda **conteúdos de investimento** (iguais para todos) e o estado das **conversas no WhatsApp**. O **resumo financeiro não é armazenado** — é calculado a partir das transações e metas.
+O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz login com e-mail e senha e tem um **telefone**. O usuário registra seus **gastos** (classificados por categoria e carteira) e pode definir um **orçamento** mensal (teto de gastos). Gastos que se repetem todo mês são modelados por uma **recorrência**, que gera os lançamentos de forma idempotente. O usuário define **metas** (a reserva é apenas uma meta com nome próprio) e mantém uma **carteira** com seus cartões, contas e dinheiro em espécie. A recuperação de senha usa um **token** temporário cujo hash é guardado com expiração automática (TTL). O **resumo financeiro não é armazenado** — é calculado a partir dos gastos, do orçamento e das metas.
 
-## 2. Visão geral das coleções
+## 2. Visão geral das coleções (implementadas)
 
-| Coleção | Finalidade |
-|---|---|
-| `usuarios` | Conta, login e telefone. Dono de todos os demais dados. |
-| `carteiras` | Separações de dinheiro do usuário, com saldo. |
-| `categorias` | Categorias criadas pelo usuário para classificar transações. |
-| `transacoes` | Gastos e entradas; alteram o saldo da carteira. |
-| `metas` | Metas e reserva financeira (reserva = meta comum). |
-| `planejamentosMensais` | Planejamento do mês, com itens por categoria (embutidos). |
-| `simulacoes` | Histórico de simulações de decisões/compras. |
-| `orientacoesIA` | Histórico mínimo de perguntas e respostas do assistente. |
-| `conteudosInvestimento` | Conteúdo educativo geral (não pertence a um usuário). |
-| `conversasWhatsApp` | Estado de uma conversa em andamento no chatbot. |
+| Coleção | Classe | Finalidade |
+|---|---|---|
+| `usuarios` | `Usuario` | Conta, login, telefone e papel (role). Dono de todos os demais dados. |
+| `metas` | `Meta` | Metas e reserva financeira (reserva = meta comum). |
+| `carteiras` | `CarteiraUsuario` | Cartões, contas, dinheiro/reservas e movimentações de dinheiro do usuário. |
+| `gastos` | `Gasto` | Gastos (saídas) classificados por categoria e carteira. |
+| `orcamentos` | `Orcamento` | Teto mensal de gastos; um por usuário. |
+| `recorrencias` | `Recorrencia` | Regras de gasto recorrente (repetir todo mês). |
+| `tokens_recuperacao` | `TokenRecuperacao` | Token (hash) de recuperação de senha, com expiração via TTL. |
 
-> **Não são coleções:** o **Resumo Financeiro** (calculado) e a **Reserva** (é uma `meta`).
+> **Não é coleção:** o **Resumo Financeiro** (calculado a partir de gastos, orçamento e metas).
 
 ---
 
 ## 3. Coleções, atributos e tipos
 
-### 3.1 `usuarios`
+### 3.1 `usuarios` (`Usuario`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
+| `_id` | ObjectId/String | Identificador único. |
 | `nome` | String | Nome do usuário. |
-| `email` | String | E-mail único; usado no login. |
-| `senha` | String | Senha com hash (LGPD — nunca em texto puro). |
-| `telefone` | String | Cadastrado na web; identifica o usuário no WhatsApp. |
+| `email` | String | E-mail **único** (índice único); normalizado em minúsculas; usado no login. |
+| `telefone` | String | Telefone do usuário. |
+| `senhaHash` | String | Hash BCrypt da senha (LGPD — nunca em texto puro). |
+| `role` | String | Papel de acesso; padrão `"USER"`. |
 
-### 3.2 `carteiras`
+### 3.2 `metas` (`Meta`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da carteira. |
-| `nome` | String | Ex.: "Dinheiro em espécie", "Cartão banco X". |
-| `saldo` | Decimal128 | Saldo atual; só muda quando uma transação é registrada. |
-
-### 3.3 `categorias`
-| Atributo | Tipo | Descrição |
-|---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da categoria. |
-| `nome` | String | Ex.: "Alimentação", "Lazer", "Mesada". |
-
-### 3.4 `transacoes`
-| Atributo | Tipo | Descrição |
-|---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da transação. |
-| `carteiraId` | ObjectId (ref → `carteiras`) | Carteira afetada. |
-| `categoriaId` | ObjectId (ref → `categorias`) | Categoria da transação. |
-| `metaId` | ObjectId (ref → `metas`) \| null | Preenchido quando a transação é um aporte a uma meta. |
-| `valor` | Decimal128 | Valor monetário. |
-| `data` | Date | Data da transação. |
-| `descricao` | String | Descrição livre. |
-| `tipo` | String (enum) | `"gasto"` ou `"entrada"`. |
-| `canal` | String (enum) | `"web"` ou `"whatsapp"`. |
-
-### 3.5 `metas`
-| Atributo | Tipo | Descrição |
-|---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da meta. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono da meta. |
 | `nome` | String | Ex.: "Viagem", "Reserva de emergência". |
-| `valorAlvo` | Decimal128 | Quanto se quer alcançar. |
-| `valorAtual` | Decimal128 | Quanto já foi acumulado (progresso = valorAtual / valorAlvo). |
-| `prazo` | Date | Data-alvo. |
-| `prioridade` | String (enum) | `"alta"`, `"media"` ou `"baixa"`. |
+| `valorAlvo` | Decimal128 (BigDecimal) | Quanto se quer alcançar. |
+| `valorAtual` | Decimal128 (BigDecimal) | Quanto já foi acumulado; nasce em zero. |
+| `prazo` | Date (LocalDate) | Data-alvo (pode ser nula). |
+| `prioridade` | String | `"alta"`, `"media"` ou `"baixa"`. |
 
-> Os aportes **não** são embutidos: cada aporte é uma `transacao` com `metaId` preenchido (regra do minimundo). Assim o aporte aparece no extrato e no cálculo do saldo.
-
-### 3.6 `planejamentosMensais`
+### 3.3 `carteiras` (`CarteiraUsuario`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono do planejamento. |
-| `mes` | Int | Mês (1–12). |
-| `ano` | Int | Ano (ex.: 2026). |
-| `itens` | Array de Objetos (**embutido**) | Lista de `ItemPlanejamento`. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **único**) | Dono da carteira (uma por usuário). |
+| `cartoes` | Array de Objetos (embutido) | Cartões do usuário (estrutura flexível). |
+| `contas` | Array de Objetos (embutido) | Contas bancárias (apelido, banco, saldo, posição de destaque). |
+| `dinheiroEReservas` | Array de Objetos (embutido) | Dinheiro em espécie e reservas; o dinheiro guarda a contagem por denominação. |
+| `movsDinheiro` | Array de Objetos (embutido) | Movimentações do dinheiro em espécie (entradas/saídas). |
 
-**`itens` (subdocumento embutido — `ItemPlanejamento`):**
+> As quatro listas são salvas como subdocumentos flexíveis (`List<Map<String,Object>>`), espelhando o estado da tela de Carteira no front. **Chaves com ponto:** a contagem de cédulas usa chaves como `"0.5"`; o `MappingMongoConverter` está configurado com `setMapKeyDotReplacement("_DOT_")` para permitir pontos em chaves de mapa.
+
+### 3.4 `gastos` (`Gasto`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador do item. |
-| `categoriaId` | ObjectId (ref → `categorias`) | Categoria planejada. |
-| `valorPrevisto` | Decimal128 | Valor previsto para a categoria no mês. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono do gasto. |
+| `descricao` | String | Descrição do gasto. |
+| `categoria` | String | Categoria do gasto. |
+| `carteira` | String | Carteira/origem do gasto. |
+| `data` | String | Data no formato `"AAAA-MM-DD"` (mesmo contrato do front). |
+| `valor` | Decimal128 (BigDecimal) | Valor do gasto. |
+| `comentario` | String | Comentário livre; padrão `""`. |
+| `recorrenciaId` | String (ref → `recorrencias`) \| null | Preenchido quando o gasto nasceu de uma recorrência. |
 
-### 3.7 `simulacoes`
+### 3.5 `orcamentos` (`Orcamento`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da simulação. |
-| `descricao` | String | O que está sendo simulado (ex.: "comprar fone"). |
-| `valor` | Decimal128 | Valor da decisão simulada. |
-| `data` | Date | Quando foi simulada. |
-| `resultado` | String | Impacto calculado no orçamento futuro. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **único**) | Dono do orçamento (um por usuário). |
+| `valorMensal` | Decimal128 (BigDecimal) | Teto mensal de gastos; padrão zero. |
 
-### 3.8 `orientacoesIA`
+### 3.6 `recorrencias` (`Recorrencia`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da orientação. |
-| `data` | Date | Data/hora. |
-| `pergunta` | String | Pergunta do usuário. |
-| `resposta` | String | Resposta educativa da IA. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono da recorrência. |
+| `descricao` | String | Modelo do lançamento. |
+| `categoria` | String | Categoria do gasto gerado. |
+| `carteira` | String | Carteira/origem do gasto gerado. |
+| `valor` | Decimal128 (BigDecimal) | Valor do gasto recorrente. |
+| `comentario` | String | Comentário; padrão `""`. |
+| `diaDoMes` | Int | Dia do mês em que o gasto cai. |
+| `ativa` | Boolean | Se a recorrência está ativa; padrão `true`. |
+| `ultimoMes` | String | Último mês já lançado (`"AAAA-MM"`); torna a geração idempotente. |
 
-### 3.9 `conteudosInvestimento`
+### 3.7 `tokens_recuperacao` (`TokenRecuperacao`)
 | Atributo | Tipo | Descrição |
 |---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `titulo` | String | Título do conteúdo. |
-| `texto` | String | Conteúdo educativo sobre investir. |
-
-> **Não tem `usuarioId`:** é conteúdo geral, igual para todos os usuários.
-
-### 3.10 `conversasWhatsApp`
-| Atributo | Tipo | Descrição |
-|---|---|---|
-| `_id` | ObjectId | Identificador único. |
-| `usuarioId` | ObjectId (ref → `usuarios`) | Dono da conversa (identificado pelo telefone). |
-| `etapaAtual` | String | Etapa do fluxo (ex.: "carteira", "valor", "categoria", "confirmacao"). |
-| `tipoRegistro` | String | O que está sendo registrado (ex.: gasto, aporte). |
-| `dadosParciais` | Object (embutido) | Dados coletados até o momento na conversa. |
+| `_id` | ObjectId/String | Identificador único. |
+| `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono do token. |
+| `tokenHash` | String (**único**) | Hash do token (o valor puro só existe no link do e-mail). |
+| `expiraEm` | Date (Instant, **TTL**) | Expiração; índice TTL (`expireAfterSeconds = 0`) faz o MongoDB apagar o documento. |
 
 ---
 
@@ -137,157 +107,164 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 
 | Relacionamento | Cardinalidade | Estratégia | Justificativa |
 |---|---|---|---|
-| `usuarios` → `carteiras` | 1 : 1..N | **Referência** | Carteiras são consultadas e têm saldo próprio atualizado por transações; melhor como documentos independentes. |
-| `usuarios` → `categorias` | 1 : 0..N | **Referência** | Categorias são reutilizadas por muitas transações e itens de planejamento; separá-las evita duplicação. |
-| `carteiras` → `transacoes` | 1 : 0..N | **Referência** (`carteiraId`) | Transações crescem indefinidamente; embuti-las na carteira estouraria o documento. |
-| `categorias` → `transacoes` | 1 : 0..N | **Referência** (`categoriaId`) | Mesma categoria classifica inúmeras transações. |
-| `usuarios` → `metas` | 1 : 0..N | **Referência** | Metas são filtradas por prioridade/prazo isoladamente. |
-| `metas` → aportes | 1 : 0..N | **Referência via `transacoes`** (`metaId`) | O minimundo define que o aporte **é uma transação**; assim ele afeta o saldo da carteira e aparece no extrato. |
-| `usuarios` → `planejamentosMensais` | 1 : 0..N | **Referência** | Um planejamento por mês; consultado por mês/ano. |
-| `planejamentosMensais` → `itens` | 1 : 1..N | **Embutido** | Itens só existem dentro do planejamento, são poucos e sempre lidos juntos — caso ideal de embutir. |
-| `itens` → `categorias` | N : 1 | **Referência** (`categoriaId`) | O item aponta para a categoria existente, sem duplicá-la. |
-| `usuarios` → `simulacoes` | 1 : 0..N | **Referência** | Histórico que cresce; consultado isoladamente. |
-| `usuarios` → `orientacoesIA` | 1 : 0..N | **Referência** | Histórico ilimitado — não pode ser embutido no usuário. |
-| `usuarios` → `conversasWhatsApp` | 1 : 0..N | **Referência** | Estado transitório de conversa; vinculado pelo telefone. |
-| (nenhum) → `conteudosInvestimento` | — | **Coleção independente** | Conteúdo global, não pertence a usuário algum. |
+| `usuarios` → `metas` | 1 : 0..N | **Referência** (`usuarioId`) | Metas são filtradas por usuário/prioridade/prazo isoladamente. |
+| `usuarios` → `carteiras` | 1 : 1 | **Referência** (`usuarioId` único) | Uma carteira por usuário; o conteúdo (cartões/contas/dinheiro) é **embutido** nela. |
+| `usuarios` → `gastos` | 1 : 0..N | **Referência** (`usuarioId`) | Gastos crescem indefinidamente; consulta sempre por usuário. |
+| `usuarios` → `orcamentos` | 1 : 1 | **Referência** (`usuarioId` único) | Um teto mensal por usuário. |
+| `usuarios` → `recorrencias` | 1 : 0..N | **Referência** (`usuarioId`) | Cada regra é consultada e processada isoladamente. |
+| `recorrencias` → `gastos` | 1 : 0..N | **Referência** (`recorrenciaId`) | Cada gasto gerado aponta para a regra que o originou. |
+| `usuarios` → `tokens_recuperacao` | 1 : 0..N | **Referência** (`usuarioId`) + **TTL** | Tokens temporários, apagados automaticamente ao expirar. |
+| `carteiras` → cartões/contas/dinheiro/movs | 1 : 0..N | **Embutido** | Lidos e salvos sempre juntos, como estado único da tela de Carteira. |
 
 ### Princípio adotado (embutir vs. referenciar)
-- **Embutir** → relação 1:poucos, lida sempre junto, lista limitada: **apenas `itens` dentro de `planejamentosMensais`** (e `dadosParciais` dentro de `conversasWhatsApp`).
-- **Referenciar** → tudo que cresce muito ou é consultado isoladamente: transações, metas, carteiras, categorias, simulações, orientações.
+- **Embutir** → o conteúdo da `carteira` (cartões, contas, dinheiro/reservas, movimentações de dinheiro), porque é lido e gravado como um bloco único por usuário.
+- **Referenciar** → tudo que cresce de forma independente (gastos, metas, recorrências, tokens) ou é único por usuário (orçamento).
 
 ### Integridade e consistência com o minimundo
-- **Isolamento por usuário:** todo documento (exceto `conteudosInvestimento`) carrega `usuarioId` → cumpre a regra "um usuário nunca acessa dados de outro".
-- **Saldo coerente:** o `saldo` da `carteira` só muda via `transacoes` (gasto diminui, entrada aumenta). A aplicação atualiza os dois numa mesma operação.
-- **Aporte em meta:** cria uma `transacao` de gasto na carteira **e** soma o valor ao `valorAtual` da `meta` (regra do WhatsApp e da web).
-- **Simulações não alteram saldo:** `simulacoes` é uma coleção isolada, sem efeito sobre `carteiras` ou `transacoes`.
-- **Reserva:** não há coleção própria — é um documento em `metas` cujo `nome` indica reserva.
-- **Resumo financeiro:** calculado em tempo de consulta (soma de entradas, soma de gastos, soma de `valorAtual` das metas); **não é persistido**.
-- **Dinheiro:** `Decimal128` em todos os valores monetários, evitando erro de arredondamento de ponto flutuante.
-- **Índices sugeridos:** `usuarios { email }` único; `transacoes { usuarioId, data }` e `{ carteiraId }` e `{ metaId }`; `planejamentosMensais { usuarioId, ano, mes }`; `conversasWhatsApp { usuarioId }`.
+- **Isolamento por usuário:** todo documento carrega `usuarioId`, e o back-end resolve o usuário sempre pelo JWT (`authentication.getName()`), nunca pelo corpo da requisição.
+- **Dinheiro:** `BigDecimal` (Decimal128 no MongoDB) em todos os valores monetários, evitando erro de arredondamento.
+- **Recorrência idempotente:** `ultimoMes` garante que gerar os lançamentos duas vezes não duplica gastos.
+- **Segurança da recuperação:** guarda-se apenas o `tokenHash`; o TTL em `expiraEm` apaga tokens expirados automaticamente.
+- **Chaves com ponto:** denominações como `"0.5"` são permitidas via `setMapKeyDotReplacement("_DOT_")`.
+- **Resumo financeiro:** calculado em tempo de consulta; **não é persistido**.
 
 ---
 
-## 5. Diagrama do modelo
+## 5. Diagrama do modelo (implementado)
 
 ```mermaid
 erDiagram
-    USUARIOS ||--|{ CARTEIRAS : "possui (1..N)"
-    USUARIOS ||--o{ CATEGORIAS : "cria (0..N)"
     USUARIOS ||--o{ METAS : "define (0..N)"
-    USUARIOS ||--o{ PLANEJAMENTOS : "monta (0..N)"
-    USUARIOS ||--o{ SIMULACOES : "faz (0..N)"
-    USUARIOS ||--o{ ORIENTACOESIA : "recebe (0..N)"
-    USUARIOS ||--o{ CONVERSASWPP : "possui (0..N)"
-    CARTEIRAS ||--o{ TRANSACOES : "registra (0..N)"
-    CATEGORIAS ||--o{ TRANSACOES : "classifica (0..N)"
-    METAS ||--o{ TRANSACOES : "recebe aporte (0..N)"
-    PLANEJAMENTOS ||--|{ ITENS : "contém embutido (1..N)"
-    CATEGORIAS ||--o{ ITENS : "referenciada por"
+    USUARIOS ||--|| CARTEIRAS : "possui (1)"
+    USUARIOS ||--o{ GASTOS : "registra (0..N)"
+    USUARIOS ||--|| ORCAMENTOS : "define (1)"
+    USUARIOS ||--o{ RECORRENCIAS : "cria (0..N)"
+    USUARIOS ||--o{ TOKENS_RECUPERACAO : "gera (0..N)"
+    RECORRENCIAS ||--o{ GASTOS : "gera (0..N)"
 
     USUARIOS {
-        ObjectId _id
+        string _id
         string nome
         string email
-        string senha
         string telefone
-    }
-    CARTEIRAS {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        string nome
-        decimal saldo
-    }
-    CATEGORIAS {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        string nome
-    }
-    TRANSACOES {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        ObjectId carteiraId "ref"
-        ObjectId categoriaId "ref"
-        ObjectId metaId "ref opcional"
-        decimal valor
-        date data
-        string tipo
-        string canal
+        string senhaHash
+        string role
     }
     METAS {
-        ObjectId _id
-        ObjectId usuarioId "ref"
+        string _id
+        string usuarioId "ref"
         string nome
         decimal valorAlvo
         decimal valorAtual
         date prazo
         string prioridade
     }
-    PLANEJAMENTOS {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        int mes
-        int ano
-        array itens "embutido"
+    CARTEIRAS {
+        string _id
+        string usuarioId "ref unico"
+        array cartoes "embutido"
+        array contas "embutido"
+        array dinheiroEReservas "embutido"
+        array movsDinheiro "embutido"
     }
-    ITENS {
-        ObjectId _id
-        ObjectId categoriaId "ref"
-        decimal valorPrevisto
-    }
-    SIMULACOES {
-        ObjectId _id
-        ObjectId usuarioId "ref"
+    GASTOS {
+        string _id
+        string usuarioId "ref"
         string descricao
+        string categoria
+        string carteira
+        string data
         decimal valor
-        date data
-        string resultado
+        string comentario
+        string recorrenciaId "ref opcional"
     }
-    ORIENTACOESIA {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        date data
-        string pergunta
-        string resposta
+    ORCAMENTOS {
+        string _id
+        string usuarioId "ref unico"
+        decimal valorMensal
     }
-    CONVERSASWPP {
-        ObjectId _id
-        ObjectId usuarioId "ref"
-        string etapaAtual
-        string tipoRegistro
-        object dadosParciais "embutido"
+    RECORRENCIAS {
+        string _id
+        string usuarioId "ref"
+        string descricao
+        string categoria
+        string carteira
+        decimal valor
+        string comentario
+        int diaDoMes
+        bool ativa
+        string ultimoMes
+    }
+    TOKENS_RECUPERACAO {
+        string _id
+        string usuarioId "ref"
+        string tokenHash "unico"
+        date expiraEm "TTL"
     }
 ```
-
-> `conteudosInvestimento` não aparece ligado a nada: é uma coleção global, igual para todos os usuários.
 
 ## 6. Exemplos de documentos (JSON)
 
 ```json
-// carteiras
-{ "_id": "ObjectId(c1)", "usuarioId": "ObjectId(u1)", "nome": "Dinheiro em espécie", "saldo": { "$numberDecimal": "350.00" } }
+// usuarios
+{ "_id": "u1", "nome": "Lucas", "email": "lucas@exemplo.com",
+  "telefone": "31999990000", "senhaHash": "$2a$10$...", "role": "USER" }
 ```
 
 ```json
-// transacoes — gasto comum
-{ "_id": "ObjectId(t1)", "usuarioId": "ObjectId(u1)", "carteiraId": "ObjectId(c1)",
-  "categoriaId": "ObjectId(cat1)", "metaId": null,
-  "valor": { "$numberDecimal": "32.50" }, "data": "2026-09-20T12:30:00Z",
-  "descricao": "Almoço", "tipo": "gasto", "canal": "web" }
+// metas
+{ "_id": "m1", "usuarioId": "u1", "nome": "Reserva de emergência",
+  "valorAlvo": { "$numberDecimal": "3000.00" },
+  "valorAtual": { "$numberDecimal": "900.00" },
+  "prazo": "2026-12-31", "prioridade": "alta" }
 ```
 
 ```json
-// transacoes — aporte a uma meta (gasto na carteira + soma no valorAtual da meta)
-{ "_id": "ObjectId(t2)", "usuarioId": "ObjectId(u1)", "carteiraId": "ObjectId(c1)",
-  "categoriaId": "ObjectId(cat2)", "metaId": "ObjectId(m1)",
-  "valor": { "$numberDecimal": "100.00" }, "data": "2026-09-21T09:00:00Z",
-  "descricao": "Aporte reserva", "tipo": "gasto", "canal": "whatsapp" }
+// gastos
+{ "_id": "g1", "usuarioId": "u1", "descricao": "Mercado",
+  "categoria": "Alimentação", "carteira": "Nubank", "data": "2026-10-16",
+  "valor": { "$numberDecimal": "142.90" }, "comentario": "", "recorrenciaId": null }
 ```
 
 ```json
-// planejamentosMensais com itens embutidos
-{ "_id": "ObjectId(p1)", "usuarioId": "ObjectId(u1)", "mes": 10, "ano": 2026,
-  "itens": [
-    { "_id": "ObjectId(i1)", "categoriaId": "ObjectId(cat1)", "valorPrevisto": { "$numberDecimal": "400.00" } },
-    { "_id": "ObjectId(i2)", "categoriaId": "ObjectId(cat2)", "valorPrevisto": { "$numberDecimal": "200.00" } }
-  ] }
+// orcamentos
+{ "_id": "o1", "usuarioId": "u1", "valorMensal": { "$numberDecimal": "2000.00" } }
 ```
+
+```json
+// recorrencias
+{ "_id": "r1", "usuarioId": "u1", "descricao": "Assinatura de streaming",
+  "categoria": "Assinaturas", "carteira": "Nubank",
+  "valor": { "$numberDecimal": "27.90" }, "comentario": "",
+  "diaDoMes": 14, "ativa": true, "ultimoMes": "2026-10" }
+```
+
+```json
+// carteiras (conteúdo embutido; chaves de denominação com ponto)
+{ "_id": "w1", "usuarioId": "u1",
+  "cartoes": [ { "id": "cartao-nubank", "tipo": "cartao", "apelido": "Nubank" } ],
+  "contas": [ { "id": "conta-nubank", "tipo": "conta", "apelido": "Nubank",
+                "saldo": 1240.0, "posicao": "principal" } ],
+  "dinheiroEReservas": [ { "id": "dinheiro-especie", "tipo": "dinheiro",
+                           "apelido": "Dinheiro na carteira", "saldo": 180.0,
+                           "contagem": { "100": 1, "50": 1, "20": 1, "10": 1 } } ],
+  "movsDinheiro": [ { "id": 1, "descricao": "Troco do almoço",
+                      "categoria": "Dinheiro", "data": "17 out",
+                      "valor": -12.0, "entrada": false } ] }
+```
+
+---
+
+## 7. Planejado (ainda não implementado)
+
+As coleções abaixo fazem parte do modelo conceitual do projeto, mas **ainda não existem no back-end**. Serão adicionadas conforme as funcionalidades avançarem:
+
+| Coleção | Finalidade |
+|---|---|
+| `categorias` | Categorias do usuário como documentos próprios (hoje a categoria é um texto livre em `gastos`/`recorrencias`). |
+| `transacoes` | Modelo unificado de entradas/saídas e aportes a metas (hoje há `gastos`; aportes a meta ainda não geram transação). |
+| `planejamentosMensais` | Planejamento do mês com itens por categoria. |
+| `simulacoes` | Histórico de simulações de decisões/compras. |
+| `orientacoesIA` | Perguntas e respostas do assistente de IA. |
+| `conteudosInvestimento` | Conteúdo educativo geral sobre investimentos. |
+| `conversasWhatsApp` | Estado das conversas no chatbot do WhatsApp. |

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 
 import { listarCarteirasComSaldo } from "../../service/carteirasStorage";
@@ -53,8 +53,24 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   const [erro, setErro] = useState("");
 
   // Carteiras com saldo (contas e dinheiro físico) disponíveis como
-  // origem/destino da movimentação. Lidas ao montar o modal.
-  const [carteiras] = useState(() => listarCarteirasComSaldo());
+  // origem/destino da movimentação. Carregadas da API ao montar o modal.
+  const [carteiras, setCarteiras] = useState([]);
+  const [carregandoCarteiras, setCarregandoCarteiras] = useState(true);
+
+  useEffect(() => {
+    let ativo = true;
+    setCarregandoCarteiras(true);
+    listarCarteirasComSaldo()
+      .then((lista) => {
+        if (ativo) setCarteiras(lista);
+      })
+      .finally(() => {
+        if (ativo) setCarregandoCarteiras(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   if (!aberto || !meta) return null;
 
@@ -178,7 +194,9 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
             <label htmlFor="carteira">
               {tipo === "deposito" ? "De qual carteira sai" : "Para qual carteira vai"}
             </label>
-            {carteiras.length === 0 ? (
+            {carregandoCarteiras ? (
+              <p className={styles.aviso}>Carregando carteiras...</p>
+            ) : carteiras.length === 0 ? (
               <p className={styles.aviso}>
                 Nenhuma carteira com saldo encontrada. Cadastre uma conta ou
                 dinheiro na página Carteiras.
@@ -237,7 +255,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
             <button
               type="submit"
               className={styles.btnSalvar}
-              disabled={carteiras.length === 0}
+              disabled={carregandoCarteiras || carteiras.length === 0}
             >
               {tipo === "deposito" ? "Depositar" : "Retirar"}
             </button>
