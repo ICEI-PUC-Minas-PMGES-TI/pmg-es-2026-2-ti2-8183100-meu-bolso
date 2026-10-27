@@ -30,28 +30,15 @@ import {
   saldoDaContagem,
   totalCentavos,
 } from "../../data/denominacoes";
+import { obterCarteiras, salvarCarteiras } from "../../service/Api";
 
 import styles from "./Carteiras.module.css";
 
-// Persistência simples em localStorage (sem backend nesta etapa).
-const CHAVE_STORAGE = "meubolso:carteira";
-
-function carregarPersistido() {
-  try {
-    const bruto = localStorage.getItem(CHAVE_STORAGE);
-    if (!bruto) return null;
-    const dados = JSON.parse(bruto);
-    if (
-      Array.isArray(dados?.cartoes) &&
-      Array.isArray(dados?.contas) &&
-      Array.isArray(dados?.dinheiroEReservas)
-    ) {
-      return dados;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+// Normaliza a lista de dinheiro/reservas (itens de dinheiro ganham contagem/saldo).
+function normalizarListaDinheiro(lista) {
+  return (lista ?? []).map((item) =>
+    item.tipo === "dinheiro" ? normalizarDinheiro(item) : item
+  );
 }
 
 function Carteiras() {
@@ -62,26 +49,62 @@ function Carteiras() {
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
 
-  const persistido = carregarPersistido();
-  const [cartoes, setCartoes] = useState(persistido?.cartoes ?? cartoesMock);
-  const [contas, setContas] = useState(persistido?.contas ?? contasMock);
+  // Estado inicial = dados fictícios; substituídos pela carteira do usuário
+  // assim que a API responde.
+  const [cartoes, setCartoes] = useState(cartoesMock);
+  const [contas, setContas] = useState(contasMock);
   const [dinheiroEReservas, setDinheiroEReservas] = useState(() =>
-    (persistido?.dinheiroEReservas ?? dinheiroEReservasMock).map((item) =>
-      item.tipo === "dinheiro" ? normalizarDinheiro(item) : item
-    )
+    normalizarListaDinheiro(dinheiroEReservasMock)
   );
 
-  // Salva as listas sempre que mudarem (edição, exclusão, inclusão).
+  // Controle de carga/salvamento com a API.
+  const [carregado, setCarregado] = useState(false);
+  const [erroSalvar, setErroSalvar] = useState(false);
+
+  // Carrega a carteira do usuário na montagem. Se vierem listas com itens,
+  // aplica-as (normalizando o dinheiro); se vierem vazias, mantém os mocks.
+  // Em qualquer caso (inclusive erro) marca carregado=true.
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        CHAVE_STORAGE,
-        JSON.stringify({ cartoes, contas, dinheiroEReservas })
-      );
-    } catch {
-      // armazenamento indisponível: segue apenas em memória
-    }
-  }, [cartoes, contas, dinheiroEReservas]);
+    let ativo = true;
+    obterCarteiras()
+      .then((dados) => {
+        if (!ativo || !dados) return;
+        if (Array.isArray(dados.cartoes) && dados.cartoes.length > 0) {
+          setCartoes(dados.cartoes);
+        }
+        if (Array.isArray(dados.contas) && dados.contas.length > 0) {
+          setContas(dados.contas);
+        }
+        if (
+          Array.isArray(dados.dinheiroEReservas) &&
+          dados.dinheiroEReservas.length > 0
+        ) {
+          setDinheiroEReservas(normalizarListaDinheiro(dados.dinheiroEReservas));
+        }
+        if (Array.isArray(dados.movsDinheiro) && dados.movsDinheiro.length > 0) {
+          setMovsDinheiro(dados.movsDinheiro);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (ativo) setCarregado(true);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  // Salva as listas na API quando mudarem, com debounce de 800ms.
+  // Só roda depois que a carga inicial terminou (carregado=true).
+  useEffect(() => {
+    if (!carregado) return;
+    const id = setTimeout(() => {
+      salvarCarteiras({ cartoes, contas, dinheiroEReservas, movsDinheiro })
+        .then(() => setErroSalvar(false))
+        .catch(() => setErroSalvar(true));
+    }, 800);
+    return () => clearTimeout(id);
+  }, [carregado, cartoes, contas, dinheiroEReservas, movsDinheiro]);
 
   // Resumo recalculado a partir do estado atual.
   const saldoContas =
@@ -245,8 +268,21 @@ function Carteiras() {
     ? movsDinheiro
     : movimentacoesPorItem[itemSelecionado.id] || [];
 
+  if (!carregado) {
+    return (
+      <div className={styles.carteiras}>
+        <p className="texto-secundario">Carregando carteira...</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.carteiras}>
+      {erroSalvar && (
+        <p className="texto-secundario" role="alert">
+          Não foi possível salvar. Tentando novamente na próxima alteração.
+        </p>
+      )}
       <div className={styles.topo}>
         <div>
           <span className={styles.rotulo}>CARTEIRA</span>
