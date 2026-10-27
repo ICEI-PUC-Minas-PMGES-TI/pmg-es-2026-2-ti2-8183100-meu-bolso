@@ -57,6 +57,12 @@ function Carteiras() {
     normalizarListaDinheiro(dinheiroEReservasMock)
   );
 
+  // Movimentações do dinheiro em espécie (começam com as do mock e crescem
+  // a cada adicionar/retirar). Declarado aqui, antes dos efeitos que o usam.
+  const [movsDinheiro, setMovsDinheiro] = useState(
+    () => movimentacoesPorItem["dinheiro-especie"] || []
+  );
+
   // Controle de carga/salvamento com a API.
   const [carregado, setCarregado] = useState(false);
   const [erroSalvar, setErroSalvar] = useState(false);
@@ -126,12 +132,6 @@ function Carteiras() {
 
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
-
-  // Movimentações do dinheiro em espécie (começam com as do mock e crescem
-  // a cada adicionar/retirar). Só o dinheiro precisa ser dinâmico aqui.
-  const [movsDinheiro, setMovsDinheiro] = useState(
-    () => movimentacoesPorItem["dinheiro-especie"] || []
-  );
 
   // Modal de cédulas/moedas: { modo, item } ou null.
   const [modalCedulas, setModalCedulas] = useState(null);
