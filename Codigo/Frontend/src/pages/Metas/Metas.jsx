@@ -168,9 +168,13 @@ function Metas() {
   // e carteiraId, recalculando os dois saldos numa só operação.)
   //  - Depósito: sai da carteira (delta negativo), entra na meta.
   //  - Retirada: entra na carteira (delta positivo), sai da meta.
-  function confirmarMovimentacao(meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) {
+  async function confirmarMovimentacao(meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) {
     const deltaCarteira = tipo === "deposito" ? -valor : valor;
-    ajustarSaldoCarteira(carteiraId, deltaCarteira);
+    const ok = await ajustarSaldoCarteira(carteiraId, deltaCarteira);
+    if (!ok) {
+      alert("Não foi possível atualizar o saldo da carteira. Tente novamente.");
+      return;
+    }
 
     // Detecta a transição para "concluída" (cruzou de <100% para 100%)
     // para disparar a animação de celebração.
