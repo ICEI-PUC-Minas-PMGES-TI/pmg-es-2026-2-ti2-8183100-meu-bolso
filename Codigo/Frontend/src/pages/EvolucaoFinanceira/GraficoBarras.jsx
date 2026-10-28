@@ -43,12 +43,12 @@ function GraficoBarras({
   const alturaValor = (valor) => (valor / teto) * alturaUtil;
 
   // Cada barra com as posições já calculadas na tela.
-  // "acumulado" é a soma do guardado até o mês — o MESMO número
-  // que o gráfico de linha mostra naquele ponto.
+  // "acumulado" é o saldo até o mês (entradas - gastos) — o MESMO
+  // número que o gráfico de linha mostra naquele ponto.
   const barras = dados.map((d, i) => {
     const acumulado = dados
       .slice(0, i + 1)
-      .reduce((soma, item) => soma + item.guardado, 0);
+      .reduce((soma, item) => soma + item.guardado - item.gastos, 0);
 
     const centroX = MARGEM.esquerda + passo * i + passo / 2;
     const x = centroX - larguraBarra / 2;
