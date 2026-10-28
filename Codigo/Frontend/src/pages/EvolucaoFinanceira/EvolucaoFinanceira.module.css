@@ -109,6 +109,34 @@
   animation: cardEntra 0.4s ease both;
 }
 
+/* Estados de carregando / erro / vazio */
+.estado {
+  max-width: 800px;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--espaco-2);
+  animation: cardEntra 0.4s ease both;
+}
+
+.estadoTitulo {
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.estadoIcone {
+  color: var(--verde-principal);
+  margin-bottom: var(--espaco-2);
+}
+
+.estadoIconeErro {
+  color: var(--erro);
+  margin-bottom: var(--espaco-2);
+}
+
 /* Topo do card de linha: título/subtítulo à esquerda, seletor à direita */
 .topo {
   display: flex;
@@ -144,6 +172,12 @@
 .grade {
   stroke: var(--cinza-100);
   stroke-width: 1;
+}
+
+/* Linha do zero destacada quando o gráfico tem saldo negativo */
+.gradeZero {
+  stroke: var(--cinza-300);
+  stroke-width: 1.5;
 }
 
 .rotuloY {

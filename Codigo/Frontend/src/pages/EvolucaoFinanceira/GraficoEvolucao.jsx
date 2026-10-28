@@ -28,14 +28,16 @@ function GraficoEvolucao({
   const larguraUtil = Math.max(largura - MARGEM.esquerda - MARGEM.direita, 10);
   const alturaUtil = altura - MARGEM.topo - MARGEM.base;
 
-  // Eixo Y: marcas de R$ 1.000 em R$ 1.000
-  const { teto, marcas } = useMemo(
-    () => calcularEscala(Math.max(...dados.map((d) => d.valor), 1), 1000),
-    [dados],
-  );
+  // Eixo Y: marcas de R$ 1.000 em R$ 1.000, com piso para valores
+  // negativos (quando os gastos superam as entradas acumuladas).
+  const { piso, teto, marcas } = useMemo(() => {
+    const valores = dados.map((d) => d.valor);
+    return calcularEscala(Math.max(...valores, 1), Math.min(...valores, 0), 1000);
+  }, [dados]);
 
+  // Mapeia o valor dentro do range [piso, teto] para a coordenada Y.
   const posicaoY = (valor) =>
-    MARGEM.topo + alturaUtil - (valor / teto) * alturaUtil;
+    MARGEM.topo + alturaUtil - ((valor - piso) / (teto - piso)) * alturaUtil;
 
   const posicaoX = (indice) => {
     if (dados.length === 1) return MARGEM.esquerda + larguraUtil / 2;
@@ -111,11 +113,14 @@ function GraficoEvolucao({
           onPointerDown={handleMouseMove}
           onPointerLeave={() => setPontoAtivo(null)}
         >
-          {/* Linhas de grade e valores do eixo Y */}
+          {/* Linhas de grade e valores do eixo Y.
+              A linha do zero fica destacada quando há saldo negativo. */}
           {marcas.map((valor) => (
             <g key={valor}>
               <line
-                className={styles.grade}
+                className={`${styles.grade} ${
+                  valor === 0 && piso < 0 ? styles.gradeZero : ""
+                }`}
                 x1={MARGEM.esquerda}
                 x2={largura - MARGEM.direita}
                 y1={posicaoY(valor)}
