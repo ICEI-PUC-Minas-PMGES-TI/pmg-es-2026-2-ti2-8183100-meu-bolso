@@ -25,11 +25,13 @@ function GraficoBarras({
   const larguraUtil = Math.max(largura - MARGEM.esquerda - MARGEM.direita, 10);
   const alturaUtil = altura - MARGEM.topo - MARGEM.base;
 
-  // Teto do eixo Y arredondado para a próxima marca de R$ 500
+  // Teto do eixo Y arredondado para a próxima marca de R$ 500.
+  // Barras empilhadas são sempre positivas, então o piso é 0.
   const { teto, marcas } = useMemo(
     () =>
       calcularEscala(
         Math.max(...dados.map((d) => d.gastos + d.guardado), 1),
+        0,
         500,
       ),
     [dados],
