@@ -21,6 +21,8 @@ public class CarteiraUsuario {
     private List<Map<String, Object>> dinheiroEReservas = new ArrayList<>();
     private List<Map<String, Object>> movsDinheiro = new ArrayList<>();
 
+    private long versao = 0;
+
     public CarteiraUsuario() {
     }
 
@@ -75,4 +77,8 @@ public class CarteiraUsuario {
     public void setMovsDinheiro(List<Map<String, Object>> movsDinheiro) {
         this.movsDinheiro = movsDinheiro;
     }
+
+    public long getVersao() { return versao; }
+
+    public void setVersao(long versao) { this.versao = versao; }
 }
