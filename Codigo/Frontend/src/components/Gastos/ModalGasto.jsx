@@ -6,7 +6,7 @@
     mesAtualChave,
     valorParaTexto,
     } from "../../utils/Gastosutils";
-    import { CATEGORIAS, CARTEIRAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
+    import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
     import Modal from "./Modal";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
@@ -14,6 +14,7 @@
     descricao: "",
     categoria: "",
     carteira: "",
+    carteiraId: "",
     valor: "",
     data: "",
     comentario: "",
@@ -30,7 +31,7 @@
      * onSalvar recebe os dados prontos e devolve uma Promise; se ela falhar,
      * a mensagem de erro aparece aqui dentro do modal.
      */
-    export default function ModalGasto({ gasto, mesSelecionado, onFechar, onSalvar }) {
+    export default function ModalGasto({ gasto, mesSelecionado, carteiras = [], onFechar, onSalvar }) {
     const editando = Boolean(gasto);
 
     const [form, setForm] = useState(() =>
@@ -39,6 +40,7 @@
             descricao: gasto.descricao,
             categoria: gasto.categoria,
             carteira: gasto.carteira,
+            carteiraId: gasto.carteiraId ?? "",
             valor: valorParaTexto(gasto.valor),
             data: gasto.data,
             comentario: gasto.comentario ?? "",
@@ -50,15 +52,19 @@
     const [erroEnvio, setErroEnvio] = useState("");
     const [salvando, setSalvando] = useState(false);
 
-    // Se o gasto tiver uma categoria/carteira fora da lista, ela continua selecionável
+    // Se o gasto tiver uma categoria fora da lista, ela continua selecionável
     const categorias =
         !form.categoria || CATEGORIAS.includes(form.categoria)
         ? CATEGORIAS
         : [...CATEGORIAS, form.categoria];
-    const carteiras =
-        !form.carteira || CARTEIRAS.includes(form.carteira)
-        ? CARTEIRAS
-        : [...CARTEIRAS, form.carteira];
+
+    // Formas de pagamento disponíveis. Item editado sem carteiraId mas com
+    // nome legado ganha uma opção extra para não perder o valor atual.
+    const semCarteiras = carteiras.length === 0;
+    const opcoesCarteira =
+        !form.carteiraId && form.carteira
+        ? [{ id: "", nome: form.carteira }, ...carteiras]
+        : carteiras;
 
     const jaEhRecorrente = editando && Boolean(gasto.recorrenciaId);
     const diaDaRecorrencia = form.data ? Number(form.data.slice(8, 10)) : null;
@@ -75,7 +81,7 @@
 
         if (!form.descricao.trim()) novosErros.descricao = "Informe a descrição.";
         if (!form.categoria) novosErros.categoria = "Selecione a categoria.";
-        if (!form.carteira) novosErros.carteira = "Selecione a carteira.";
+        if (!form.carteiraId) novosErros.carteira = "Selecione a carteira.";
         if (!form.data) novosErros.data = "Informe a data.";
 
         const valorNumerico = converterValor(form.valor);
@@ -104,6 +110,7 @@
             descricao: form.descricao.trim(),
             categoria: form.categoria,
             carteira: form.carteira,
+            carteiraId: form.carteiraId,
             data: form.data,
             valor: converterValor(form.valor),
             comentario: form.comentario.trim(),
@@ -165,18 +172,33 @@
             </label>
             <select
                 id="gasto-carteira"
-                name="carteira"
+                name="carteiraId"
                 className="form-input"
-                value={form.carteira}
-                onChange={alterarCampo}
+                value={form.carteiraId}
+                onChange={(event) => {
+                const id = event.target.value;
+                const opcao = opcoesCarteira.find((c) => c.id === id);
+                setForm((atual) => ({
+                    ...atual,
+                    carteiraId: id,
+                    carteira: opcao ? opcao.nome : "",
+                }));
+                setErros((atual) => ({ ...atual, carteira: undefined }));
+                }}
+                disabled={semCarteiras}
             >
                 <option value="">Selecione</option>
-                {carteiras.map((carteira) => (
-                <option key={carteira} value={carteira}>
-                    {carteira}
+                {opcoesCarteira.map((carteira) => (
+                <option key={carteira.id} value={carteira.id}>
+                    {carteira.nome}
                 </option>
                 ))}
             </select>
+            {semCarteiras && (
+                <span className={styles["gastos-erro-campo"]}>
+                Cadastre uma conta na Carteira antes de registrar gastos.
+                </span>
+            )}
             {erros.carteira && (
                 <span className={styles["gastos-erro-campo"]}>{erros.carteira}</span>
             )}
@@ -279,7 +301,7 @@
                 Cancelar
             </button>
 
-            <button type="submit" className="btn btn-primario" disabled={salvando}>
+            <button type="submit" className="btn btn-primario" disabled={salvando || semCarteiras}>
                 {salvando ? "Salvando..." : editando ? "Salvar alterações" : "Adicionar"}
             </button>
             </div>

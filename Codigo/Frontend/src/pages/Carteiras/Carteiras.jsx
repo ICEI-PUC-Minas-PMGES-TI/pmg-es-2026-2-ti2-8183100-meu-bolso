@@ -100,11 +100,7 @@ function Carteiras() {
   }, [carregado, conflito, cartoes, contas, dinheiroEReservas, movsDinheiro]);
 
   // Resumo recalculado a partir do estado atual.
-  const saldoContas =
-    contas.reduce((acc, c) => acc + (c.saldo || 0), 0) +
-    dinheiroEReservas
-      .filter((i) => i.tipo === "dinheiro")
-      .reduce((acc, d) => acc + (d.saldo || 0), 0);
+  const saldoContas = contas.reduce((acc, c) => acc + (c.saldo || 0), 0); 
 
   const faturasCartoes = cartoes
     .filter((c) => c.subtipo === "credito")
@@ -361,7 +357,6 @@ function Carteiras() {
               <strong className={styles.resumoValor}>
                 {formatarBRL(saldoContas)}
               </strong>
-              <span className="texto-secundario">Contas e dinheiro físico</span>
             </div>
             <ChevronRight size={18} className={styles.resumoSeta} />
           </div>
@@ -375,9 +370,6 @@ function Carteiras() {
               <strong className={styles.resumoValor}>
                 {formatarBRL(faturasCartoes)}
               </strong>
-              <span className="texto-secundario">
-                Cartões de crédito em aberto
-              </span>
             </div>
             <ChevronRight size={18} className={styles.resumoSeta} />
           </div>

@@ -9,18 +9,19 @@
     mudarMes,
     valorParaTexto,
     } from "../../utils/Gastosutils";
-    import { CATEGORIAS, CARTEIRAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
+    import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
     import IconeCategoria from "./IconeCategoria";
     import Modal from "./Modal";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
     // ---------- Formulário de edição de uma recorrência ----------
 
-    function FormRecorrencia({ recorrencia, onCancelar, onSalvar }) {
+    function FormRecorrencia({ recorrencia, carteiras = [], onCancelar, onSalvar }) {
     const [form, setForm] = useState({
         descricao: recorrencia.descricao,
         categoria: recorrencia.categoria,
         carteira: recorrencia.carteira,
+        carteiraId: recorrencia.carteiraId ?? "",
         valor: valorParaTexto(recorrencia.valor),
         diaDoMes: String(recorrencia.diaDoMes),
         comentario: recorrencia.comentario ?? "",
@@ -28,6 +29,12 @@
     const [erros, setErros] = useState({});
     const [erroEnvio, setErroEnvio] = useState("");
     const [salvando, setSalvando] = useState(false);
+
+    const semCarteiras = carteiras.length === 0;
+    const opcoesCarteira =
+        !form.carteiraId && form.carteira
+        ? [{ id: "", nome: form.carteira }, ...carteiras]
+        : carteiras;
 
     function alterarCampo(event) {
         const { name, value } = event.target;
@@ -43,6 +50,7 @@
         const dia = Number(form.diaDoMes);
 
         if (!form.descricao.trim()) novosErros.descricao = "Informe a descrição.";
+        if (!form.carteiraId) novosErros.carteira = "Selecione a carteira.";
         if (!form.valor.trim() || !Number.isFinite(valor) || valor <= 0) {
         novosErros.valor = "Informe um valor maior que zero.";
         }
@@ -61,6 +69,7 @@
             descricao: form.descricao.trim(),
             categoria: form.categoria,
             carteira: form.carteira,
+            carteiraId: form.carteiraId,
             valor,
             diaDoMes: dia,
             comentario: form.comentario.trim(),
@@ -123,20 +132,36 @@
             </label>
             <select
             id="rec-carteira"
-            name="carteira"
+            name="carteiraId"
             className="form-input"
-            value={form.carteira}
-            onChange={alterarCampo}
+            value={form.carteiraId}
+            onChange={(event) => {
+                const id = event.target.value;
+                const opcao = opcoesCarteira.find((c) => c.id === id);
+                setForm((atual) => ({
+                ...atual,
+                carteiraId: id,
+                carteira: opcao ? opcao.nome : "",
+                }));
+                setErros((atual) => ({ ...atual, carteira: undefined }));
+            }}
+            disabled={semCarteiras}
             >
-            {(CARTEIRAS.includes(form.carteira)
-                ? CARTEIRAS
-                : [...CARTEIRAS, form.carteira]
-            ).map((carteira) => (
-                <option key={carteira} value={carteira}>
-                {carteira}
+            <option value="">Selecione</option>
+            {opcoesCarteira.map((carteira) => (
+                <option key={carteira.id} value={carteira.id}>
+                {carteira.nome}
                 </option>
             ))}
             </select>
+            {semCarteiras && (
+            <span className={styles["gastos-erro-campo"]}>
+                Cadastre uma conta na Carteira antes de registrar gastos.
+            </span>
+            )}
+            {erros.carteira && (
+            <span className={styles["gastos-erro-campo"]}>{erros.carteira}</span>
+            )}
         </div>
 
         <div className="form-group">
@@ -201,7 +226,7 @@
             <button type="button" className="btn btn-secundario" onClick={onCancelar}>
             Voltar
             </button>
-            <button type="submit" className="btn btn-primario" disabled={salvando}>
+            <button type="submit" className="btn btn-primario" disabled={salvando || semCarteiras}>
             {salvando ? "Salvando..." : "Salvar alterações"}
             </button>
         </div>
@@ -218,6 +243,7 @@
 
     export default function ModalRecorrencias({
     recorrencias,
+    carteiras = [],
     onAtualizar,
     onExcluir,
     onFechar,
@@ -263,6 +289,7 @@
         <Modal titulo="Editar recorrência" onFechar={onFechar}>
             <FormRecorrencia
             recorrencia={editando}
+            carteiras={carteiras}
             onCancelar={() => setEditandoId(null)}
             onSalvar={async (dados) => {
                 await onAtualizar(editando.id, dados);

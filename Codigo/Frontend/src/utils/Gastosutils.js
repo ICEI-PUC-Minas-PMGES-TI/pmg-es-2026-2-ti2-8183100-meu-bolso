@@ -203,7 +203,7 @@
     return gastos.filter((gasto) => {
         if (busca && !normalizar(gasto.descricao).includes(busca)) return false;
         if (filtros.categoria && gasto.categoria !== filtros.categoria) return false;
-        if (filtros.carteira && gasto.carteira !== filtros.carteira) return false;
+        if (filtros.carteira && gasto.carteiraId !== filtros.carteira) return false;
         if (filtros.de && gasto.data < filtros.de) return false;
         if (filtros.ate && gasto.data > filtros.ate) return false;
         return true;

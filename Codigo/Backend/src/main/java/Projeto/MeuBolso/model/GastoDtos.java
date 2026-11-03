@@ -30,7 +30,8 @@ public final class GastoDtos {
         @NotBlank @Pattern(regexp = PADRAO_DATA, message = "Data deve estar no formato AAAA-MM-DD.") String data,
         @NotNull @DecimalMin(value = "0.01", message = "O valor deve ser maior que zero.") BigDecimal valor,
         @Size(max = 300) String comentario,
-        boolean recorrente
+        boolean recorrente,
+        @Size(max = 100) String carteiraId
     ) {}
 
     /** Dados que a API devolve para cada gasto. */
@@ -42,7 +43,8 @@ public final class GastoDtos {
         String data,
         BigDecimal valor,
         String comentario,
-        String recorrenciaId
+        String recorrenciaId,
+        String carteiraId
     ) {}
 
     /** Corpo do PATCH de comentário. */
@@ -59,7 +61,8 @@ public final class GastoDtos {
         @Min(value = 1, message = "O dia do mês deve estar entre 1 e 31.")
         @Max(value = 31, message = "O dia do mês deve estar entre 1 e 31.") int diaDoMes,
         @Size(max = 300) String comentario,
-        boolean ativa
+        boolean ativa,
+        @Size(max = 100) String carteiraId
     ) {}
 
     /** Dados que a API devolve para cada recorrência. */
@@ -72,7 +75,8 @@ public final class GastoDtos {
         String comentario,
         int diaDoMes,
         boolean ativa,
-        String ultimoMes
+        String ultimoMes,
+        String carteiraId
     ) {}
 
     /** Corpo e resposta do orçamento. */

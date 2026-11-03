@@ -70,3 +70,25 @@ export async function ajustarSaldoCarteira(carteiraId, delta) {
     return false;
   }
 }
+
+/**
+ * Lista as formas de pagamento disponíveis (contas, cartões e dinheiro) no
+ * formato { id, nome, tipo }, para seleção ao registrar um gasto.
+ */
+export async function listarFormasDePagamento() {
+  let dados;
+  try { dados = await obterCarteiras(); } catch { return []; }
+  if (!dados) return [];
+
+  const contas = (dados.contas ?? []).map((c) => ({ id: c.id, nome: c.apelido, tipo: "conta" }));
+  const cartoes = (dados.cartoes ?? []).map((c) => ({
+    id: c.id,
+    nome: `${c.apelido} (${c.subtipo === "credito" ? "Crédito" : "Débito"})`,
+    tipo: "cartao",
+  }));
+  const dinheiro = (dados.dinheiroEReservas ?? [])
+    .filter((d) => d.tipo === "dinheiro")
+    .map((d) => ({ id: d.id, nome: d.apelido, tipo: "dinheiro" }));
+
+  return [...contas, ...cartoes, ...dinheiro];
+}

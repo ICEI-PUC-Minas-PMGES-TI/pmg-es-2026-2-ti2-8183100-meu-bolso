@@ -11,9 +11,11 @@
     import Projeto.MeuBolso.repository.GastoRepository;
     import Projeto.MeuBolso.repository.RecorrenciaRepository;
     import Projeto.MeuBolso.repository.UsuarioRepository;
+    import Projeto.MeuBolso.service.CarteiraService;
     import Projeto.MeuBolso.service.GastoRecorrenciaService;
 
     import jakarta.validation.Valid;
+    import java.math.BigDecimal;
     import java.util.List;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
@@ -48,15 +50,18 @@
         private final RecorrenciaRepository recorrenciaRepository;
         private final UsuarioRepository usuarioRepository;
         private final GastoRecorrenciaService recorrenciaService;
+        private final CarteiraService carteiraService;
 
         public GastoController(GastoRepository gastoRepository,
                             RecorrenciaRepository recorrenciaRepository,
                             UsuarioRepository usuarioRepository,
-                            GastoRecorrenciaService recorrenciaService) {
+                            GastoRecorrenciaService recorrenciaService,
+                            CarteiraService carteiraService) {
             this.gastoRepository = gastoRepository;
             this.recorrenciaRepository = recorrenciaRepository;
             this.usuarioRepository = usuarioRepository;
             this.recorrenciaService = recorrenciaService;
+            this.carteiraService = carteiraService;
         }
 
 
@@ -87,6 +92,7 @@
                 comentarioLimpo(request.comentario()),
                 null
             );
+            gasto.setCarteiraId(request.carteiraId());
 
             if (request.recorrente()) {
                 Recorrencia recorrencia = recorrenciaRepository.save(criarRecorrenciaDe(gasto));
@@ -94,6 +100,7 @@
             }
 
             Gasto salvo = gastoRepository.save(gasto);
+            carteiraService.aplicarGasto(usuarioId, salvo.getCarteiraId(), salvo.getValor());
             return ResponseEntity.status(HttpStatus.CREATED).body(paraResponse(salvo));
         }
 
@@ -107,12 +114,16 @@
             Gasto gasto = gastoRepository.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto não encontrado."));
 
+            String carteiraAntiga = gasto.getCarteiraId();
+            BigDecimal valorAntigo = gasto.getValor();
+
             gasto.setDescricao(request.descricao().trim());
             gasto.setCategoria(request.categoria());
             gasto.setCarteira(request.carteira());
             gasto.setData(request.data());
             gasto.setValor(request.valor());
             gasto.setComentario(comentarioLimpo(request.comentario()));
+            gasto.setCarteiraId(request.carteiraId());
 
             // Transformar um gasto avulso em recorrente.
             if (request.recorrente() && gasto.getRecorrenciaId() == null) {
@@ -120,7 +131,10 @@
                 gasto.setRecorrenciaId(recorrencia.getId());
             }
 
-            return paraResponse(gastoRepository.save(gasto));
+            Gasto salvo = gastoRepository.save(gasto);
+            carteiraService.aplicarGasto(usuarioId, carteiraAntiga, valorAntigo.negate());
+            carteiraService.aplicarGasto(usuarioId, salvo.getCarteiraId(), salvo.getValor());
+            return paraResponse(salvo);
         }
 
         // Atualiza só o comentário do gasto.
@@ -146,6 +160,7 @@
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto não encontrado."));
 
             gastoRepository.delete(gasto);
+            carteiraService.aplicarGasto(usuarioId, gasto.getCarteiraId(), gasto.getValor().negate());
             return ResponseEntity.noContent().build();
         }
 
@@ -178,6 +193,7 @@
             rec.setComentario(comentarioLimpo(request.comentario()));
             rec.setDiaDoMes(request.diaDoMes());
             rec.setAtiva(request.ativa());
+            rec.setCarteiraId(request.carteiraId());
 
             // Ao reativar, não gera retroativamente os meses em que ficou pausada:
             // alinha o "ultimoMes" ao mês anterior (mesma regra do front).
@@ -214,7 +230,7 @@
         private static Recorrencia criarRecorrenciaDe(Gasto gasto) {
             int diaDoMes = Integer.parseInt(gasto.getData().substring(8, 10));
             String ultimoMes = gasto.getData().substring(0, 7);
-            return new Recorrencia(
+            Recorrencia r = new Recorrencia(
                 gasto.getUsuarioId(),
                 gasto.getDescricao(),
                 gasto.getCategoria(),
@@ -225,6 +241,8 @@
                 true,
                 ultimoMes
             );
+            r.setCarteiraId(gasto.getCarteiraId());
+            return r;
         }
 
         private static String comentarioLimpo(String comentario) {
@@ -248,7 +266,8 @@
                 g.getData(),
                 g.getValor(),
                 g.getComentario(),
-                g.getRecorrenciaId()
+                g.getRecorrenciaId(),
+                g.getCarteiraId()
             );
         }
 
@@ -262,7 +281,8 @@
                 r.getComentario(),
                 r.getDiaDoMes(),
                 r.isAtiva(),
-                r.getUltimoMes()
+                r.getUltimoMes(),
+                r.getCarteiraId()
             );
         }
     }

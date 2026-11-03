@@ -31,6 +31,9 @@ public class Recorrencia {
     // Último mês já lançado ("AAAA-MM"). A geração só avança a partir daqui.
     private String ultimoMes;
 
+    // Id da forma de pagamento (conta/cartão/dinheiro) na carteira.
+    private String carteiraId;
+
     public Recorrencia() {}
 
     public Recorrencia(String usuarioId, String descricao, String categoria, String carteira,
@@ -67,4 +70,7 @@ public class Recorrencia {
     public void setDiaDoMes(int diaDoMes) { this.diaDoMes = diaDoMes; }
     public void setAtiva(boolean ativa) { this.ativa = ativa; }
     public void setUltimoMes(String ultimoMes) { this.ultimoMes = ultimoMes; }
+
+    public String getCarteiraId() { return carteiraId; }
+    public void setCarteiraId(String carteiraId) { this.carteiraId = carteiraId; }
 }

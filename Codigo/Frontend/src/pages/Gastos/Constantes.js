@@ -20,14 +20,6 @@
     "Outros",
     ];
 
-    export const CARTEIRAS = [
-    "Carteira",
-    "Nubank",
-    "Itaú",
-    "Inter",
-    "Cartão de crédito",
-    ];
-
     export const ICONES_CATEGORIAS = {
     Alimentação: Utensils,
     Transporte: CarFront,

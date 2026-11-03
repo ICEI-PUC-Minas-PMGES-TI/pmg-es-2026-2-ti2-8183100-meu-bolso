@@ -27,11 +27,14 @@ public class GastoRecorrenciaService {
 
     private final GastoRepository gastoRepository;
     private final RecorrenciaRepository recorrenciaRepository;
+    private final CarteiraService carteiraService;
 
     public GastoRecorrenciaService(GastoRepository gastoRepository,
-                                   RecorrenciaRepository recorrenciaRepository) {
+                                   RecorrenciaRepository recorrenciaRepository,
+                                   CarteiraService carteiraService) {
         this.gastoRepository = gastoRepository;
         this.recorrenciaRepository = recorrenciaRepository;
+        this.carteiraService = carteiraService;
     }
 
     /**
@@ -39,7 +42,7 @@ public class GastoRecorrenciaService {
      * tanto os novos gastos quanto o avanço do "ultimoMes" de cada regra.
      */
     public void processar(String usuarioId) {
-        processar(usuarioId, mesAtualChave());
+        processar(usuarioId, hojeIso());
     }
 
     // Variante com "mês de referência" explícito (facilita testes).
@@ -56,7 +59,7 @@ public class GastoRecorrenciaService {
             boolean avancou = false;
             while (dataDaOcorrencia(proximo, rec.getDiaDoMes()).compareTo(hojeIso) <= 0
                     && novos.size() < LIMITE_OCORRENCIAS) {
-                novos.add(new Gasto(
+                Gasto g = new Gasto(
                     usuarioId,
                     rec.getDescricao(),
                     rec.getCategoria(),
@@ -65,7 +68,9 @@ public class GastoRecorrenciaService {
                     rec.getValor(),
                     rec.getComentario(),
                     rec.getId()
-                ));
+                );
+                g.setCarteiraId(rec.getCarteiraId());
+                novos.add(g);
                 ultimoMes = proximo;
                 proximo = mudarMes(proximo, 1);
                 avancou = true;
@@ -79,6 +84,9 @@ public class GastoRecorrenciaService {
 
         if (!novos.isEmpty()) {
             gastoRepository.saveAll(novos);
+            for (Gasto g : novos) {
+                carteiraService.aplicarGasto(usuarioId, g.getCarteiraId(), g.getValor());
+            }
         }
     }
 

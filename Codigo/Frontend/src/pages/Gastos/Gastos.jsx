@@ -2,6 +2,7 @@
     import { ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
 
     import gastosService from "../../service/gastosService";
+    import { listarFormasDePagamento } from "../../service/carteirasStorage";
     import {
     FILTROS_INICIAIS,
     ORDENACAO_INICIAL,
@@ -40,6 +41,7 @@
     const [erro, setErro] = useState("");
 
     const [mesSelecionado, setMesSelecionado] = useState(mesAtualChave);
+    const [formasPagamento, setFormasPagamento] = useState([]);
     const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
     const [ordenacao, setOrdenacao] = useState(ORDENACAO_INICIAL);
 
@@ -75,6 +77,19 @@
             if (ativo) setErro(e.message || "Não foi possível carregar os gastos.");
         });
 
+        return () => {
+        ativo = false;
+        };
+    }, []);
+
+    // Formas de pagamento (contas/cartões/dinheiro) para os selects de carteira.
+    useEffect(() => {
+        let ativo = true;
+        listarFormasDePagamento()
+        .then((formas) => {
+            if (ativo) setFormasPagamento(formas);
+        })
+        .catch(() => {});
         return () => {
         ativo = false;
         };
@@ -282,6 +297,7 @@
                     onOrdenar={setOrdenacao}
                     mesSelecionado={mesSelecionado}
                     diasDoMes={diasNoMes(mesSelecionado)}
+                    carteiras={formasPagamento}
                 />
                 )}
 
@@ -307,6 +323,7 @@
             <ModalGasto
             gasto={modal.gasto}
             mesSelecionado={mesSelecionado}
+            carteiras={formasPagamento}
             onFechar={fecharModal}
             onSalvar={(dadosForm) => salvarGasto(dadosForm, modal.gasto)}
             />
@@ -331,6 +348,7 @@
         {modal?.tipo === "recorrencias" && (
             <ModalRecorrencias
             recorrencias={dados?.recorrencias ?? []}
+            carteiras={formasPagamento}
             onAtualizar={atualizarRecorrencia}
             onExcluir={excluirRecorrencia}
             onFechar={fecharModal}

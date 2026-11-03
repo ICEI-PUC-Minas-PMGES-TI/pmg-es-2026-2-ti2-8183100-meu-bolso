@@ -35,6 +35,9 @@ public class Gasto {
     // Preenchido quando o gasto nasceu de uma recorrência; null se for avulso.
     private String recorrenciaId;
 
+    // Id da forma de pagamento (conta/cartão/dinheiro) na carteira.
+    private String carteiraId;
+
     public Gasto() {}
 
     public Gasto(String usuarioId, String descricao, String categoria, String carteira,
@@ -68,4 +71,7 @@ public class Gasto {
     public void setValor(BigDecimal valor) { this.valor = valor; }
     public void setComentario(String comentario) { this.comentario = comentario == null ? "" : comentario; }
     public void setRecorrenciaId(String recorrenciaId) { this.recorrenciaId = recorrenciaId; }
+
+    public String getCarteiraId() { return carteiraId; }
+    public void setCarteiraId(String carteiraId) { this.carteiraId = carteiraId; }
 }

@@ -81,6 +81,7 @@
         data: dados.data,
         valor: Number(dados.valor),
         comentario: (dados.comentario ?? "").trim(),
+        carteiraId: dados.carteiraId || null,
     };
     }
 
@@ -314,6 +315,7 @@
         descricao: atual.descricao,
         categoria: atual.categoria,
         carteira: atual.carteira,
+        carteiraId: atual.carteiraId ?? null,
         valor: atual.valor,
         diaDoMes: atual.diaDoMes,
         comentario: atual.comentario ?? "",
