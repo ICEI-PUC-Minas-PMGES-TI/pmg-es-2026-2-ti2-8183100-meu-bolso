@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   CreditCard,
@@ -15,13 +15,7 @@ import PainelContas from "../../components/PainelContas/PainelContas";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
 import ModalCedulas from "../../components/ModalCedulas/ModalCedulas";
 
-import {
-  contas as contasMock,
-  cartoes as cartoesMock,
-  dinheiroEReservas as dinheiroEReservasMock,
-  movimentacoesPorItem,
-  formatarBRL,
-} from "./carteirasMock";
+import { formatarBRL } from "./carteirasMock";
 
 import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
 import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
@@ -49,68 +43,61 @@ function Carteiras() {
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
 
-  // Estado inicial = dados fictícios; substituídos pela carteira do usuário
-  // assim que a API responde.
-  const [cartoes, setCartoes] = useState(cartoesMock);
-  const [contas, setContas] = useState(contasMock);
-  const [dinheiroEReservas, setDinheiroEReservas] = useState(() =>
-    normalizarListaDinheiro(dinheiroEReservasMock)
-  );
+  // Estado inicial vazio; preenchido pela carteira do usuário via API.
+  const [cartoes, setCartoes] = useState([]);
+  const [contas, setContas] = useState([]);
+  const [dinheiroEReservas, setDinheiroEReservas] = useState([]);
 
-  // Movimentações do dinheiro em espécie (começam com as do mock e crescem
-  // a cada adicionar/retirar). Declarado aqui, antes dos efeitos que o usam.
-  const [movsDinheiro, setMovsDinheiro] = useState(
-    () => movimentacoesPorItem["dinheiro-especie"] || []
-  );
+  // Movimentações do dinheiro em espécie (crescem a cada adicionar/retirar).
+  const [movsDinheiro, setMovsDinheiro] = useState([]);
 
   // Controle de carga/salvamento com a API.
   const [carregado, setCarregado] = useState(false);
   const [erroSalvar, setErroSalvar] = useState(false);
+  const [erroCarga, setErroCarga] = useState(false);
+  const versaoRef = useRef(0);
+  const filaRef = useRef(Promise.resolve());
+  const [conflito, setConflito] = useState(false);
 
-  // Carrega a carteira do usuário na montagem. Se vierem listas com itens,
-  // aplica-as (normalizando o dinheiro); se vierem vazias, mantém os mocks.
-  // Em qualquer caso (inclusive erro) marca carregado=true.
+  // Carrega a carteira do usuário na montagem.
   useEffect(() => {
     let ativo = true;
     obterCarteiras()
       .then((dados) => {
-        if (!ativo || !dados) return;
-        if (Array.isArray(dados.cartoes) && dados.cartoes.length > 0) {
-          setCartoes(dados.cartoes);
-        }
-        if (Array.isArray(dados.contas) && dados.contas.length > 0) {
-          setContas(dados.contas);
-        }
-        if (
-          Array.isArray(dados.dinheiroEReservas) &&
-          dados.dinheiroEReservas.length > 0
-        ) {
-          setDinheiroEReservas(normalizarListaDinheiro(dados.dinheiroEReservas));
-        }
-        if (Array.isArray(dados.movsDinheiro) && dados.movsDinheiro.length > 0) {
-          setMovsDinheiro(dados.movsDinheiro);
-        }
+        if (!ativo) return;
+        setCartoes(dados?.cartoes ?? []);
+        setContas(dados?.contas ?? []);
+        setDinheiroEReservas(normalizarListaDinheiro(dados?.dinheiroEReservas));
+        setMovsDinheiro(dados?.movsDinheiro ?? []);
+        versaoRef.current = dados?.versao ?? 0;
+        setCarregado(true);
       })
-      .catch(() => {})
-      .finally(() => {
-        if (ativo) setCarregado(true);
-      });
-    return () => {
-      ativo = false;
-    };
+      .catch(() => { if (ativo) setErroCarga(true); });
+    return () => { ativo = false; };
   }, []);
 
   // Salva as listas na API quando mudarem, com debounce de 800ms.
   // Só roda depois que a carga inicial terminou (carregado=true).
   useEffect(() => {
-    if (!carregado) return;
+    if (!carregado || conflito) return;
     const id = setTimeout(() => {
-      salvarCarteiras({ cartoes, contas, dinheiroEReservas, movsDinheiro })
-        .then(() => setErroSalvar(false))
-        .catch(() => setErroSalvar(true));
+      filaRef.current = filaRef.current.then(() =>
+        salvarCarteiras({
+          cartoes, contas, dinheiroEReservas, movsDinheiro,
+          versao: versaoRef.current,
+        })
+          .then((resp) => {
+            versaoRef.current = resp?.versao ?? versaoRef.current;
+            setErroSalvar(false);
+          })
+          .catch((e) => {
+            if (e?.status === 409) setConflito(true);
+            else setErroSalvar(true);
+          })
+      );
     }, 800);
     return () => clearTimeout(id);
-  }, [carregado, cartoes, contas, dinheiroEReservas, movsDinheiro]);
+  }, [carregado, conflito, cartoes, contas, dinheiroEReservas, movsDinheiro]);
 
   // Resumo recalculado a partir do estado atual.
   const saldoContas =
@@ -262,11 +249,18 @@ function Carteiras() {
 
   const itemPainel = dinheiroAtual ?? itemSelecionado;
 
-  const movimentacoes = !itemSelecionado
-    ? []
-    : itemSelecionado.tipo === "dinheiro"
-    ? movsDinheiro
-    : movimentacoesPorItem[itemSelecionado.id] || [];
+  const movimentacoes =
+    itemSelecionado?.tipo === "dinheiro" ? movsDinheiro : [];
+
+  if (erroCarga) {
+    return (
+      <div className={styles.carteiras}>
+        <p className="texto-secundario" role="alert">
+          Não foi possível carregar sua carteira. Recarregue a página.
+        </p>
+      </div>
+    );
+  }
 
   if (!carregado) {
     return (
@@ -278,6 +272,11 @@ function Carteiras() {
 
   return (
     <div className={styles.carteiras}>
+      {conflito && (
+        <p className="texto-secundario" role="alert">
+          Sua carteira foi alterada em outra tela. Recarregue a página para continuar.
+        </p>
+      )}
       {erroSalvar && (
         <p className="texto-secundario" role="alert">
           Não foi possível salvar. Tentando novamente na próxima alteração.
@@ -600,10 +599,8 @@ function chaveBanco(item) {
   return chaveDoBanco(item.instituicao || item.apelido);
 }
 
-/** Última movimentação (a lista do mock já vem com a mais recente primeiro). */
-function ultimaMovimentacao(id) {
-  const lista = movimentacoesPorItem[id];
-  return Array.isArray(lista) && lista.length ? lista[0] : null;
+function ultimaMovimentacao() {
+  return null;
 }
 
 /**

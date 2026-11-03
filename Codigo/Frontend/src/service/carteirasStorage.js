@@ -63,6 +63,7 @@ export async function ajustarSaldoCarteira(carteiraId, delta) {
       contas: aplicar(dados.contas),
       dinheiroEReservas: aplicar(dados.dinheiroEReservas),
       movsDinheiro: dados.movsDinheiro ?? [],
+      versao: dados.versao ?? 0,
     });
     return true;
   } catch {
