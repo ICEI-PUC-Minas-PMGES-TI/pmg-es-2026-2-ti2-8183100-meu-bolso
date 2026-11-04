@@ -126,11 +126,21 @@
   cursor: not-allowed;
 }
 
-.qtd {
-  min-width: 24px;
+.inputQtd {
+  width: 56px;
+  height: 32px;
   text-align: center;
   font-size: var(--texto-sm);
   font-weight: 700;
+  color: var(--preto);
+  background-color: var(--branco, #fff);
+  border: 1px solid var(--cinza-100);
+  border-radius: 8px;
+}
+
+.inputQtd:focus {
+  outline: 2px solid var(--cinza-100);
+  outline-offset: 1px;
 }
 
 .rodape {

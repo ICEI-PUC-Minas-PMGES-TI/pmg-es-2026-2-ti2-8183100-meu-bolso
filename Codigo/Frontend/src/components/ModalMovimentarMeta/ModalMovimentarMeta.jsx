@@ -6,7 +6,7 @@ import styles from "./ModalMovimentarMeta.module.css";
 
 /**
  * Modal para movimentar o valor guardado de uma meta, sempre vinculado a
- * uma carteira (conta ou dinheiro físico).
+ * uma carteira (conta).
  *
  *  - Depósito: o dinheiro SAI da carteira e ENTRA na meta
  *    (carteira.saldo -= valor; meta.valorAtual += valor).
@@ -52,7 +52,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   const [carteiraId, setCarteiraId] = useState("");
   const [erro, setErro] = useState("");
 
-  // Carteiras com saldo (contas e dinheiro físico) disponíveis como
+  // Carteiras com saldo (contas) disponíveis como
   // origem/destino da movimentação. Carregadas da API ao montar o modal.
   const [carteiras, setCarteiras] = useState([]);
   const [carregandoCarteiras, setCarregandoCarteiras] = useState(true);
@@ -90,7 +90,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
     e.preventDefault();
 
     if (!carteiraId) {
-      setErro("Selecione a carteira da movimentação.");
+      setErro("Selecione a conta da movimentação.");
       return;
     }
 
@@ -104,7 +104,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
     if (tipo === "deposito") {
       // Sai da carteira, entra na meta: carteira precisa ter saldo.
       if (carteiraSelecionada && valorNum > carteiraSelecionada.saldo) {
-        setErro("Saldo insuficiente na carteira para este depósito.");
+        setErro("Saldo insuficiente na conta para este depósito.");
         return;
       }
     } else {
@@ -192,14 +192,14 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
           {/* Carteira vinculada */}
           <div className={styles.campo}>
             <label htmlFor="carteira">
-              {tipo === "deposito" ? "De qual carteira sai" : "Para qual carteira vai"}
+              {tipo === "deposito" ? "De qual conta sai" : "Para qual conta vai"}
             </label>
             {carregandoCarteiras ? (
               <p className={styles.aviso}>Carregando carteiras...</p>
             ) : carteiras.length === 0 ? (
               <p className={styles.aviso}>
-                Nenhuma carteira com saldo encontrada. Cadastre uma conta ou
-                dinheiro na página Carteiras.
+                Nenhuma conta com saldo encontrada. Cadastre uma conta na
+                página Carteiras.
               </p>
             ) : (
               <select
@@ -207,7 +207,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
                 value={carteiraId}
                 onChange={(e) => setCarteiraId(e.target.value)}
               >
-                <option value="">Selecione uma carteira</option>
+                <option value="">Selecione uma conta</option>
                 {carteiras.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.nome} · {formatarMoeda(c.saldo)}

@@ -40,6 +40,16 @@ function ModalCedulas({ aberto, modo = "adicionar", disponivel = {}, onFechar, o
     });
   }
 
+  function definir(chave, texto) {
+    const digitos = texto.replace(/\D/g, "").slice(0, 4);
+    let novo = digitos === "" ? 0 : parseInt(digitos, 10);
+    if (retirando) {
+      const teto = Number(disponivel[chave]) || 0;
+      if (novo > teto) novo = teto;
+    }
+    setContagem((c) => ({ ...c, [chave]: novo }));
+  }
+
   function fecharResetando() {
     setContagem(contagemZerada());
     onFechar?.();
@@ -92,7 +102,17 @@ function ModalCedulas({ aberto, modo = "adicionar", disponivel = {}, onFechar, o
                   >
                     <Minus size={16} />
                   </button>
-                  <span className={styles.qtd}>{qtd}</span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    className={styles.inputQtd}
+                    value={qtd === 0 ? "" : qtd}
+                    placeholder="0"
+                    onChange={(e) => definir(d.chave, e.target.value)}
+                    onFocus={(e) => e.target.select()}
+                    aria-label={`Quantidade de ${rotuloDenominacao(d.chave)}`}
+                  />
                   <button
                     type="button"
                     className={styles.botaoContador}
