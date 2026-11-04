@@ -24,7 +24,7 @@ import {
   saldoDaContagem,
   totalCentavos,
 } from "../../data/denominacoes";
-import { obterCarteiras, salvarCarteiras } from "../../service/Api";
+import { obterCarteiras, salvarCarteiras, gastosApi } from "../../service/Api";
 
 import styles from "./Carteiras.module.css";
 
@@ -51,6 +51,9 @@ function Carteiras() {
   // Movimentações do dinheiro em espécie (crescem a cada adicionar/retirar).
   const [movsDinheiro, setMovsDinheiro] = useState([]);
 
+  // Gastos do usuário, usados para derivar os extratos de contas/cartões.
+  const [gastos, setGastos] = useState([]);
+
   // Controle de carga/salvamento com a API.
   const [carregado, setCarregado] = useState(false);
   const [erroSalvar, setErroSalvar] = useState(false);
@@ -59,20 +62,26 @@ function Carteiras() {
   const filaRef = useRef(Promise.resolve());
   const [conflito, setConflito] = useState(false);
 
-  // Carrega a carteira do usuário na montagem.
+  // Carrega gastos primeiro (para os extratos) e depois a carteira do usuário.
   useEffect(() => {
     let ativo = true;
-    obterCarteiras()
-      .then((dados) => {
+    (async () => {
+      let lista = [];
+      try { lista = await gastosApi.listar(); } catch (e) { console.error("gastos:", e); }
+      try {
+        const dados = await obterCarteiras();
         if (!ativo) return;
+        setGastos(lista);
         setCartoes(dados?.cartoes ?? []);
         setContas(dados?.contas ?? []);
         setDinheiroEReservas(normalizarListaDinheiro(dados?.dinheiroEReservas));
         setMovsDinheiro(dados?.movsDinheiro ?? []);
         versaoRef.current = dados?.versao ?? 0;
         setCarregado(true);
-      })
-      .catch(() => { if (ativo) setErroCarga(true); });
+      } catch {
+        if (ativo) setErroCarga(true);
+      }
+    })();
     return () => { ativo = false; };
   }, []);
 
@@ -246,7 +255,9 @@ function Carteiras() {
   const itemPainel = dinheiroAtual ?? itemSelecionado;
 
   const movimentacoes =
-    itemSelecionado?.tipo === "dinheiro" ? movsDinheiro : [];
+    itemSelecionado?.tipo === "dinheiro"
+      ? movsDinheiro
+      : gastosDoItem(itemSelecionado, gastos, cartoes).slice(0, 50);
 
   if (erroCarga) {
     return (
@@ -403,6 +414,7 @@ function Carteiras() {
               item={item}
               selecionado={itemSelecionado?.id === item.id}
               onSelecionar={() => setItemSelecionado(item)}
+              ultimaMov={gastosDoItem(item, gastos, cartoes)[0] ?? null}
             />
           ))}
           <CardAdicionarConta
@@ -591,8 +603,30 @@ function chaveBanco(item) {
   return chaveDoBanco(item.instituicao || item.apelido);
 }
 
-function ultimaMovimentacao() {
-  return null;
+// Converte um gasto da API em uma linha de movimentação (sempre saída).
+function gastoParaMovimentacao(g) {
+  return {
+    id: g.id,
+    descricao: g.descricao,
+    categoria: g.categoria,
+    data: new Date(`${g.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+    valor: -Number(g.valor),
+    entrada: false,
+  };
+}
+
+// Gastos que afetam o item: ele próprio e, para conta, seus cartões de débito.
+function gastosDoItem(item, gastos, cartoes) {
+  if (!item) return [];
+  let ids = [item.id];
+  if (item.tipo === "conta") {
+    ids = ids.concat(
+      cartoes.filter((c) => c.subtipo === "debito" && c.contaId === item.id).map((c) => c.id)
+    );
+  } else if (item.tipo !== "cartao") {
+    return [];
+  }
+  return gastos.filter((g) => ids.includes(g.carteiraId)).map(gastoParaMovimentacao);
 }
 
 /**
@@ -600,7 +634,7 @@ function ultimaMovimentacao() {
  * logo/ícone circular, nome, subtítulo, valor dentro, seta e rodapé
  * com a última movimentação. Apenas apresentação; não altera dados.
  */
-function CardConta({ item, selecionado, onSelecionar }) {
+function CardConta({ item, selecionado, onSelecionar, ultimaMov = null }) {
   const ehReserva = item.tipo === "reserva";
   const chave = ehReserva ? null : chaveBanco(item);
   const banco = ehReserva ? null : bancoDe(chave);
@@ -630,7 +664,7 @@ function CardConta({ item, selecionado, onSelecionar }) {
     ? formatarBRL(item.valorReservado)
     : formatarBRL(item.saldo);
 
-  const mov = ultimaMovimentacao(item.id);
+  const mov = ultimaMov;
 
   return (
     <div
