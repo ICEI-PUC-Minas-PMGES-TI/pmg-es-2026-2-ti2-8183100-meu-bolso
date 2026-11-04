@@ -90,14 +90,41 @@ O token é obtido no login e identifica o usuário pelo e-mail.
 | `PUT` | `/api/metas/{id}` | Edita os dados da meta (não altera o valor acumulado). |
 | `DELETE` | `/api/metas/{id}` | Exclui a meta. |
 
+### Carteira — `/api/carteiras` (requer token)
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/carteiras` | Retorna a carteira do usuário (vazia se ainda não existir). |
+| `PUT` | `/api/carteiras` | Substitui as listas. Exige a `versao` atual (409 se desatualizada) e valida os itens (400). |
+
+### Gastos — `/api/gastos` (requer token)
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/gastos` | Lista os gastos; antes gera as recorrências vencidas. |
+| `POST` | `/api/gastos` | Cria um gasto (opcionalmente recorrente) e ajusta o saldo da carteira. |
+| `PUT` | `/api/gastos/{id}` | Edita o gasto e reajusta o saldo. |
+| `PATCH` | `/api/gastos/{id}/comentario` | Atualiza só o comentário. |
+| `DELETE` | `/api/gastos/{id}` | Exclui o gasto e estorna o saldo. |
+| `GET` | `/api/gastos/recorrentes` | Lista as regras de recorrência. |
+| `PUT` | `/api/gastos/recorrentes/{id}` | Edita uma regra. |
+| `DELETE` | `/api/gastos/recorrentes/{id}` | Exclui uma regra. |
+
+### Orçamento — `/api/orcamento` (requer token)
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/api/orcamento` | Retorna o teto mensal. |
+| `PUT` | `/api/orcamento` | Define o teto mensal. |
+
 ## Estrutura do código
 
 ```
 src/main/java/Projeto/MeuBolso/
   Config/        Configuração de segurança (SecurityConfig)
-  controller/    Endpoints REST (Auth, Usuario, Meta)
-  model/         Entidades e DTOs (Usuario, Meta, *Dtos)
+  controller/    Endpoints REST (Auth, Usuario, Meta, Gasto, Orcamento, Carteira)
+  model/         Entidades e DTOs (Usuario, Meta, Gasto, Recorrencia, Orcamento, CarteiraUsuario, *Dtos)
   repository/    Repositórios Spring Data MongoDB
   security/      Filtro de autenticação JWT
-  service/       Geração de token e UserDetailsService
+  service/       Token, UserDetailsService, recorrência de gastos e ajuste de saldos da carteira
 ```

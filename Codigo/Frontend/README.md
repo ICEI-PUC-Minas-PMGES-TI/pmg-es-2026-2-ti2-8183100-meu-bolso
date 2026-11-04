@@ -24,6 +24,7 @@ Copie `.env.example` para `.env`. Variáveis do Vite precisam do prefixo `VITE_`
 |---|---|
 | `VITE_EMAIL_TESTE` | E-mail usado para preencher o login em desenvolvimento. |
 | `VITE_SENHA_TESTE` | Senha usada para preencher o login em desenvolvimento. |
+| `VITE_GASTOS_API` | `true` faz a página de Gastos usar a API; sem ela, usa o `localStorage`. |
 
 ## Como executar
 
@@ -54,5 +55,4 @@ src/
   style/         Estilos globais
 ```
 
-> Observação: parte dos dados da carteira ainda é mantida no `localStorage` do
-> navegador (sem back-end nesta etapa). As metas já são persistidas via API.
+> Observação: carteira, gastos e metas são persistidos via API; o `localStorage` guarda apenas a sessão (token e usuário).

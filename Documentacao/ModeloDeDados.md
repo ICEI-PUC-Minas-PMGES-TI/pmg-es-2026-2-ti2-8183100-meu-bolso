@@ -6,7 +6,7 @@
 
 ## 1. Minimundo (resumo)
 
-O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz login com e-mail e senha e tem um **telefone**. O usuário registra seus **gastos** (classificados por categoria e carteira) e pode definir um **orçamento** mensal (teto de gastos). Gastos que se repetem todo mês são modelados por uma **recorrência**, que gera os lançamentos de forma idempotente. O usuário define **metas** (a reserva é apenas uma meta com nome próprio) e mantém uma **carteira** com seus cartões, contas e dinheiro em espécie. A recuperação de senha usa um **token** temporário cujo hash é guardado com expiração automática (TTL). O **resumo financeiro não é armazenado** — é calculado a partir dos gastos, do orçamento e das metas.
+O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz login com e-mail e senha e tem um **telefone**. O usuário registra seus **gastos** (classificados por categoria e **vinculados a uma conta ou cartão da carteira**; cada gasto atualiza o saldo da conta ou a fatura do cartão de crédito) e pode definir um **orçamento** mensal (teto de gastos). Gastos que se repetem todo mês são modelados por uma **recorrência**, que gera os lançamentos de forma idempotente. O usuário define **metas** (a reserva é apenas uma meta com nome próprio) e mantém uma **carteira** com seus cartões, contas e dinheiro em espécie. A recuperação de senha usa um **token** temporário cujo hash é guardado com expiração automática (TTL). O **resumo financeiro não é armazenado** — é calculado a partir dos gastos, do orçamento e das metas.
 
 ## 2. Visão geral das coleções (implementadas)
 
@@ -20,7 +20,7 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `recorrencias` | `Recorrencia` | Regras de gasto recorrente (repetir todo mês). |
 | `tokens_recuperacao` | `TokenRecuperacao` | Token (hash) de recuperação de senha, com expiração via TTL. |
 
-> **Não é coleção:** o **Resumo Financeiro** (calculado a partir de gastos, orçamento e metas).
+> **Não é coleção:** o **Resumo Financeiro** (calculado a partir de gastos, orçamento e metas) e o **extrato** de conta e cartão (derivado dos gastos por `carteiraId`).
 
 ---
 
@@ -56,8 +56,13 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `contas` | Array de Objetos (embutido) | Contas bancárias (apelido, banco, saldo, posição de destaque). |
 | `dinheiroEReservas` | Array de Objetos (embutido) | Dinheiro em espécie e reservas; o dinheiro guarda a contagem por denominação. |
 | `movsDinheiro` | Array de Objetos (embutido) | Movimentações do dinheiro em espécie (entradas/saídas). |
+| `versao` | Long | Controle de concorrência otimista; começa em 0 e sobe a cada gravação. `PUT` com versão diferente da do banco retorna 409. |
 
 > As quatro listas são salvas como subdocumentos flexíveis (`List<Map<String,Object>>`), espelhando o estado da tela de Carteira no front. **Chaves com ponto:** a contagem de cédulas usa chaves como `"0.5"`; o `MappingMongoConverter` está configurado com `setMapKeyDotReplacement("_DOT_")` para permitir pontos em chaves de mapa.
+
+> **Validação no `PUT`:** `id` obrigatório e único entre todas as listas, `tipo` coerente com a lista (`conta`, `cartao`, `dinheiro` ou `reserva`), `saldo` numérico e no máximo 200 itens por lista (400 se violar).
+
+> **Saldos alterados pelos gastos:** conta (`saldo` diminui), cartão de crédito (`faturaAtual` aumenta) e cartão de débito (`saldo` da conta indicada em `contaId` diminui). Dinheiro em espécie e reservas NÃO são alterados: o saldo do dinheiro deriva da `contagem` e só muda pelo modal de cédulas.
 
 ### 3.4 `gastos` (`Gasto`)
 | Atributo | Tipo | Descrição |
@@ -66,7 +71,8 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono do gasto. |
 | `descricao` | String | Descrição do gasto. |
 | `categoria` | String | Categoria do gasto. |
-| `carteira` | String | Carteira/origem do gasto. |
+| `carteira` | String | Nome da carteira no lançamento (texto de exibição). |
+| `carteiraId` | String (ref lógica → item embutido em `carteiras`) \| null | Id da conta, cartão ou dinheiro usado. Vínculo que ajusta saldo e monta o extrato. Gastos antigos não têm. |
 | `data` | String | Data no formato `"AAAA-MM-DD"` (mesmo contrato do front). |
 | `valor` | Decimal128 (BigDecimal) | Valor do gasto. |
 | `comentario` | String | Comentário livre; padrão `""`. |
@@ -86,7 +92,8 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono da recorrência. |
 | `descricao` | String | Modelo do lançamento. |
 | `categoria` | String | Categoria do gasto gerado. |
-| `carteira` | String | Carteira/origem do gasto gerado. |
+| `carteira` | String | Nome da carteira no lançamento (texto de exibição). |
+| `carteiraId` | String (ref lógica → item embutido em `carteiras`) \| null | Id da conta, cartão ou dinheiro usado. Vínculo que ajusta saldo e monta o extrato. Gastos antigos não têm. O gasto gerado herda o `carteiraId`. |
 | `valor` | Decimal128 (BigDecimal) | Valor do gasto recorrente. |
 | `comentario` | String | Comentário; padrão `""`. |
 | `diaDoMes` | Int | Dia do mês em que o gasto cai. |
@@ -115,6 +122,7 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `recorrencias` → `gastos` | 1 : 0..N | **Referência** (`recorrenciaId`) | Cada gasto gerado aponta para a regra que o originou. |
 | `usuarios` → `tokens_recuperacao` | 1 : 0..N | **Referência** (`usuarioId`) + **TTL** | Tokens temporários, apagados automaticamente ao expirar. |
 | `carteiras` → cartões/contas/dinheiro/movs | 1 : 0..N | **Embutido** | Lidos e salvos sempre juntos, como estado único da tela de Carteira. |
+| `gastos`/`recorrencias` → item de `carteiras` | N : 0..1 | **Referência lógica** (`carteiraId`) | O item é embutido, então não há chave estrangeira. O back ignora o ajuste se o item não existir mais. |
 
 ### Princípio adotado (embutir vs. referenciar)
 - **Embutir** → o conteúdo da `carteira` (cartões, contas, dinheiro/reservas, movimentações de dinheiro), porque é lido e gravado como um bloco único por usuário.
@@ -127,6 +135,9 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 - **Segurança da recuperação:** guarda-se apenas o `tokenHash`; o TTL em `expiraEm` apaga tokens expirados automaticamente.
 - **Chaves com ponto:** denominações como `"0.5"` são permitidas via `setMapKeyDotReplacement("_DOT_")`.
 - **Resumo financeiro:** calculado em tempo de consulta; **não é persistido**.
+- **Saldo derivado dos gastos:** criar, editar e excluir um gasto reaplica ou estorna o efeito na carteira (regras na seção 3.3).
+- **Concorrência na carteira:** `versao` impede que uma tela desatualizada sobrescreva dados mais novos.
+- **Sem transação entre `gastos` e `carteiras`:** consistência eventual; uma falha entre as duas gravações pode deixar o saldo defasado.
 
 ---
 
@@ -141,6 +152,7 @@ erDiagram
     USUARIOS ||--o{ RECORRENCIAS : "cria (0..N)"
     USUARIOS ||--o{ TOKENS_RECUPERACAO : "gera (0..N)"
     RECORRENCIAS ||--o{ GASTOS : "gera (0..N)"
+    GASTOS }o--o| CARTEIRAS : "paga com (item embutido)"
 
     USUARIOS {
         string _id
@@ -162,6 +174,7 @@ erDiagram
     CARTEIRAS {
         string _id
         string usuarioId "ref unico"
+        long versao
         array cartoes "embutido"
         array contas "embutido"
         array dinheiroEReservas "embutido"
@@ -173,6 +186,7 @@ erDiagram
         string descricao
         string categoria
         string carteira
+        string carteiraId "ref logica opcional"
         string data
         decimal valor
         string comentario
@@ -189,6 +203,7 @@ erDiagram
         string descricao
         string categoria
         string carteira
+        string carteiraId "ref logica opcional"
         decimal valor
         string comentario
         int diaDoMes
@@ -222,7 +237,7 @@ erDiagram
 ```json
 // gastos
 { "_id": "g1", "usuarioId": "u1", "descricao": "Mercado",
-  "categoria": "Alimentação", "carteira": "Nubank", "data": "2026-10-16",
+  "categoria": "Alimentação", "carteira": "Nubank", "carteiraId": "conta-nubank", "data": "2026-10-16",
   "valor": { "$numberDecimal": "142.90" }, "comentario": "", "recorrenciaId": null }
 ```
 
@@ -234,15 +249,15 @@ erDiagram
 ```json
 // recorrencias
 { "_id": "r1", "usuarioId": "u1", "descricao": "Assinatura de streaming",
-  "categoria": "Assinaturas", "carteira": "Nubank",
+  "categoria": "Assinaturas", "carteira": "Nubank", "carteiraId": "conta-nubank",
   "valor": { "$numberDecimal": "27.90" }, "comentario": "",
   "diaDoMes": 14, "ativa": true, "ultimoMes": "2026-10" }
 ```
 
 ```json
 // carteiras (conteúdo embutido; chaves de denominação com ponto)
-{ "_id": "w1", "usuarioId": "u1",
-  "cartoes": [ { "id": "cartao-nubank", "tipo": "cartao", "apelido": "Nubank" } ],
+{ "_id": "w1", "usuarioId": "u1", "versao": 4,
+  "cartoes": [ { "id": "cartao-nubank", "tipo": "cartao", "subtipo": "credito", "apelido": "Nubank", "faturaAtual": 250.0 } ],
   "contas": [ { "id": "conta-nubank", "tipo": "conta", "apelido": "Nubank",
                 "saldo": 1240.0, "posicao": "principal" } ],
   "dinheiroEReservas": [ { "id": "dinheiro-especie", "tipo": "dinheiro",
