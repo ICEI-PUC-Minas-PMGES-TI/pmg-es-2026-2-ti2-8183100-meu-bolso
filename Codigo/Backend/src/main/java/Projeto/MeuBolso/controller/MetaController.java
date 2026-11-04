@@ -11,10 +11,9 @@ import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.MetaRepository;
 import Projeto.MeuBolso.repository.MovimentacaoMetaRepository;
 import Projeto.MeuBolso.repository.UsuarioRepository;
-import Projeto.MeuBolso.service.CarteiraService;
+import Projeto.MeuBolso.service.MetaService;
 
 import jakarta.validation.Valid;
-import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,16 +35,16 @@ public class MetaController {
     private final MetaRepository metaRepository;
     private final UsuarioRepository usuarioRepository;
     private final MovimentacaoMetaRepository movimentacaoRepository;
-    private final CarteiraService carteiraService;
+    private final MetaService metaService;
 
     public MetaController(MetaRepository metaRepository,
                           UsuarioRepository usuarioRepository,
                           MovimentacaoMetaRepository movimentacaoRepository,
-                          CarteiraService carteiraService) {
+                          MetaService metaService) {
         this.metaRepository = metaRepository;
         this.usuarioRepository = usuarioRepository;
         this.movimentacaoRepository = movimentacaoRepository;
-        this.carteiraService = carteiraService;
+        this.metaService = metaService;
     }
 
     // Lista todas as metas do usuário autenticado.
@@ -135,48 +134,13 @@ public class MetaController {
                                                                    Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
-        Meta meta = metaRepository.findByIdAndUsuarioId(id, usuarioId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
-
-        BigDecimal valor = request.valor();
-        boolean deposito = "deposito".equals(request.tipo());
-
-        // Valida saldo conforme o tipo.
-        if (deposito) {
-            BigDecimal saldo = carteiraService.saldoDe(usuarioId, request.carteiraId());
-            if (saldo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Carteira inválida para a movimentação.");
-            }
-            if (valor.compareTo(saldo) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na carteira para este depósito.");
-            }
-        } else {
-            if (valor.compareTo(meta.getValorAtual()) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A retirada não pode ser maior que o valor guardado na meta.");
-            }
-        }
-
-        // Ajusta o saldo da carteira: depósito tira da carteira; retirada devolve.
-        BigDecimal deltaCarteira = deposito ? valor.negate() : valor;
-        boolean ajustou = carteiraService.ajustarSaldo(usuarioId, request.carteiraId(), deltaCarteira);
-        if (!ajustou) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Não foi possível ajustar o saldo da carteira.");
-        }
-
-        // Atualiza o valor guardado da meta.
-        BigDecimal novoValor = deposito
-            ? meta.getValorAtual().add(valor)
-            : meta.getValorAtual().subtract(valor);
-        meta.setValorAtual(novoValor);
-        Meta metaSalva = metaRepository.save(meta);
-
-        // Registra a movimentação no histórico.
-        String titulo = request.titulo() == null ? "" : request.titulo().trim();
-        MovimentacaoMeta mov = movimentacaoRepository.save(
-            new MovimentacaoMeta(usuarioId, id, request.carteiraId(), request.tipo(), valor, titulo));
+        MetaService.MovimentacaoAplicada aplicada = metaService.movimentar(
+            usuarioId, id, request.tipo(), request.valor(), request.carteiraId(), request.titulo());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-            new MovimentacaoAplicadaResponse(paraResponse(metaSalva), paraResponse(mov)));
+            new MovimentacaoAplicadaResponse(
+                paraResponse(aplicada.meta()),
+                paraResponse(aplicada.movimentacao())));
     }
 
     // Resolve o usuário logado a partir do token (Authentication.getName() = e-mail).

@@ -13,6 +13,7 @@
     import Projeto.MeuBolso.repository.UsuarioRepository;
     import Projeto.MeuBolso.service.CarteiraService;
     import Projeto.MeuBolso.service.GastoRecorrenciaService;
+    import Projeto.MeuBolso.service.GastoService;
 
     import jakarta.validation.Valid;
     import java.math.BigDecimal;
@@ -51,17 +52,20 @@
         private final UsuarioRepository usuarioRepository;
         private final GastoRecorrenciaService recorrenciaService;
         private final CarteiraService carteiraService;
+        private final GastoService gastoService;
 
         public GastoController(GastoRepository gastoRepository,
                             RecorrenciaRepository recorrenciaRepository,
                             UsuarioRepository usuarioRepository,
                             GastoRecorrenciaService recorrenciaService,
-                            CarteiraService carteiraService) {
+                            CarteiraService carteiraService,
+                            GastoService gastoService) {
             this.gastoRepository = gastoRepository;
             this.recorrenciaRepository = recorrenciaRepository;
             this.usuarioRepository = usuarioRepository;
             this.recorrenciaService = recorrenciaService;
             this.carteiraService = carteiraService;
+            this.gastoService = gastoService;
         }
 
 
@@ -82,25 +86,17 @@
                                                 Authentication authentication) {
             String usuarioId = usuarioAutenticado(authentication).getId();
 
-            Gasto gasto = new Gasto(
+            Gasto salvo = gastoService.criar(
                 usuarioId,
-                request.descricao().trim(),
+                request.descricao(),
                 request.categoria(),
                 request.carteira(),
                 request.data(),
                 request.valor(),
-                comentarioLimpo(request.comentario()),
-                null
+                request.comentario(),
+                request.recorrente(),
+                request.carteiraId()
             );
-            gasto.setCarteiraId(request.carteiraId());
-
-            if (request.recorrente()) {
-                Recorrencia recorrencia = recorrenciaRepository.save(criarRecorrenciaDe(gasto));
-                gasto.setRecorrenciaId(recorrencia.getId());
-            }
-
-            Gasto salvo = gastoRepository.save(gasto);
-            carteiraService.aplicarGasto(usuarioId, salvo.getCarteiraId(), salvo.getValor());
             return ResponseEntity.status(HttpStatus.CREATED).body(paraResponse(salvo));
         }
 
