@@ -185,6 +185,23 @@ export async function excluirMeta(id) {
   });
 }
 
+// Registra uma movimentação (aporte/retirada) numa meta.
+// `dados` = { tipo: "deposito"|"retirada", valor, carteiraId, titulo }.
+// O back-end ajusta a carteira, atualiza a meta e grava o histórico numa só
+// operação, devolvendo { meta, movimentacao }.
+export async function movimentarMeta(id, dados) {
+  return requisicao(`/api/metas/${id}/movimentacoes`, {
+    metodo: "POST",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Lista o histórico de movimentações de uma meta (mais recente primeiro).
+export async function listarMovimentacoesMeta(id) {
+  return requisicao(`/api/metas/${id}/movimentacoes`, { autenticado: true });
+}
+
 /* ========================================
    PERFIL
    ======================================== */
