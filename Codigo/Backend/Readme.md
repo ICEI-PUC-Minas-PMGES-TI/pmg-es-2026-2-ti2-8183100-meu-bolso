@@ -117,6 +117,37 @@ O token é obtido no login e identifica o usuário pelo e-mail.
 | `GET` | `/api/orcamento` | Retorna o teto mensal. |
 | `PUT` | `/api/orcamento` | Define o teto mensal. |
 
+## Testes
+
+Testes unitários (JUnit 5 + Mockito + AssertJ) das regras de saldo e de metas. Não precisam de MongoDB nem do back-end no ar.
+
+| Classe | O que cobre |
+|---|---|
+| `CarteiraServiceTest` | Gasto em conta, crédito e débito, estorno, dinheiro físico intocado, entradas inválidas, `saldoDe` e `ajustarSaldo` |
+| `MetaServiceTest` | Depósito e retirada de meta, saldo insuficiente, carteira inválida, falha ao ajustar a carteira, meta de outro usuário (404) |
+
+### Como executar
+
+Pré-requisito: JDK 21. No PowerShell, a partir da raiz do repositório:
+
+```powershell
+cd Codigo\Backend
+.\mvnw.cmd test "-Dtest=CarteiraServiceTest,MetaServiceTest"
+```
+
+As aspas são obrigatórias no PowerShell por causa da vírgula. No Linux/macOS: `./mvnw test -Dtest=CarteiraServiceTest,MetaServiceTest`.
+
+Resultado esperado:
+
+```
+Tests run: 22, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+Em caso de falha, o Maven mostra o nome do teste e o valor esperado contra o obtido.
+
+> `.\mvnw.cmd test` sem filtro também roda `MeuBolsoApplicationTests`, que sobe o Spring e exige MongoDB e as variáveis do `.env` disponíveis.
+
 ## Estrutura do código
 
 ```
