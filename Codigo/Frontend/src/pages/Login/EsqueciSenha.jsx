@@ -49,8 +49,8 @@ function EsqueciSenha() {
           </div>
 
           <p className={styles["login-marketing-rodape"]}>
-            Por segurança, o link de recuperação expira em pouco tempo e só
-            pode ser usado uma vez.
+            Por segurança, o link de recuperação expira em pouco tempo e só pode
+            ser usado uma vez.
           </p>
         </aside>
 
@@ -65,7 +65,7 @@ function EsqueciSenha() {
             <div className={styles["login-form"]}>
               <p className={styles["login-sucesso"]}>
                 Se este e-mail estiver cadastrado, você receberá em instantes um
-                link para criar uma nova senha. Confira também a caixa de spam.
+                link para criar uma nova senha. Verifique a caixa de spam.
               </p>
             </div>
           ) : (
