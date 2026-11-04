@@ -48,8 +48,8 @@ public class CarteiraService {
     }
 
     /**
-     * Saldo atual de uma carteira movimentável (conta ou dinheiro físico).
-     * Retorna null se a carteira não existir ou não tiver saldo numérico.
+     * Saldo atual de uma conta bancária.
+     * Retorna null se a conta não existir ou não tiver saldo numérico.
      * Usado para validar movimentações de meta antes de aplicá-las.
      */
     public BigDecimal saldoDe(String usuarioId, String carteiraId) {
@@ -58,7 +58,6 @@ public class CarteiraService {
         if (c == null) return null;
 
         Map<String, Object> item = achar(c.getContas(), carteiraId);
-        if (item == null) item = acharDinheiro(c.getDinheiroEReservas(), carteiraId);
         if (item == null) return null;
 
         Object saldo = item.get("saldo");
@@ -66,8 +65,8 @@ public class CarteiraService {
     }
 
     /**
-     * Ajusta o saldo de uma carteira movimentável (conta ou dinheiro físico).
-     * `delta` positivo entra na carteira; negativo sai. Retorna true se gravou.
+     * Ajusta o saldo de uma conta bancária.
+     * `delta` positivo entra na conta; negativo sai. Retorna true se gravou.
      * Diferente de aplicarGasto: aqui o sinal do delta é aplicado direto no saldo
      * (usado pelas movimentações de meta).
      */
@@ -79,22 +78,12 @@ public class CarteiraService {
         if (c == null) return false;
 
         Map<String, Object> item = achar(c.getContas(), carteiraId);
-        if (item == null) item = acharDinheiro(c.getDinheiroEReservas(), carteiraId);
         if (item == null) return false;
 
         somar(item, "saldo", delta);
         c.setVersao(c.getVersao() + 1);
         repo.save(c);
         return true;
-    }
-
-    // Acha um item de dinheiro físico (tipo "dinheiro") na lista dinheiroEReservas.
-    private static Map<String, Object> acharDinheiro(List<Map<String, Object>> lista, String id) {
-        if (lista == null) return null;
-        for (Map<String, Object> item : lista) {
-            if (id.equals(item.get("id")) && "dinheiro".equals(item.get("tipo"))) return item;
-        }
-        return null;
     }
 
     private static Map<String, Object> achar(List<Map<String, Object>> lista, String id) {

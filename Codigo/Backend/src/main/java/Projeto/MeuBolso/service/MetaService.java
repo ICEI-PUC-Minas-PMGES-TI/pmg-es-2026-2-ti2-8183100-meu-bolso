@@ -14,9 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
  * Regra de negócio das metas, independente do canal (site via JWT ou
  * chatbot via telefone). Os métodos recebem o usuarioId já resolvido.
  *
- * A lógica de movimentação foi extraída do MetaController sem alteração de
- * comportamento: mesmas validações, mesma ordem de operações e mesmas
- * mensagens de erro. O controller passou a delegar para cá.
+ * Metas movimentam apenas contas bancárias: o dinheiro físico é controlado
+ * exclusivamente pelo modal de cédulas, então toda movimentação (depósito ou
+ * retirada) valida e ajusta o saldo de uma conta. O controller delega para cá.
  */
 @Service
 public class MetaService {
@@ -54,14 +54,14 @@ public class MetaService {
 
         boolean deposito = "deposito".equals(tipo);
 
-        // Valida saldo conforme o tipo.
+        // Só conta bancária movimenta meta (dinheiro físico é controlado pelas cédulas).
+        BigDecimal saldo = carteiraService.saldoDe(usuarioId, carteiraId);
+        if (saldo == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selecione uma conta bancária para a movimentação.");
+        }
         if (deposito) {
-            BigDecimal saldo = carteiraService.saldoDe(usuarioId, carteiraId);
-            if (saldo == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Carteira inválida para a movimentação.");
-            }
             if (valor.compareTo(saldo) > 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na carteira para este depósito.");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na conta para este depósito.");
             }
         } else {
             if (valor.compareTo(meta.getValorAtual()) > 0) {
