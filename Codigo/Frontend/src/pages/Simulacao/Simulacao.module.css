@@ -1,0 +1,219 @@
+/* ========================================
+   SIMULAÇÃO (RF-08)
+======================================== */
+
+.simulacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* Cabeçalho da página */
+.cabecalho h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.cabecalho p {
+  margin-top: var(--espaco-1);
+}
+
+/* Layout: formulário à esquerda, resultado à direita */
+.conteudo {
+  align-items: start;
+}
+
+/* ---------- Formulário ---------- */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.formulario h3 {
+  margin: 0;
+}
+
+.erroCampo {
+  padding: 6px 10px;
+}
+
+/* Alternador à vista / parcelado */
+.toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-2);
+}
+
+.toggleBotao {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--branco);
+  color: var(--preto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--transicao-rapida),
+    border-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.toggleBotao:hover {
+  background-color: var(--cinza-50);
+}
+
+.toggleAtivo,
+.toggleAtivo:hover {
+  background-color: var(--preto);
+  border-color: var(--preto);
+  color: var(--branco);
+}
+
+/* ---------- Resultado ---------- */
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+.comparacao h3,
+.planejamento h3 {
+  margin: 0 0 var(--espaco-4);
+}
+
+/* Antes x depois */
+.cenario {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--espaco-4);
+}
+
+.cenarioBloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  padding: var(--espaco-4);
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-medio);
+}
+
+.cenarioRotulo {
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cinza-500);
+}
+
+.cenarioValor {
+  font-size: var(--titulo-md);
+  font-weight: 800;
+  color: var(--preto);
+}
+
+.valorNegativo {
+  color: var(--erro);
+}
+
+.cenarioSeta {
+  color: var(--cinza-300);
+}
+
+.aviso {
+  margin-top: var(--espaco-4);
+}
+
+/* Impacto nas metas */
+.placeholder {
+  text-align: center;
+  padding: var(--espaco-6) 0;
+}
+
+.listaMetas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.itemMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  border: 1px solid var(--cinza-100);
+  border-radius: var(--radius-medio);
+}
+
+.metaIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.metaInfo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.metaStatus {
+  padding: 2px 10px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusOk {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.statusRuim {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+/* ---------- Estados (carregando / erro) ---------- */
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--espaco-2);
+  min-height: 200px;
+}
+
+.estadoTitulo {
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.iconeErro {
+  color: var(--erro);
+  margin-bottom: var(--espaco-2);
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 768px) {
+  .cenario {
+    grid-template-columns: 1fr;
+  }
+
+  .cenarioSeta {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+}

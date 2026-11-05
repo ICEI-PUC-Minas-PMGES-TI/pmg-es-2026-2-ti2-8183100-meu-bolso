@@ -16,7 +16,7 @@ const navItems = [
   { nome: "Planejamento", caminho: "/planejamento", futuro: true },
   { nome: "Carteiras", caminho: "/carteiras" },
   { nome: "Metas", caminho: "/metas" },
-  { nome: "Simulador", caminho: "/simulador", futuro: true },
+  { nome: "Simulador", caminho: "/simulador" },
   { nome: "Assistente IA", caminho: "/assistente", futuro: true },
   { nome: "Aprender", caminho: "/aprender", futuro: true },
 ];
