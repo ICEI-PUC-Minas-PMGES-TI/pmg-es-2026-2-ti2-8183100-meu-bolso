@@ -13,6 +13,7 @@ import Gastos from "./pages/Gastos/Gastos";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
 import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
+import Simulacao from "./pages/Simulacao/Simulacao";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               path="/evolucao-financeira"
               element={<EvolucaoFinanceira />}
             />
+            <Route path="/simulador" element={<Simulacao />} />
 
             {/* Adicione quando criar as páginas:
             <Route path="/perfil" element={<Perfil />} />
