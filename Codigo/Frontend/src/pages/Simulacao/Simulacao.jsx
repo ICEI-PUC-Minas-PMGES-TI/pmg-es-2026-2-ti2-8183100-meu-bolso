@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import styles from "./Simulacao.module.css";
-import { CATEGORIAS, validar } from "./calculoSimulacao";
+import { CATEGORIAS, converterValor, validar, simular } from "./calculoSimulacao";
 import { useDadosSimulacao } from "./useDadosSimulacao";
 import FormularioCompra from "./FormularioCompra";
+import ComparacaoCenario from "./ComparacaoCenario";
 import EstadoCard from "./EstadoCard";
 
 // ============================================================
@@ -23,21 +24,45 @@ const FORM_INICIAL = {
 };
 
 function Simulacao() {
-  const { carteiras, carregando, erro } = useDadosSimulacao();
+  const { carteiras, metas, carregando, erro } = useDadosSimulacao();
 
   const [form, setForm] = useState(FORM_INICIAL);
   const [erros, setErros] = useState({});
+  const [resultado, setResultado] = useState(null);
 
   // Carteira efetiva: a escolhida ou a primeira da lista (sem efeito).
   const carteiraId = form.carteiraId || carteiras[0]?.id || "";
+  const saldoAtual = useMemo(
+    () => carteiras.find((c) => c.id === carteiraId)?.saldo ?? 0,
+    [carteiras, carteiraId],
+  );
 
+  // Altera um campo e invalida o resultado anterior (evita cenário velho).
   function aoAlterar(campo, valor) {
     setForm((atual) => ({ ...atual, [campo]: valor }));
+    setResultado(null);
   }
 
   function aoCalcular(e) {
     e.preventDefault();
-    setErros(validar(form));
+
+    const errosValidacao = validar(form);
+    setErros(errosValidacao);
+    if (Object.keys(errosValidacao).length > 0) {
+      setResultado(null);
+      return;
+    }
+
+    // A simulação é só um cálculo em memória — não grava nada.
+    setResultado(
+      simular({
+        valor: converterValor(form.valor),
+        forma: form.forma,
+        parcelas: Number(form.parcelas),
+        saldoAtual,
+        metas,
+      }),
+    );
   }
 
   return (
@@ -60,6 +85,10 @@ function Simulacao() {
             aoAlterar={aoAlterar}
             aoCalcular={aoCalcular}
           />
+
+          <div className={styles.resultado}>
+            <ComparacaoCenario saldoAtual={saldoAtual} resultado={resultado} />
+          </div>
         </div>
       )}
     </div>
