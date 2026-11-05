@@ -5,6 +5,7 @@ import { CATEGORIAS, converterValor, validar, simular } from "./calculoSimulacao
 import { useDadosSimulacao } from "./useDadosSimulacao";
 import FormularioCompra from "./FormularioCompra";
 import ComparacaoCenario from "./ComparacaoCenario";
+import ImpactoMetas from "./ImpactoMetas";
 import EstadoCard from "./EstadoCard";
 
 // ============================================================
@@ -88,6 +89,7 @@ function Simulacao() {
 
           <div className={styles.resultado}>
             <ComparacaoCenario saldoAtual={saldoAtual} resultado={resultado} />
+            <ImpactoMetas resultado={resultado} temMetas={metas.length > 0} />
           </div>
         </div>
       )}
