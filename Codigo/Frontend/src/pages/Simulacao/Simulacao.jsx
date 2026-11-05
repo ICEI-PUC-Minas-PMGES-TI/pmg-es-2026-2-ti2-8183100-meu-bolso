@@ -1,4 +1,6 @@
 import styles from "./Simulacao.module.css";
+import { useDadosSimulacao } from "./useDadosSimulacao";
+import EstadoCard from "./EstadoCard";
 
 // ============================================================
 // SIMULAÇÃO (RF-08 — Planejamento / Simulação)
@@ -9,6 +11,8 @@ import styles from "./Simulacao.module.css";
 // ============================================================
 
 function Simulacao() {
+  const { carteiras, metas, carregando, erro } = useDadosSimulacao();
+
   return (
     <div className={styles.simulacao}>
       <div className={styles.cabecalho}>
@@ -17,6 +21,14 @@ function Simulacao() {
           Entenda o impacto de uma compra antes de decidir.
         </p>
       </div>
+
+      {carregando || erro ? (
+        <EstadoCard erro={erro} />
+      ) : (
+        <p className="texto-secundario">
+          {carteiras.length} carteira(s) e {metas.length} meta(s) carregadas.
+        </p>
+      )}
     </div>
   );
 }
