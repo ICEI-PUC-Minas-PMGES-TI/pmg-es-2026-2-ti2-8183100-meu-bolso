@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import Projeto.MeuBolso.model.Gasto;
 
@@ -19,4 +20,12 @@ public interface GastoRepository extends MongoRepository<Gasto, String> {
     List<Gasto> findByUsuarioIdAndRecorrenciaId(String usuarioId, String recorrenciaId);
 
     boolean existsByRecorrenciaIdAndData(String recorrenciaId, LocalDate data);
+
+    // Gastos de um usuário num período (datas inclusivas, no formato "AAAA-MM-DD").
+    // Usa @Query porque o "Between" derivado do Spring Data exclui as duas pontas,
+    // e aqui o primeiro e o último dia do período precisam entrar.
+    // Funciona porque a data é texto ISO: comparar texto equivale a comparar datas.
+    @Query("{ 'usuarioId': ?0, 'data': { $gte: ?1, $lte: ?2 } }")
+    List<Gasto> findPorPeriodo(String usuarioId, String inicio, String fim);
 }
+ 
