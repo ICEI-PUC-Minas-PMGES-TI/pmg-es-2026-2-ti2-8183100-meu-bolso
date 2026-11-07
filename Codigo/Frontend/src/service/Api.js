@@ -300,5 +300,44 @@ export async function obterCarteiras() {
 }
 
 export async function salvarCarteiras(dados) {
-  return requisicao("/api/carteiras", { metodo: "PUT", corpo: dados, autenticado: true });
+  return requisicao("/api/carteiras", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
 }
+
+/* ========================================
+   RESUMO SEMANAL POR E-MAIL
+   ======================================== */
+
+export const resumoSemanalApi = {
+  // Estado atual: { ativo, email, ultimoEnvio }
+  obterPreferencia: () =>
+    requisicao("/api/resumo-semanal/preferencia", { autenticado: true }),
+
+  // Liga ou desliga o envio semanal.
+  definirPreferencia: (ativo) =>
+    requisicao("/api/resumo-semanal/preferencia", {
+      metodo: "PUT",
+      corpo: { ativo },
+      autenticado: true,
+    }),
+
+  // Resumo dos últimos 7 dias, sem enviar nada.
+  previa: () => requisicao("/api/resumo-semanal/previa", { autenticado: true }),
+
+  // Envia o resumo agora. Devolve { mensagem }.
+  enviarAgora: () =>
+    requisicao("/api/resumo-semanal/enviar-agora", {
+      metodo: "POST",
+      autenticado: true,
+    }),
+
+  // Rota pública: usada pela tela aberta pelo link do e-mail.
+  cancelar: (token) =>
+    requisicao("/api/resumo-semanal/cancelar", {
+      metodo: "POST",
+      corpo: { token },
+    }),
+};

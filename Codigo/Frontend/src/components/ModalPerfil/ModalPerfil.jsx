@@ -3,6 +3,7 @@ import { X, Pencil, KeyRound } from "lucide-react";
 
 import { buscarPerfil, atualizarPerfil, trocarSenha } from "../../service/Api";
 import styles from "./ModalPerfil.module.css";
+import ResumoSemanalConfig from "./ResumoSemanalConfig";
 
 /**
  * Modal de edição de perfil (sobrepõe a tela atual, sem mudar de rota).
@@ -272,6 +273,10 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
               </>
             )}
           </div>
+
+          <div className={styles.separador} />
+
+          <ResumoSemanalConfig />
 
           {erro && <p className={styles.erro}>{erro}</p>}
 

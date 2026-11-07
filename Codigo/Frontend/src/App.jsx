@@ -6,6 +6,7 @@ import Layout from "./components/Layout/Layout";
 import RotaProtegida from "./components/RotaProtegida/RotaProtegida";
 import EsqueciSenha from "./pages/Login/EsqueciSenha";
 import RedefinirSenha from "./pages/Login/RedefinirSenha";
+import CancelarResumo from "./pages/ResumoSemanal/CancelarResumo";
 
 // Páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
@@ -24,6 +25,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro />} />
         <Route path="/esqueci-senha" element={<EsqueciSenha />} />
         <Route path="/redefinir-senha" element={<RedefinirSenha />} />
+        <Route path="/resumo-semanal/cancelar" element={<CancelarResumo />} />
 
         {/* Páginas que exigem login */}
         <Route element={<RotaProtegida />}>
