@@ -1,9 +1,9 @@
 package Projeto.MeuBolso.Config;
- 
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
- 
+
 /**
  * Liga dois recursos do Spring que o projeto usa:
  *
@@ -18,4 +18,3 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class AsyncConfig {
 }
- 
