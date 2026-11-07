@@ -28,4 +28,3 @@ public interface GastoRepository extends MongoRepository<Gasto, String> {
     @Query("{ 'usuarioId': ?0, 'data': { $gte: ?1, $lte: ?2 } }")
     List<Gasto> findPorPeriodo(String usuarioId, String inicio, String fim);
 }
- 
