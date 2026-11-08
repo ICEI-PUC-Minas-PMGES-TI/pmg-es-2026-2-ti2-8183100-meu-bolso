@@ -48,7 +48,7 @@ npm run dev      # ambiente de desenvolvimento em http://localhost:5173
 src/
   App.jsx        Rotas e layout principal
   main.jsx       Ponto de entrada
-  pages/         Telas: Login, Dashboard, Gastos, Carteiras, Metas, EvolucaoFinanceira
+  pages/         Telas: Login, Dashboard, Gastos, Carteiras, Metas, EvolucaoFinanceira, Simulacao, Assistente (/assistente — perguntas prontas calculadas pelo back-end)
   components/    Componentes reutilizáveis (modais, painéis, cartões)
   data/          Dados e mapas de apoio (ex.: bancos, posição de contas)
   service/       Integração com a API (cliente HTTP)
