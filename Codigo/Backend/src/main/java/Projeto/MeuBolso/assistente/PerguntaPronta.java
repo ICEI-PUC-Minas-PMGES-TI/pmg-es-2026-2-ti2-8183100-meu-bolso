@@ -1,5 +1,6 @@
 package Projeto.MeuBolso.assistente;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,4 +19,9 @@ public interface PerguntaPronta {
     boolean disponivel(String usuarioId);
 
     RespostaPronta responder(String usuarioId, Map<String, String> params);
+
+    /** Parâmetros exigidos para responder. Vazio por padrão (pergunta sem parâmetros). */
+    default List<ParametroPergunta> parametros(String usuarioId) {
+        return List.of();
+    }
 }
