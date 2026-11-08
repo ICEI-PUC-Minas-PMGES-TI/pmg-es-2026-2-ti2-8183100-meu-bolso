@@ -5,6 +5,7 @@ import Projeto.MeuBolso.repository.GastoRepository;
 
 import java.math.BigDecimal;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -26,12 +27,15 @@ public class GastosDoMes {
 
     public BigDecimal total(String usuarioId) {
         YearMonth mes = YearMonth.now(clock);
-        String inicio = mes.atDay(1).toString();
-        String fim = mes.atEndOfMonth().toString();
         BigDecimal total = BigDecimal.ZERO;
-        for (Gasto g : gastoRepository.findPorPeriodo(usuarioId, inicio, fim)) {
+        for (Gasto g : noPeriodo(usuarioId, mes.atDay(1), mes.atEndOfMonth())) {
             total = total.add(g.getValor() == null ? BigDecimal.ZERO : g.getValor());
         }
         return total;
+    }
+
+    /** Gastos do usuário num intervalo de datas (limites inclusivos). */
+    public List<Gasto> noPeriodo(String usuarioId, LocalDate inicio, LocalDate fim) {
+        return gastoRepository.findPorPeriodo(usuarioId, inicio.toString(), fim.toString());
     }
 }

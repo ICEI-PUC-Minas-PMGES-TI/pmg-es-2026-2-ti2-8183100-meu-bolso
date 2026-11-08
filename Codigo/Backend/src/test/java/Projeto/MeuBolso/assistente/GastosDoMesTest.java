@@ -53,4 +53,12 @@ class GastosDoMesTest {
             .thenReturn(List.of());
         assertThat(gastosDoMes.total(USUARIO)).isEqualByComparingTo("0");
     }
+
+    @Test
+    void noPeriodoUsaLimitesInclusivos() {
+        when(gastoRepository.findPorPeriodo(USUARIO, "2026-03-05", "2026-03-10"))
+            .thenReturn(List.of(gasto("10"), gasto("20")));
+        assertThat(gastosDoMes.noPeriodo(USUARIO, LocalDate.of(2026, 3, 5), LocalDate.of(2026, 3, 10)))
+            .hasSize(2);
+    }
 }
