@@ -33,7 +33,8 @@ class GastosPorCategoriaPerguntaTest {
 
     @BeforeEach
     void preparar() {
-        pergunta = new GastosPorCategoriaPergunta(gastoRepository, CLOCK);
+        // GastosDoMes real sobre o GastoRepository (interface) mockado e o Clock fixo.
+        pergunta = new GastosPorCategoriaPergunta(new GastosDoMes(gastoRepository, CLOCK));
     }
 
     private static Gasto gasto(String categoria, String data, String valor) {

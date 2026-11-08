@@ -1,14 +1,9 @@
 package Projeto.MeuBolso.assistente;
 
 import Projeto.MeuBolso.model.Gasto;
-import Projeto.MeuBolso.repository.GastoRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -21,8 +16,8 @@ import org.springframework.stereotype.Component;
  * "Onde gastei mais este mês?" — mostra as 3 maiores categorias de gasto do
  * mês atual, com valor e percentual do total.
  *
- * Só considera gastos do mês corrente (campo data no formato "AAAA-MM-DD"),
- * obtido via {@link Clock} injetado para permitir data fixa nos testes.
+ * Reaproveita {@link GastosDoMes} (regra de "mês corrente" via Clock) e
+ * {@link FormatoBRL} (formatação monetária pt-BR).
  */
 @Component
 public class GastosPorCategoriaPergunta implements PerguntaPronta {
@@ -30,12 +25,10 @@ public class GastosPorCategoriaPergunta implements PerguntaPronta {
     private static final Locale PT_BR = Locale.forLanguageTag("pt-BR");
     private static final int TOP = 3;
 
-    private final GastoRepository gastoRepository;
-    private final Clock clock;
+    private final GastosDoMes gastosDoMes;
 
-    public GastosPorCategoriaPergunta(GastoRepository gastoRepository, Clock clock) {
-        this.gastoRepository = gastoRepository;
-        this.clock = clock;
+    public GastosPorCategoriaPergunta(GastosDoMes gastosDoMes) {
+        this.gastosDoMes = gastosDoMes;
     }
 
     @Override
@@ -50,12 +43,12 @@ public class GastosPorCategoriaPergunta implements PerguntaPronta {
 
     @Override
     public boolean disponivel(String usuarioId) {
-        return !gastosDoMes(usuarioId).isEmpty();
+        return !gastosDoMes.doMes(usuarioId).isEmpty();
     }
 
     @Override
     public RespostaPronta responder(String usuarioId, Map<String, String> params) {
-        List<Gasto> gastos = gastosDoMes(usuarioId);
+        List<Gasto> gastos = gastosDoMes.doMes(usuarioId);
 
         // Soma por categoria, preservando ordem de inserção para desempate estável.
         Map<String, BigDecimal> porCategoria = new LinkedHashMap<>();
@@ -79,24 +72,17 @@ public class GastosPorCategoriaPergunta implements PerguntaPronta {
             item.put("percentual", percentual);
             categorias.add(item);
             partesTexto.add(String.format(PT_BR, "%s (%s, %d%%)",
-                e.getKey(), moeda(e.getValue()), percentual));
+                e.getKey(), FormatoBRL.moeda(e.getValue()), percentual));
         }
 
         String texto = String.format(PT_BR, "Neste mês você gastou %s. Maiores categorias: %s.",
-            moeda(total), String.join(", ", partesTexto));
+            FormatoBRL.moeda(total), String.join(", ", partesTexto));
 
         Map<String, Object> dados = new LinkedHashMap<>();
         dados.put("total", total);
         dados.put("categorias", categorias);
 
         return new RespostaPronta(texto, dados);
-    }
-
-    private List<Gasto> gastosDoMes(String usuarioId) {
-        YearMonth mes = YearMonth.now(clock);
-        String inicio = mes.atDay(1).toString();
-        String fim = mes.atEndOfMonth().toString();
-        return gastoRepository.findPorPeriodo(usuarioId, inicio, fim);
     }
 
     // Percentual inteiro do valor sobre o total, arredondado HALF_UP.
@@ -107,9 +93,5 @@ public class GastosPorCategoriaPergunta implements PerguntaPronta {
         return valor.multiply(BigDecimal.valueOf(100))
             .divide(total, 0, RoundingMode.HALF_UP)
             .intValueExact();
-    }
-
-    private static String moeda(BigDecimal valor) {
-        return NumberFormat.getCurrencyInstance(PT_BR).format(valor);
     }
 }

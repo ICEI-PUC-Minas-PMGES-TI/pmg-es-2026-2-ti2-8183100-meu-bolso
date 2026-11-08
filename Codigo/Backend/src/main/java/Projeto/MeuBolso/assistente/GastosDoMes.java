@@ -26,12 +26,17 @@ public class GastosDoMes {
     }
 
     public BigDecimal total(String usuarioId) {
-        YearMonth mes = YearMonth.now(clock);
         BigDecimal total = BigDecimal.ZERO;
-        for (Gasto g : noPeriodo(usuarioId, mes.atDay(1), mes.atEndOfMonth())) {
+        for (Gasto g : doMes(usuarioId)) {
             total = total.add(g.getValor() == null ? BigDecimal.ZERO : g.getValor());
         }
         return total;
+    }
+
+    /** Gastos do mês corrente (1º ao último dia, via Clock injetado). */
+    public List<Gasto> doMes(String usuarioId) {
+        YearMonth mes = YearMonth.now(clock);
+        return noPeriodo(usuarioId, mes.atDay(1), mes.atEndOfMonth());
     }
 
     /** Gastos do usuário num intervalo de datas (limites inclusivos). */
