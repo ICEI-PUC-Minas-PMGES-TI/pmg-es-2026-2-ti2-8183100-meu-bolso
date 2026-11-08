@@ -15,6 +15,8 @@ import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
 import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
 import Simulacao from "./pages/Simulacao/Simulacao";
+import Assistente from "./pages/Assistente/Assistente";
+import AssistenteProvider from "./pages/Assistente/AssistenteProvider";
 
 function App() {
   return (
@@ -29,8 +31,15 @@ function App() {
 
         {/* Páginas que exigem login */}
         <Route element={<RotaProtegida />}>
-          {/* Páginas com barra de navegação superior */}
-          <Route element={<Layout />}>
+          {/* Páginas com barra de navegação superior. O AssistenteProvider fica
+              dentro da RotaProtegida para que a conversa seja descartada ao sair. */}
+          <Route
+            element={
+              <AssistenteProvider>
+                <Layout />
+              </AssistenteProvider>
+            }
+          >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/gastos" element={<Gastos />} />
             <Route path="/carteiras" element={<Carteiras />} />
@@ -40,6 +49,7 @@ function App() {
               element={<EvolucaoFinanceira />}
             />
             <Route path="/simulador" element={<Simulacao />} />
+            <Route path="/assistente" element={<Assistente />} />
 
             {/* Adicione quando criar as páginas:
             <Route path="/perfil" element={<Perfil />} />

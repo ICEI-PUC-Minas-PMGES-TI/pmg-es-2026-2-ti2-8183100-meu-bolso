@@ -1,0 +1,194 @@
+/* ========================================
+   ASSISTENTE (perguntas prontas)
+======================================== */
+
+.assistente {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+}
+
+/* Cabeçalho da página */
+.cabecalho h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.cabecalho p {
+  margin-top: var(--espaco-1);
+}
+
+/* ---------- Perguntas ---------- */
+.perguntas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.gradePerguntas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--espaco-3);
+}
+
+.botaoPergunta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  text-align: left;
+  min-height: 56px;
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-medio);
+  background-color: var(--branco);
+  color: var(--preto);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--transicao-rapida),
+    border-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.botaoPergunta:hover:not(:disabled) {
+  background-color: var(--cinza-50);
+  border-color: var(--verde-escuro);
+}
+
+.botaoPergunta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.botaoPerguntaAtivo,
+.botaoPerguntaAtivo:hover:not(:disabled) {
+  background-color: var(--verde-claro);
+  border-color: var(--verde-escuro);
+  color: var(--verde-escuro);
+}
+
+/* Painel do parâmetro (select + botão) */
+.painelParametro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.rotuloParametro {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.linhaParametro {
+  display: flex;
+  gap: var(--espaco-3);
+  align-items: center;
+}
+
+.select {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--branco);
+  color: var(--preto);
+  font-size: var(--texto-sm);
+}
+
+.botaoCancelar {
+  flex-shrink: 0;
+}
+
+/* ---------- Conversa ---------- */
+.conversa {
+  display: flex;
+  flex-direction: column;
+}
+
+.conversaVazia {
+  padding: var(--espaco-4) 0;
+}
+
+.baloes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.balao {
+  max-width: 80%;
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--radius-medio);
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+}
+
+.balaoUsuario {
+  align-self: flex-end;
+  background-color: var(--verde-escuro);
+  color: var(--branco);
+  border-bottom-right-radius: var(--radius-pequeno);
+}
+
+.balaoAssistente {
+  align-self: flex-start;
+  background-color: var(--cinza-50);
+  border: 1px solid var(--cinza-100);
+  color: var(--preto);
+  border-bottom-left-radius: var(--radius-pequeno);
+}
+
+.balaoErro {
+  background-color: var(--erro-fundo);
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.horario {
+  display: block;
+  margin-top: var(--espaco-1);
+}
+
+/* ---------- Aviso fixo ---------- */
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-xs);
+  color: var(--cinza-500);
+}
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Estados (carregando / erro / vazio) ---------- */
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--espaco-2);
+  min-height: 160px;
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 768px) {
+  .gradePerguntas {
+    grid-template-columns: 1fr;
+  }
+
+  .linhaParametro {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .balao {
+    max-width: 92%;
+  }
+}

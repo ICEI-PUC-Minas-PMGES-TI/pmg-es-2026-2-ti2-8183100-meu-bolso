@@ -292,6 +292,24 @@ export const gastosApi = {
 };
 
 /* ========================================
+   ASSISTENTE (perguntas prontas)
+   ======================================== */
+
+export const assistenteApi = {
+  // Lista as perguntas disponíveis para o usuário, já com seus parâmetros.
+  listarPerguntas: () =>
+    requisicao("/api/assistente/perguntas", { autenticado: true }),
+
+  // Responde uma pergunta pelo id. `params` = { <nome>: <valor> }.
+  responder: (id, params) =>
+    requisicao(`/api/assistente/perguntas/${id}`, {
+      metodo: "POST",
+      corpo: { params },
+      autenticado: true,
+    }),
+};
+
+/* ========================================
    CARTEIRAS
    ======================================== */
 
