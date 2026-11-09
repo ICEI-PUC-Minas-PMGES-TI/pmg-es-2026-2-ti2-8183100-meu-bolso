@@ -160,6 +160,26 @@ public class CarteiraService {
         repo.save(c);
     }
 
+    /**
+     * Indica se o usuário tem pelo menos uma conta cadastrada na carteira.
+     * Usado para bloquear o lançamento de gastos/receitas sem conta.
+     */
+    public boolean possuiConta(String usuarioId) {
+        CarteiraUsuario c = repo.findByUsuarioId(usuarioId).orElse(null);
+        return c != null && c.getContas() != null && !c.getContas().isEmpty();
+    }
+
+    /**
+     * Indica se o id informado corresponde a uma conta existente na carteira
+     * do usuário. Gastos e receitas só podem ser lançados em uma conta válida.
+     */
+    public boolean contaExiste(String usuarioId, String carteiraId) {
+        if (carteiraId == null || carteiraId.isBlank()) return false;
+        CarteiraUsuario c = repo.findByUsuarioId(usuarioId).orElse(null);
+        if (c == null) return false;
+        return achar(c.getContas(), carteiraId) != null;
+    }
+
     private static Map<String, Object> achar(List<Map<String, Object>> lista, String id) {
         if (lista == null) return null;
         for (Map<String, Object> item : lista) {

@@ -6,7 +6,9 @@ import Projeto.MeuBolso.repository.GastoRepository;
 import Projeto.MeuBolso.repository.RecorrenciaRepository;
 
 import java.math.BigDecimal;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Regra de negócio de criação de gastos, independente do canal (site via JWT
@@ -38,6 +40,12 @@ public class GastoService {
     public Gasto criar(String usuarioId, String descricao, String categoria, String carteira,
                        String data, BigDecimal valor, String comentario,
                        boolean recorrente, String carteiraId) {
+        // Um gasto só pode ser lançado em uma conta existente na carteira.
+        if (!carteiraService.contaExiste(usuarioId, carteiraId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Cadastre uma conta na Carteira antes de registrar gastos.");
+        }
+
         Gasto gasto = new Gasto(
             usuarioId,
             descricao.trim(),

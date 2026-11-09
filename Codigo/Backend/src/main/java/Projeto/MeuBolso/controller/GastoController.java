@@ -111,6 +111,12 @@
             Gasto gasto = gastoRepository.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto não encontrado."));
 
+            // Um gasto só pode ser lançado em uma conta existente na carteira.
+            if (!carteiraService.contaExiste(usuarioId, request.carteiraId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cadastre uma conta na Carteira antes de registrar gastos.");
+            }
+
             String carteiraAntiga = gasto.getCarteiraId();
             BigDecimal valorAntigo = gasto.getValor();
 

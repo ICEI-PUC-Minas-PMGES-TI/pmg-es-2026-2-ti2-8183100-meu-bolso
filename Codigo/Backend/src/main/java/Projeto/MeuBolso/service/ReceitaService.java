@@ -6,7 +6,9 @@ import Projeto.MeuBolso.repository.ReceitaRecorrenciaRepository;
 import Projeto.MeuBolso.repository.ReceitaRepository;
 
 import java.math.BigDecimal;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Regra de negócio de criação de receitas, independente do canal (site via JWT
@@ -38,6 +40,12 @@ public class ReceitaService {
     public Receita criar(String usuarioId, String descricao, String categoria, String carteira,
                          String data, BigDecimal valor, String comentario,
                          boolean recorrente, String carteiraId) {
+        // Uma receita só pode entrar em uma conta existente na carteira.
+        if (!carteiraService.contaExiste(usuarioId, carteiraId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Cadastre uma conta na Carteira antes de registrar receitas.");
+        }
+
         Receita receita = new Receita(
             usuarioId,
             descricao.trim(),

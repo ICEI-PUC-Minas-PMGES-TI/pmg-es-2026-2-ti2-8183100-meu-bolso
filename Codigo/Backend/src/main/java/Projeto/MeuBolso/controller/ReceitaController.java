@@ -89,7 +89,8 @@ public class ReceitaController {
                                             Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
-        // A regra de criação fica no ReceitaService (reutilizada pelo chatbot).
+        // A regra de criação (inclusive a exigência de uma conta existente na
+        // carteira) fica no ReceitaService, reutilizada pelo chatbot.
         Receita salva = receitaService.criar(
             usuarioId,
             request.descricao(),
@@ -113,6 +114,12 @@ public class ReceitaController {
 
         Receita receita = receitaRepository.findByIdAndUsuarioId(id, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Receita não encontrada."));
+
+        // Uma receita só pode entrar em uma conta existente na carteira.
+        if (!carteiraService.contaExiste(usuarioId, request.carteiraId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Cadastre uma conta na Carteira antes de registrar receitas.");
+        }
 
         String carteiraAntiga = receita.getCarteiraId();
         BigDecimal valorAntigo = receita.getValor();
