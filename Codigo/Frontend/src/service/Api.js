@@ -289,10 +289,12 @@ export const gastosApi = {
       autenticado: true,
     }),
 
-  obterOrcamento: () => requisicao("/api/orcamento", { autenticado: true }),
+  // Orçamento de um mês ("AAAA-MM"). Sem mês, o back usa o mês atual.
+  obterOrcamento: (mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, { autenticado: true }),
 
-  salvarOrcamento: (valorMensal) =>
-    requisicao("/api/orcamento", {
+  salvarOrcamento: (valorMensal, mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, {
       metodo: "PUT",
       corpo: { valorMensal },
       autenticado: true,

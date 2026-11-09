@@ -4,7 +4,7 @@
     import Modal from "./Modal";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
-    export default function ModalOrcamento({ orcamentoAtual, onFechar, onSalvar }) {
+    export default function ModalOrcamento({ orcamentoAtual, mesExtenso, onFechar, onSalvar }) {
     const [valor, setValor] = useState(orcamentoAtual > 0 ? valorParaTexto(orcamentoAtual) : "");
     const [erro, setErro] = useState("");
     const [salvando, setSalvando] = useState(false);
@@ -35,11 +35,11 @@
     }
 
     return (
-        <Modal titulo="Orçamento mensal" onFechar={onFechar} largura={440}>
+        <Modal titulo="Orçamento do mês" onFechar={onFechar} largura={440}>
         <form className={styles["gastos-form-coluna"]} onSubmit={enviar} noValidate>
             <p className="texto-secundario texto-pequeno">
-            Quanto você quer gastar, no máximo, em cada mês. O mesmo valor vale para todos
-            os meses.
+            Quanto você quer gastar, no máximo, {mesExtenso ? `em ${mesExtenso}` : "neste mês"}.
+            Vale só para este mês; os outros meses têm o próprio orçamento.
             </p>
 
             <div className="form-group">

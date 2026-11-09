@@ -85,10 +85,10 @@ public final class GastoDtos {
         @NotBlank @Pattern(regexp = "\\d{4}-\\d{2}", message = "Mês deve estar no formato AAAA-MM.") String mes
     ) {}
 
-    /** Corpo e resposta do orçamento. */
+    /** Corpo e resposta do orçamento (sempre de um mês específico "AAAA-MM"). */
     public record OrcamentoRequest(
         @NotNull @DecimalMin(value = "0.00", message = "O orçamento não pode ser negativo.") BigDecimal valorMensal
     ) {}
 
-    public record OrcamentoResponse(BigDecimal valorMensal) {}
+    public record OrcamentoResponse(String mes, BigDecimal valorMensal) {}
 }

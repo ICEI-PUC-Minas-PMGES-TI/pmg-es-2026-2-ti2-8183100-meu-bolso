@@ -86,6 +86,38 @@
     };
     }
 
+    /* ----- Orçamento por mês (localStorage) -----
+    Guardamos um mapa { "AAAA-MM": valor }. Para não perder o orçamento global
+    da versão antiga (um número só), migramos esse valor para o mês atual na
+    primeira vez que lemos. */
+    function lerMapaOrcamentos() {
+    const bruto = ler(CHAVES.orcamento, {});
+    if (typeof bruto === "number") {
+        // Formato antigo: número único -> vira o orçamento do mês atual.
+        const migrado = bruto > 0 ? { [mesAtualChave()]: bruto } : {};
+        gravar(CHAVES.orcamento, migrado);
+        return migrado;
+    }
+    return bruto && typeof bruto === "object" ? bruto : {};
+    }
+
+    function lerOrcamentoDoMes(mes) {
+    const alvo = mes || mesAtualChave();
+    return Number(lerMapaOrcamentos()[alvo]) || 0;
+    }
+
+    function gravarOrcamentoDoMes(mes, valor) {
+    const alvo = mes || mesAtualChave();
+    const mapa = lerMapaOrcamentos();
+    const numero = Number(valor) || 0;
+    if (numero > 0) {
+        mapa[alvo] = numero;
+    } else {
+        delete mapa[alvo];
+    }
+    gravar(CHAVES.orcamento, mapa);
+    }
+
     // A recorrência nasce a partir de um gasto: o dia do mês vem da data dele.
     function criarRecorrenciaDe(gasto) {
     return {
@@ -161,8 +193,13 @@
         // Projeta os recorrentes para os próximos meses (ocorrências virtuais).
         gastos: comProjecoes(gastos, recorrencias),
         recorrencias,
-        orcamento: Number(ler(CHAVES.orcamento, 0)) || 0,
+        // Orçamento do mês atual (a tela busca os demais meses sob demanda).
+        orcamento: lerOrcamentoDoMes(mesAtualChave()),
         };
+    },
+
+    async obterOrcamento(mes) {
+        return lerOrcamentoDoMes(mes);
     },
 
     async criarGasto({ recorrente, ...dados }) {
@@ -275,8 +312,8 @@
         );
     },
 
-    async salvarOrcamento(valor) {
-        gravar(CHAVES.orcamento, Number(valor) || 0);
+    async salvarOrcamento(valor, mes) {
+        gravarOrcamentoDoMes(mes, valor);
     },
     };
 
@@ -320,6 +357,11 @@
         recorrencias: recorrenciasNorm,
         orcamento: Number(orcamento.valorMensal) || 0,
         };
+    },
+
+    async obterOrcamento(mes) {
+        const orcamento = await gastosApi.obterOrcamento(mes);
+        return Number(orcamento.valorMensal) || 0;
     },
 
     async criarGasto(dados) {
@@ -368,8 +410,8 @@
         await gastosApi.pularRecorrente(id, mes);
     },
 
-    async salvarOrcamento(valor) {
-        await gastosApi.salvarOrcamento(Number(valor) || 0);
+    async salvarOrcamento(valor, mes) {
+        await gastosApi.salvarOrcamento(Number(valor) || 0, mes);
     },
     };
 

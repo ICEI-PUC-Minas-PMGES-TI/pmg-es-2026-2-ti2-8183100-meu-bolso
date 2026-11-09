@@ -77,7 +77,8 @@ public class GastoPorDiaPergunta implements PerguntaPronta {
     }
 
     private Optional<Orcamento> orcamentoDefinido(String usuarioId) {
-        return orcamentoRepository.findByUsuarioId(usuarioId)
+        // Orçamento do mês corrente (casa com o mês dos gastos de GastosDoMes).
+        return orcamentoRepository.findByUsuarioIdAndMes(usuarioId, gastosDoMes.mesAtualChave())
             .filter(o -> o.getValorMensal() != null && o.getValorMensal().signum() > 0);
     }
 }
