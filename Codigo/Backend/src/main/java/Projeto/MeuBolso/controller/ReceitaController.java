@@ -15,6 +15,7 @@ import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.CarteiraService;
 import Projeto.MeuBolso.service.GastoRecorrenciaService;
 import Projeto.MeuBolso.service.ReceitaRecorrenciaService;
+import Projeto.MeuBolso.service.ReceitaService;
 
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
@@ -56,17 +57,20 @@ public class ReceitaController {
     private final UsuarioRepository usuarioRepository;
     private final ReceitaRecorrenciaService recorrenciaService;
     private final CarteiraService carteiraService;
+    private final ReceitaService receitaService;
 
     public ReceitaController(ReceitaRepository receitaRepository,
                         ReceitaRecorrenciaRepository recorrenciaRepository,
                         UsuarioRepository usuarioRepository,
                         ReceitaRecorrenciaService recorrenciaService,
-                        CarteiraService carteiraService) {
+                        CarteiraService carteiraService,
+                        ReceitaService receitaService) {
         this.receitaRepository = receitaRepository;
         this.recorrenciaRepository = recorrenciaRepository;
         this.usuarioRepository = usuarioRepository;
         this.recorrenciaService = recorrenciaService;
         this.carteiraService = carteiraService;
+        this.receitaService = receitaService;
     }
 
     @GetMapping
@@ -85,25 +89,18 @@ public class ReceitaController {
                                             Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
-        Receita receita = new Receita(
+        // A regra de criação fica no ReceitaService (reutilizada pelo chatbot).
+        Receita salva = receitaService.criar(
             usuarioId,
-            request.descricao().trim(),
+            request.descricao(),
             request.categoria(),
             request.carteira(),
             request.data(),
             request.valor(),
-            comentarioLimpo(request.comentario()),
-            null
+            request.comentario(),
+            request.recorrente(),
+            request.carteiraId()
         );
-        receita.setCarteiraId(request.carteiraId());
-
-        if (request.recorrente()) {
-            ReceitaRecorrencia recorrencia = recorrenciaRepository.save(criarRecorrenciaDe(receita));
-            receita.setRecorrenciaId(recorrencia.getId());
-        }
-
-        Receita salva = receitaRepository.save(receita);
-        carteiraService.aplicarReceita(usuarioId, salva.getCarteiraId(), salva.getValor());
         return ResponseEntity.status(HttpStatus.CREATED).body(paraResponse(salva));
     }
 

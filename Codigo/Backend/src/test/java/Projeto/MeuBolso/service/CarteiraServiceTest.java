@@ -1,6 +1,7 @@
 package Projeto.MeuBolso.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class CarteiraServiceTest {
@@ -156,7 +158,54 @@ class CarteiraServiceTest {
         verifyNoInteractions(repo);
     }
 
+    // ---------- transferir ----------
+
+    @Test
+    void transferirDebitaOrigemCreditaDestinoNumUnicoSave() {
+        adicionarSegundaConta();
+        carregar();
+        service.transferir(USUARIO, "conta-1", "conta-2", new BigDecimal("300"));
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(700.0);
+        assertThat(numero(carteira.getContas(), "conta-2", "saldo")).isEqualTo(350.0);
+        assertThat(carteira.getVersao()).isEqualTo(1);
+        verify(repo).save(carteira);
+    }
+
+    @Test
+    void transferirMaisQueOSaldoFalhaSemGravar() {
+        adicionarSegundaConta();
+        carregar();
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-2", new BigDecimal("1000.01")))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Saldo insuficiente");
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(1000.0);
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void transferirParaDinheiroOuCartaoFalha() {
+        carregar();
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "din-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "cred-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void transferirParaAMesmaContaOuValorInvalidoNemConsulta() {
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-2", BigDecimal.ZERO))
+            .isInstanceOf(ResponseStatusException.class);
+        verifyNoInteractions(repo);
+    }
+
     // ---------- auxiliares ----------
+
+    private void adicionarSegundaConta() {
+        carteira.getContas().add(item("id", "conta-2", "tipo", "conta", "saldo", 50.0));
+    }
 
     private void carregar() {
         when(repo.findByUsuarioId(USUARIO)).thenReturn(Optional.of(carteira));

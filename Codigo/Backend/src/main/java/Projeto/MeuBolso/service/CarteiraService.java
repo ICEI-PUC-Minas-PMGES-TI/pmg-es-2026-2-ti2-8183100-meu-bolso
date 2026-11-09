@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CarteiraService {
@@ -120,6 +122,42 @@ public class CarteiraService {
         c.setVersao(c.getVersao() + 1);
         repo.save(c);
         return true;
+    }
+
+    /**
+     * Transfere `valor` de uma conta bancária para outra do mesmo usuário.
+     * As duas contas estão no mesmo documento, então um único save aplica
+     * débito e crédito juntos (não há estado intermediário gravado).
+     *
+     * Só contas bancárias: dinheiro físico é controlado pelas cédulas e
+     * cartões não têm saldo próprio.
+     */
+    public void transferir(String usuarioId, String origemId, String destinoId, BigDecimal valor) {
+        if (valor == null || valor.signum() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Informe um valor maior que zero.");
+        }
+        if (origemId == null || destinoId == null || origemId.equals(destinoId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Escolha contas de origem e destino diferentes.");
+        }
+        CarteiraUsuario c = repo.findByUsuarioId(usuarioId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nenhuma conta cadastrada."));
+
+        Map<String, Object> origem = achar(c.getContas(), origemId);
+        Map<String, Object> destino = achar(c.getContas(), destinoId);
+        if (origem == null || destino == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selecione contas bancárias para a transferência.");
+        }
+
+        Object saldoOrigem = origem.get("saldo");
+        BigDecimal disponivel = saldoOrigem instanceof Number n ? new BigDecimal(n.toString()) : BigDecimal.ZERO;
+        if (valor.compareTo(disponivel) > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo insuficiente na conta de origem.");
+        }
+
+        somar(origem, "saldo", valor.negate());
+        somar(destino, "saldo", valor);
+        c.setVersao(c.getVersao() + 1);
+        repo.save(c);
     }
 
     private static Map<String, Object> achar(List<Map<String, Object>> lista, String id) {
