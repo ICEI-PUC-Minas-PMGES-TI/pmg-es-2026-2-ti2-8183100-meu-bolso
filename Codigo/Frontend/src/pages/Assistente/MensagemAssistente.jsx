@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import styles from "./MensagemAssistente.module.css";
 
@@ -98,4 +98,6 @@ function MensagemAssistente({ mensagem, finalizarDigitacao }) {
   );
 }
 
-export default MensagemAssistente;
+// Memo: durante a digitação (a cada ~22ms) só o balão em digitação, cujo
+// estado local muda, re-renderiza; os demais ficam estáveis.
+export default memo(MensagemAssistente);

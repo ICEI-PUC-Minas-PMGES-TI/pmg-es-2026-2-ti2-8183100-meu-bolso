@@ -49,24 +49,6 @@
   gap: var(--espaco-2);
 }
 
-.etiqueta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espaco-2);
-  font-size: var(--texto-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--preto-suave);
-}
-
-.etiquetaBolinha {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-redondo);
-  background-color: var(--verde-principal);
-}
-
 .titulo {
   font-size: var(--titulo-xl);
   font-weight: 800;
@@ -85,7 +67,7 @@
 }
 
 .subtitulo {
-  color: var(--cinza-500);
+  color: var(--cinza-700);
   line-height: 1.5;
 }
 
@@ -114,6 +96,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--espaco-3);
+  /* Em telas muito largas, não deixa os cartões esticarem demais. */
+  width: 100%;
+  max-width: var(--largura-maxima);
 }
 
 .cartao {
@@ -141,7 +126,7 @@
 }
 
 .cartao:focus-visible {
-  outline: 2px solid var(--verde-principal);
+  outline: 2px solid var(--verde-escuro);
   outline-offset: 2px;
 }
 
@@ -212,6 +197,8 @@
 
 .select {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--cinza-300);
@@ -274,7 +261,7 @@
 .vazioTexto {
   max-width: 420px;
   text-align: center;
-  color: var(--cinza-500);
+  color: var(--cinza-700);
 }
 
 .baloes {
@@ -314,7 +301,7 @@
   background-color: var(--branco);
   border: 1px solid var(--cinza-200);
   box-shadow: var(--sombra-leve);
-  color: var(--cinza-500);
+  color: var(--cinza-700);
   font-size: var(--texto-sm);
 }
 
@@ -364,7 +351,7 @@
   align-items: center;
   gap: var(--espaco-2);
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cinza-700);
 }
 
 /* ---------- Rodapé ---------- */
@@ -385,9 +372,16 @@
 }
 
 /* ---------- Responsividade ---------- */
-@media (max-width: 1024px) {
+/* Grade de cartões: 4 colunas no desktop, 2 até 900px, 1 até 480px. */
+@media (max-width: 900px) {
   .gradePerguntas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .gradePerguntas {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -397,16 +391,13 @@
     align-items: flex-start;
   }
 
-  .gradePerguntas {
-    grid-template-columns: 1fr;
-  }
-
   .linhaParametro {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .balao {
-    max-width: 92%;
+  /* Alvos de toque de 44px no celular. */
+  .cartao {
+    min-height: 56px;
   }
 }

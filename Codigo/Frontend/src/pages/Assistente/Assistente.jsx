@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   Trash2,
@@ -16,7 +16,7 @@ import {
 
 import { assistenteApi } from "../../service/Api";
 import { useAssistente } from "./AssistenteContext";
-import JarvisAvatar from "./JarvisAvatar";
+import OrbeJarvis from "./OrbeJarvis";
 import MensagemAssistente from "./MensagemAssistente";
 import styles from "./Assistente.module.css";
 
@@ -57,6 +57,13 @@ const PERGUNTAS_UI = {
 
 const AVISO_PADRAO = "Orientação educativa; não substitui um profissional.";
 
+function prefereMenosMovimento() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
 // Interface da pergunta: do mapa, ou um fallback com o texto da API.
 function interfaceDe(pergunta) {
   return PERGUNTAS_UI[pergunta.id] ?? { Icone: Sparkles, rotulo: pergunta.texto };
@@ -90,9 +97,16 @@ function Assistente() {
     finalizarDigitacao,
   } = useAssistente();
 
-  const [perguntas, setPerguntas] = useState([]);
+  const [perguntasBrutas, setPerguntasBrutas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  // Lista ordenada derivada: só recalcula quando a lista muda, não a cada
+  // tick da digitação.
+  const perguntas = useMemo(
+    () => ordenarPerguntas(perguntasBrutas),
+    [perguntasBrutas],
+  );
 
   // Pergunta selecionada (só faz sentido quando ela tem parâmetro).
   const [selecionadaId, setSelecionadaId] = useState(null);
@@ -102,6 +116,11 @@ function Assistente() {
   const fimDaConversa = useRef(null);
   // Primeira renderização desta montagem: rola sem animação (há histórico).
   const primeiroScroll = useRef(true);
+  // Foco: select do painel e o cartão que o abriu (para devolver o foco).
+  const selectRef = useRef(null);
+  const cartaoAbriuRef = useRef(null);
+  // Quando o painel abre, pede foco para o select no próximo efeito.
+  const focarSelect = useRef(false);
 
   // Busca a lista e atualiza os estados. `reiniciar` liga o "carregando".
   async function carregarPerguntas({ reiniciar = false } = {}) {
@@ -111,7 +130,7 @@ function Assistente() {
     }
     try {
       const lista = await assistenteApi.listarPerguntas();
-      setPerguntas(ordenarPerguntas(lista));
+      setPerguntasBrutas(lista);
       setErro("");
     } catch (e) {
       setErro(e.message || "Não foi possível carregar as perguntas.");
@@ -126,7 +145,7 @@ function Assistente() {
     (async () => {
       try {
         const lista = await assistenteApi.listarPerguntas();
-        if (ativo) setPerguntas(ordenarPerguntas(lista));
+        if (ativo) setPerguntasBrutas(lista);
       } catch (e) {
         if (ativo) setErro(e.message || "Não foi possível carregar as perguntas.");
       } finally {
@@ -142,40 +161,57 @@ function Assistente() {
   // novas, no indicador "calculando" e ao terminar a digitação.
   useLayoutEffect(() => {
     if (mensagens.length === 0 && !aguardando) return;
+    const suave = !primeiroScroll.current && !prefereMenosMovimento();
     fimDaConversa.current?.scrollIntoView({
-      behavior: primeiroScroll.current ? "auto" : "smooth",
+      behavior: suave ? "smooth" : "auto",
       block: "end",
     });
     primeiroScroll.current = false;
   }, [mensagens, aguardando, estado]);
 
+  // Ao abrir o painel, move o foco para o <select>.
+  useEffect(() => {
+    if (focarSelect.current && selectRef.current) {
+      selectRef.current.focus();
+      focarSelect.current = false;
+    }
+  });
+
   // Seleciona a pergunta (destaque) e pré-seleciona a primeira opção.
-  function selecionar(pergunta) {
+  function selecionar(pergunta, elementoCartao) {
     const param = parametroOpcao(pergunta);
+    cartaoAbriuRef.current = elementoCartao ?? null;
+    focarSelect.current = true;
     setSelecionadaId(pergunta.id);
     setOpcaoSelecionada(param ? param.opcoes[0].valor : "");
   }
 
-  // Fecha o painel de parâmetros e reinicia a opção escolhida.
-  function fecharPainel() {
+  // Fecha o painel e reinicia a opção. Por padrão devolve o foco ao cartão
+  // que abriu (não devolve quando a pergunta foi respondida sem parâmetro).
+  function fecharPainel({ devolverFoco = true } = {}) {
     setSelecionadaId(null);
     setOpcaoSelecionada("");
+    if (devolverFoco && cartaoAbriuRef.current) {
+      cartaoAbriuRef.current.focus();
+    }
+    cartaoAbriuRef.current = null;
   }
 
   // Clique no botão da pergunta:
   //  - sem parâmetro: fecha qualquer painel aberto e pergunta direto;
   //  - com parâmetro: alterna o painel (segundo clique fecha).
-  function aoClicarPergunta(pergunta) {
+  function aoClicarPergunta(pergunta, elementoCartao) {
     if (aguardando) return;
     const param = parametroOpcao(pergunta);
     if (param) {
       if (pergunta.id === selecionadaId) {
         fecharPainel();
       } else {
-        selecionar(pergunta);
+        selecionar(pergunta, elementoCartao);
       }
     } else {
-      fecharPainel();
+      // Resposta direta não mexe no foco.
+      fecharPainel({ devolverFoco: false });
       perguntar(pergunta, null);
     }
   }
@@ -213,12 +249,8 @@ function Assistente() {
     <div className={styles.assistente} data-jarvis-estado={estado}>
       {/* Hero: avatar + apresentação do Jarvis */}
       <header className={styles.hero}>
-        <JarvisAvatar estado={estado} />
+        <OrbeJarvis estado={estado} />
         <div className={styles.heroTexto}>
-          <span className={styles.etiqueta}>
-            <span className={styles.etiquetaBolinha} aria-hidden="true" />
-            MeuBolso
-          </span>
           <h1 className={styles.titulo}>
             Jarvis<span className={styles.cursor} aria-hidden="true">_</span>
           </h1>
@@ -237,6 +269,13 @@ function Assistente() {
       ) : erro ? (
         <div className={`card ${styles.estado}`} role="alert">
           <p className="texto-secundario">{erro}</p>
+          <button
+            type="button"
+            className="btn btn-secundario"
+            onClick={() => carregarPerguntas({ reiniciar: true })}
+          >
+            Tentar novamente
+          </button>
         </div>
       ) : perguntas.length === 0 ? (
         <div className={`card ${styles.estado}`}>
@@ -270,7 +309,7 @@ function Assistente() {
                     className={`${styles.cartao} ${
                       ativa ? styles.cartaoAtivo : ""
                     }`}
-                    onClick={() => aoClicarPergunta(pergunta)}
+                    onClick={(e) => aoClicarPergunta(pergunta, e.currentTarget)}
                     disabled={aguardando}
                     aria-pressed={ativa}
                     aria-expanded={temParametro ? ativa : undefined}
@@ -307,6 +346,7 @@ function Assistente() {
                 <div className={styles.linhaParametro}>
                   <select
                     id="assistente-opcao"
+                    ref={selectRef}
                     className={styles.select}
                     value={opcaoSelecionada}
                     onChange={(e) => setOpcaoSelecionada(e.target.value)}

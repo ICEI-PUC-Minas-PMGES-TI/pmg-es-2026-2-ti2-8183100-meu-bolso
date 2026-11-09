@@ -61,13 +61,15 @@
 .balaoErro {
   background-color: var(--erro-fundo);
   border: 1px solid var(--erro);
-  color: var(--erro);
+  /* Texto escuro para contraste >= 4.5:1; a borda/fundo vermelhos é que
+     sinalizam o erro. */
+  color: var(--cinza-700);
   border-bottom-left-radius: 4px;
 }
 
 .horario {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cinza-700);
 }
 
 /* Texto exclusivo para leitores de tela. */
