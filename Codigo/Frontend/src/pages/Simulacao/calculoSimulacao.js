@@ -44,7 +44,7 @@ export function converterValor(texto) {
 
 // Valida os campos do formulário. Retorna um objeto de erros por campo
 // (vazio quando tudo válido).
-export function validar({ valor, forma, parcelas }) {
+export function validar({ valor, forma, parcelas, juros }) {
   const erros = {};
 
   const valorNum = converterValor(valor);
@@ -59,24 +59,50 @@ export function validar({ valor, forma, parcelas }) {
     if (!Number.isInteger(n) || n < 2) {
       erros.parcelas = "Informe o número de parcelas (mínimo 2).";
     }
+
+    // A taxa de juros é opcional (0 = sem juros), mas não pode ser negativa.
+    const taxa = converterValor(juros);
+    if (juros !== "" && juros !== undefined) {
+      if (!Number.isFinite(taxa) || taxa < 0) {
+        erros.juros = "A taxa de juros não pode ser negativa.";
+      }
+    }
   }
 
   return erros;
 }
 
+// Calcula o valor da parcela fixa pela Tabela Price, dada a taxa de juros
+// mensal (em %). Com taxa 0, é só o valor dividido pelas parcelas.
+//   parcela = PV * i / (1 - (1 + i)^-n)
+function calcularParcela(valor, nParcelas, taxaPercentual) {
+  const i = (Number(taxaPercentual) || 0) / 100;
+  if (i <= 0) return valor / nParcelas;
+  return (valor * i) / (1 - Math.pow(1 + i, -nParcelas));
+}
+
 // Calcula o impacto da compra no saldo e nas metas, sem persistir nada.
 //
 // `entrada`: { valor (number), forma ("avista"|"parcelado"), parcelas (number),
-//              saldoAtual (number), metas (array) }
+//              juros (% ao mês), saldoAtual (number), metas (array) }
 //
 // Regra do saldo:
 //  - à vista: desconta o valor cheio do saldo.
 //  - parcelado: desconta apenas o valor de UMA parcela (impacto imediato),
-//    pois as demais caem nos meses seguintes.
-export function simular({ valor, forma, parcelas, saldoAtual, metas }) {
+//    pois as demais caem nos meses seguintes. Com juros, a parcela é
+//    calculada pela Tabela Price e o total pago fica maior que o à vista.
+export function simular({ valor, forma, parcelas, juros, saldoAtual, metas }) {
   const parcelado = forma === "parcelado";
   const nParcelas = parcelado ? Math.max(Number(parcelas) || 1, 1) : 1;
-  const valorParcela = parcelado ? valor / nParcelas : valor;
+  const taxaJuros = parcelado ? Number(converterValor(juros)) || 0 : 0;
+
+  const valorParcela = parcelado
+    ? calcularParcela(valor, nParcelas, taxaJuros)
+    : valor;
+
+  // Total efetivamente pago e quanto disso foi juros.
+  const valorTotal = parcelado ? valorParcela * nParcelas : valor;
+  const totalJuros = valorTotal - valor;
 
   const impactoImediato = valorParcela; // sai do saldo agora
   const saldoDepois = saldoAtual - impactoImediato;
@@ -101,8 +127,11 @@ export function simular({ valor, forma, parcelas, saldoAtual, metas }) {
   return {
     parcelado,
     nParcelas,
+    taxaJuros,
     valorParcela,
-    valorTotal: valor,
+    valorTotal,
+    totalJuros,
+    temJuros: totalJuros > 0.005,
     saldoAntes: saldoAtual,
     saldoDepois,
     saldoNegativo: saldoDepois < 0,
