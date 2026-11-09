@@ -1,5 +1,9 @@
 package Projeto.MeuBolso.util;
 
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Normalização de telefone para um formato canônico usado na identificação
  * do usuário pelo WhatsApp (o número precisa bater com o que o provedor envia).
@@ -44,5 +48,40 @@ public final class Telefone {
         // Outros formatos: devolve os dígitos como vieram (sem forçar DDI),
         // para não corromper números atípicos.
         return digitos;
+    }
+
+    /**
+     * Formas equivalentes do mesmo celular brasileiro, com e sem o nono dígito,
+     * para usar na BUSCA do usuário (não altera como o telefone é salvo).
+     *
+     * Motivo: o WhatsApp identifica números antigos sem o 9 após o DDD
+     * (ex.: "553197186768"), enquanto o usuário costuma cadastrar com o 9
+     * ("5531997186768"). Comparando as duas formas, ambos os lados batem.
+     *  - "5531997186768" -> ["5531997186768", "553197186768"]
+     *  - "553197186768"  -> ["553197186768", "5531997186768"]
+     *  - "553133334444"  -> ["553133334444"] (fixo: começa com 2-5, não ganha 9)
+     *
+     * Retorna lista vazia se a entrada não tiver dígitos.
+     */
+    public static List<String> variantes(String bruto) {
+        String n = normalizar(bruto);
+        if (n == null) return List.of();
+
+        Set<String> formas = new LinkedHashSet<>();
+        formas.add(n);
+
+        if (n.startsWith(DDI_BRASIL)) {
+            String ddd = n.substring(2, 4);
+            String assinante = n.substring(4);
+
+            if (n.length() == 13 && assinante.charAt(0) == '9') {
+                // Com o nono dígito -> versão sem ele.
+                formas.add(DDI_BRASIL + ddd + assinante.substring(1));
+            } else if (n.length() == 12 && "6789".indexOf(assinante.charAt(0)) >= 0) {
+                // Celular antigo (8 dígitos começando em 6-9) -> versão com o 9.
+                formas.add(DDI_BRASIL + ddd + "9" + assinante);
+            }
+        }
+        return List.copyOf(formas);
     }
 }
