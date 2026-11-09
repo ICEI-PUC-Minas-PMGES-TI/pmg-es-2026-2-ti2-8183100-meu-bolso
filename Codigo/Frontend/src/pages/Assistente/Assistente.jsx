@@ -257,9 +257,7 @@ function Assistente() {
       <header className={styles.hero}>
         <OrbeJarvis estado={estado} observarRef={paginaRef} />
         <div className={styles.heroTexto}>
-          <h1 className={styles.titulo}>
-            Jarvis<span className={styles.cursor} aria-hidden="true">_</span>
-          </h1>
+          <h1 className={styles.somenteLeitor}>Jarvis</h1>
           <p className={styles.subtitulo}>
             Seu assistente financeiro pessoal.
             <br />

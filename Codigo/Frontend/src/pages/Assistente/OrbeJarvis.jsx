@@ -18,8 +18,25 @@ const PERSPECTIVA = 2.6;
 const DOIS_PI = Math.PI * 2;
 const ANGULO_OURO = Math.PI * (3 - Math.sqrt(5));
 
+// Visual de esfera oca: anel aceso na borda, miolo vazio.
+const ANEL_EXPOENTE = 2.5;
+const MIOLO_FRACAO = 0.35;
+const MIOLO_BRILHO = 0.2;
+const ANEL_LINHA = 0.25;
+
 function clamp(v, min, max) {
   return v < min ? min : v > max ? max : v;
+}
+
+// Converte uma cor do CSS em rgba(...) com o alfa pedido, usando o
+// próprio canvas para ler a cor (sem hex fixo no código).
+function comAlfa(ctx, cor, alfa) {
+  ctx.fillStyle = cor;
+  const lido = ctx.fillStyle; // normalizado para "#rrggbb" pelo canvas
+  const r = parseInt(lido.slice(1, 3), 16);
+  const g = parseInt(lido.slice(3, 5), 16);
+  const b = parseInt(lido.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alfa})`;
 }
 
 function menosMovimento() {
@@ -43,7 +60,12 @@ function gerarPontos(n) {
     const y = 1 - (2 * i) / (n - 1);
     const r = Math.sqrt(Math.max(0, 1 - y * y));
     const theta = i * ANGULO_OURO;
-    pts[i] = { x: r * Math.cos(theta), y, z: r * Math.sin(theta) };
+    pts[i] = {
+      x: r * Math.cos(theta),
+      y,
+      z: r * Math.sin(theta),
+      ph: Math.random() * DOIS_PI, // fase aleatória fixa (miolo esparso)
+    };
   }
   return pts;
 }
@@ -157,7 +179,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
     const dados = refs.current;
 
     const reduzido = menosMovimento();
-    const n = window.innerWidth < 480 ? 500 : 900;
+    const n = window.innerWidth < 480 ? 700 : 1400;
     const pontos = gerarPontos(n);
 
     dados.cor = {
@@ -182,7 +204,6 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
       const lado = Math.min(largura, altura);
       const cx = largura / 2;
       const cy = altura / 2;
-      const raioBase = 0.4 * lado;
       const t = dados.tempo;
       const est = dados.estado;
 
@@ -193,7 +214,9 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         dados.excitacao += (dados.atento - dados.excitacao) * 0.08;
         dados.pulso *= 0.94;
       }
-      const incX = reduzido ? INCLINACAO_X : dados.inclinacaoX;
+      // Cintilação lenta do anel ao longo do tempo (inclinação base em X).
+      const cintila = reduzido ? 0 : 0.12 * Math.sin(t / 6000);
+      const incX = (reduzido ? INCLINACAO_X : dados.inclinacaoX) + cintila;
       const incY = reduzido ? 0 : dados.inclinacaoY;
       const exc = reduzido ? 0 : dados.excitacao;
       const pulso = reduzido ? 0 : dados.pulso;
@@ -213,12 +236,36 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
       const escala = 1 + exc * 0.03 + pulso * 0.08;
       respiracao *= escala;
 
+      const raioEsfera = 0.43 * lado * respiracao;
+
       ctx.clearRect(0, 0, largura, altura);
 
       // Disco de fundo.
       ctx.fillStyle = dados.cor.escuro;
       ctx.beginPath();
-      ctx.arc(cx, cy, raioBase * respiracao, 0, DOIS_PI);
+      ctx.arc(cx, cy, raioEsfera, 0, DOIS_PI);
+      ctx.fill();
+
+      // Clip circular: nada vaza do disco mesmo com pulso/escala.
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, lado / 2 - 1, 0, DOIS_PI);
+      ctx.clip();
+
+      // Halo suave do centro vazio até a borda.
+      const halo = ctx.createRadialGradient(
+        cx,
+        cy,
+        0.34 * lado,
+        cx,
+        cy,
+        lado / 2,
+      );
+      halo.addColorStop(0, comAlfa(ctx, dados.cor.principal, 0));
+      halo.addColorStop(1, comAlfa(ctx, dados.cor.principal, 0.16));
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(cx, cy, lado / 2, 0, DOIS_PI);
       ctx.fill();
 
       const giro = dados.giro + exc * 0.006;
@@ -235,31 +282,55 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         // Giro em torno de Y (+ inclinação Y interativa).
         const x1 = p.x * cos - p.z * sen;
         const z1 = p.x * sen + p.z * cos;
-        // Inclinação em X (base + interativa).
+        // Inclinação em X (base + cintilação + interativa).
         const y2 = p.y * cosX - z1 * senX;
         const z2 = p.y * senX + z1 * cosX;
 
-        const f = PERSPECTIVA / (PERSPECTIVA - z2);
-        const prof = (z2 + 1) / 2;
+        // Brilho por proximidade da borda (limbo da esfera).
+        const limb = Math.pow(1 - Math.abs(z2), ANEL_EXPOENTE);
+        // Miolo esparso: quase no centro, descarta parte dos pontos.
+        if (limb < 0.15 && p.ph / DOIS_PI > MIOLO_FRACAO) continue;
 
-        let raio = raioBase * respiracao;
+        const f = PERSPECTIVA / (PERSPECTIVA - z2);
+
+        let raio = raioEsfera;
         if (tremor) {
           raio *= 1 + 0.012 * Math.sin(t / 300 + i);
         }
         if (onda) {
-          raio += raioBase * 0.05 * Math.sin(t / 110 + p.y * 7);
+          raio += raioEsfera * 0.025 * Math.sin(t / 110 + p.y * 7);
         }
 
         const px = cx + x1 * raio * f;
         const py = cy + y2 * raio * f;
-        const tamanho = (0.6 + 1.1 * prof) * f;
+        const tamanho = (0.6 + 1.1 * limb) * (lado / 132);
 
-        ctx.globalAlpha = Math.min(1, 0.18 + 0.82 * prof + alfaExtra);
+        let alfa =
+          (MIOLO_BRILHO + (1 - MIOLO_BRILHO) * limb) * (z2 >= 0 ? 1 : 0.6);
+        alfa += alfaExtra;
+        if (onda) {
+          alfa *= 1 + 0.3 * Math.sin(t / 110 + p.y * 7);
+        }
+
+        ctx.globalAlpha = Math.min(1, alfa);
         ctx.beginPath();
         ctx.arc(px, py, tamanho, 0, DOIS_PI);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
+
+      // Borda fina acesa.
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = comAlfa(
+        ctx,
+        dados.cor.principal,
+        Math.min(1, ANEL_LINHA + pulso * 0.25),
+      );
+      ctx.beginPath();
+      ctx.arc(cx, cy, raioEsfera, 0, DOIS_PI);
+      ctx.stroke();
+
+      ctx.restore();
     }
 
     function avancar(est) {
@@ -337,7 +408,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
     <div ref={recipienteRef} className={styles.orbe}>
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       <span className={styles.rotulo} aria-hidden="true">
-        Jarvis
+        J.A.R.V.I.S
       </span>
     </div>
   );
