@@ -74,26 +74,6 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
     }
 
     @Override
-    public List<Opcao> carteirasDeLancamento(String usuarioId) {
-        CarteiraUsuario c = carteiraRepository.findByUsuarioId(usuarioId).orElse(null);
-        if (c == null) return List.of();
-
-        // Mesma ordem e mesmos rótulos do formulário de gasto do site
-        // (carteirasStorage.listarFormasDePagamento): contas, cartões, dinheiro.
-        List<Opcao> lista = new ArrayList<>(contas(usuarioId));
-        for (Map<String, Object> cartao : c.getCartoes()) {
-            boolean credito = "credito".equals(cartao.get("subtipo"));
-            String nome = apelido(cartao) + (credito ? " (Crédito)" : " (Débito)");
-            lista.add(new Opcao(texto(cartao.get("id")), nome, credito ? "cartão de crédito" : "cartão de débito", null));
-        }
-        for (Map<String, Object> item : c.getDinheiroEReservas()) {
-            if (!"dinheiro".equals(item.get("tipo"))) continue;
-            lista.add(new Opcao(texto(item.get("id")), apelido(item), "dinheiro em espécie", null));
-        }
-        return lista;
-    }
-
-    @Override
     public void registrarReceita(String usuarioId, BigDecimal valor, String categoria, String descricao,
                                  Opcao carteira, LocalDate data) {
         receitaService.criar(usuarioId, descricao, categoria, carteira.nome(), data.toString(),

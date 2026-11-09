@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
  * as regras de negócio vêm de {@link OperacoesChatbot}.
  *
  * Fluxos (o "0" cancela e volta ao menu em qualquer etapa):
- *  1 Receita / 2 Gasto : valor -> categoria -> descrição -> carteira -> confirmação
+ *  1 Receita / 2 Gasto : valor -> categoria -> descrição -> conta -> confirmação
  *  3 Depósito em meta  : valor -> meta -> conta -> confirmação
  *  4 Retirada de meta  : valor -> meta -> conta -> confirmação
  *  5 Transferência     : valor -> conta de origem -> conta de destino -> confirmação
@@ -114,9 +114,7 @@ public class FluxoChatbot {
         // Pré-requisitos: avisa logo, antes de pedir o valor.
         switch (op) {
             case RECEITA, GASTO -> {
-                if (ops.carteirasDeLancamento(usuarioId).isEmpty()) {
-                    return semCadastro("uma conta, cartão ou dinheiro", "Carteiras");
-                }
+                if (ops.contas(usuarioId).isEmpty()) return semCadastro("uma conta bancária", "Carteiras");
             }
             case META_DEPOSITO, META_RETIRADA -> {
                 if (ops.metas(usuarioId).isEmpty()) return semCadastro("uma meta", "Metas");
@@ -174,9 +172,9 @@ public class FluxoChatbot {
         }
         c.setDescricao(descricao);
         String pergunta = c.getOperacao() == Operacao.RECEITA
-            ? "Em qual carteira o dinheiro entrou?"
-            : "De qual carteira o dinheiro saiu?";
-        return mostrarLista(c, Etapa.CARTEIRA, ops.carteirasDeLancamento(c.getUsuarioId()), pergunta);
+            ? "Em qual conta o dinheiro entrou?"
+            : "De qual conta o dinheiro saiu?";
+        return mostrarLista(c, Etapa.CARTEIRA, ops.contas(c.getUsuarioId()), pergunta);
     }
 
     private String escolherMeta(ConversaWhatsApp c, String t) {
@@ -197,7 +195,7 @@ public class FluxoChatbot {
 
     private String escolherCarteira(ConversaWhatsApp c, String t) {
         Opcao carteira = escolher(c, t);
-        if (carteira == null) return opcaoInvalida(c, "Escolha a carteira:");
+        if (carteira == null) return opcaoInvalida(c, "Escolha a conta:");
 
         // Quando o dinheiro sai de uma conta para a meta/outra conta, valida o saldo já aqui.
         boolean saiDaConta = c.getOperacao() == Operacao.META_DEPOSITO || c.getOperacao() == Operacao.TRANSFERENCIA;
@@ -306,13 +304,13 @@ public class FluxoChatbot {
                 + "💰 Valor: " + valor + "\n"
                 + "🏷️ Categoria: " + c.getCategoria() + "\n"
                 + "📝 Descrição: " + c.getDescricao() + "\n"
-                + "💳 Carteira: " + c.getCarteira().nome() + "\n"
+                + "🏦 Conta: " + c.getCarteira().nome() + "\n"
                 + "📅 Data: " + hoje;
             case GASTO -> "Confirma o gasto?\n\n"
                 + "💸 Valor: " + valor + "\n"
                 + "🏷️ Categoria: " + c.getCategoria() + "\n"
                 + "📝 Descrição: " + c.getDescricao() + "\n"
-                + "💳 Carteira: " + c.getCarteira().nome() + "\n"
+                + "🏦 Conta: " + c.getCarteira().nome() + "\n"
                 + "📅 Data: " + hoje;
             case META_DEPOSITO -> "Confirma o depósito na meta?\n\n"
                 + "💰 Valor: " + valor + "\n"

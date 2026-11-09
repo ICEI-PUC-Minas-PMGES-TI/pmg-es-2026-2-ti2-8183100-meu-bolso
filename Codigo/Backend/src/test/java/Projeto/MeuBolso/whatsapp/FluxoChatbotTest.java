@@ -71,16 +71,17 @@ class FluxoChatbotTest {
         assertThat(enviar("2")).contains("valor do gasto");
         assertThat(enviar("25,90")).contains("Qual a categoria?").contains("1 - Alimentação");
         assertThat(enviar("1")).contains("descrição");
-        assertThat(enviar("Mercado")).contains("De qual carteira o dinheiro saiu?")
-            .contains("1 - Nubank (saldo").contains("3 - Itaú (Crédito)").contains("4 - Carteira");
+        // Gastos e receitas só aceitam contas bancárias (mesma regra do site).
+        assertThat(enviar("Mercado")).contains("De qual conta o dinheiro saiu?")
+            .contains("1 - Nubank (saldo").contains("2 - Inter (saldo").doesNotContain("3 -");
 
-        String resumo = enviar("3");
+        String resumo = enviar("2");
         assertThat(resumo).contains("Confirma o gasto?").contains("R$").contains("25,90")
-            .contains("Alimentação").contains("Mercado").contains("Itaú (Crédito)").contains("21/10/2026");
+            .contains("Alimentação").contains("Mercado").contains("Conta: Inter").contains("21/10/2026");
 
         String fim = enviar("1");
-        assertThat(fim).startsWith("✅ Gasto de").contains("Itaú (Crédito)").contains("O que você deseja fazer?");
-        assertThat(ops.registros).containsExactly("gasto 25.90 Alimentação Mercado cred-1 2026-10-21");
+        assertThat(fim).startsWith("✅ Gasto de").contains("Inter").contains("O que você deseja fazer?");
+        assertThat(ops.registros).containsExactly("gasto 25.90 Alimentação Mercado conta-2 2026-10-21");
         assertThat(c.getEtapa()).isEqualTo(Etapa.MENU);
     }
 
@@ -230,7 +231,7 @@ class FluxoChatbotTest {
         return fluxo.processar(c, texto, "Gabriel Hermont");
     }
 
-    /** Operações em memória: 2 contas, 1 cartão, 1 dinheiro e 1 meta. */
+    /** Operações em memória: 2 contas e 1 meta. */
     static class OperacoesFalsas implements OperacoesChatbot {
         final List<Opcao> contas = new ArrayList<>(List.of(
             new Opcao("conta-1", "Nubank", "saldo R$ 500,00", new BigDecimal("500")),
@@ -242,14 +243,6 @@ class FluxoChatbotTest {
 
         @Override public List<Opcao> metas(String usuarioId) { return metas; }
         @Override public List<Opcao> contas(String usuarioId) { return contas; }
-
-        @Override
-        public List<Opcao> carteirasDeLancamento(String usuarioId) {
-            List<Opcao> l = new ArrayList<>(contas);
-            l.add(new Opcao("cred-1", "Itaú (Crédito)", "cartão de crédito", null));
-            l.add(new Opcao("din-1", "Carteira", "dinheiro em espécie", null));
-            return l;
-        }
 
         @Override
         public void registrarReceita(String u, BigDecimal valor, String categoria, String descricao, Opcao carteira, LocalDate data) {

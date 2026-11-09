@@ -18,11 +18,11 @@ public interface OperacoesChatbot {
     /** Metas do usuário. `valor` = valor guardado; `detalhe` = progresso. */
     List<Opcao> metas(String usuarioId);
 
-    /** Contas bancárias do usuário. `valor` = saldo. */
+    /**
+     * Contas bancárias do usuário. `valor` = saldo. São as únicas carteiras
+     * aceitas em receitas, gastos, metas e transferências (mesma regra do site).
+     */
     List<Opcao> contas(String usuarioId);
-
-    /** Onde uma receita/gasto pode entrar/sair: contas, cartões e dinheiro (igual ao site). */
-    List<Opcao> carteirasDeLancamento(String usuarioId);
 
     void registrarReceita(String usuarioId, BigDecimal valor, String categoria, String descricao, Opcao carteira, LocalDate data);
 
