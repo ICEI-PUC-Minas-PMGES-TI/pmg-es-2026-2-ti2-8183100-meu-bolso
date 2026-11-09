@@ -14,7 +14,7 @@ function ErroCampo({ texto }) {
 // Formulário "Dados da compra". Componente controlado: os valores e o
 // callback de alteração vêm da página; aqui só cuidamos da apresentação.
 function FormularioCompra({ form, erros, carteiras, aoAlterar, aoCalcular }) {
-  const { valor, categoria, forma, parcelas, carteiraId } = form;
+  const { valor, categoria, forma, parcelas, juros, carteiraId } = form;
   const semCarteiras = carteiras.length === 0;
 
   return (
@@ -84,22 +84,40 @@ function FormularioCompra({ form, erros, carteiras, aoAlterar, aoCalcular }) {
 
       {/* Nº de parcelas: só quando a forma for "parcelado" */}
       {forma === "parcelado" && (
-        <div className="form-group">
-          <label className="form-label" htmlFor="parcelas">
-            Número de parcelas
-          </label>
-          <input
-            id="parcelas"
-            className="form-input"
-            type="number"
-            min="2"
-            step="1"
-            value={parcelas}
-            onChange={(e) => aoAlterar("parcelas", e.target.value)}
-            aria-invalid={Boolean(erros.parcelas)}
-          />
-          <ErroCampo texto={erros.parcelas} />
-        </div>
+        <>
+          <div className="form-group">
+            <label className="form-label" htmlFor="parcelas">
+              Número de parcelas
+            </label>
+            <input
+              id="parcelas"
+              className="form-input"
+              type="number"
+              min="2"
+              step="1"
+              value={parcelas}
+              onChange={(e) => aoAlterar("parcelas", e.target.value)}
+              aria-invalid={Boolean(erros.parcelas)}
+            />
+            <ErroCampo texto={erros.parcelas} />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="juros">
+              Juros ao mês (%)
+            </label>
+            <input
+              id="juros"
+              className="form-input"
+              inputMode="decimal"
+              placeholder="0 (sem juros)"
+              value={juros}
+              onChange={(e) => aoAlterar("juros", e.target.value)}
+              aria-invalid={Boolean(erros.juros)}
+            />
+            <ErroCampo texto={erros.juros} />
+          </div>
+        </>
       )}
 
       <div className="form-group">
