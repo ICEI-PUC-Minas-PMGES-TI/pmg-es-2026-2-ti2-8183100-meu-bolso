@@ -48,6 +48,42 @@ public class CarteiraService {
     }
 
     /**
+     * valor > 0 = recebeu; valor < 0 = estorno. Espelho de aplicarGasto para
+     * entradas: uma receita SOMA no saldo da conta (gasto subtrai).
+     * Sem efeito em dinheiro ou item inexistente.
+     *
+     * Para cartões: crédito abate a fatura (reduz faturaAtual); débito credita
+     * a conta vinculada. Dinheiro em espécie é gerido direto na tela da carteira.
+     */
+    public void aplicarReceita(String usuarioId, String carteiraId, BigDecimal valor) {
+        if (carteiraId == null || carteiraId.isBlank() || valor == null || valor.signum() == 0) return;
+
+        CarteiraUsuario c = repo.findByUsuarioId(usuarioId).orElse(null);
+        if (c == null) return;
+
+        boolean mudou = false;
+        Map<String, Object> conta = achar(c.getContas(), carteiraId);
+        if (conta != null) {
+            mudou = somar(conta, "saldo", valor);
+        } else {
+            Map<String, Object> cartao = achar(c.getCartoes(), carteiraId);
+            if (cartao != null) {
+                if ("credito".equals(cartao.get("subtipo"))) {
+                    mudou = somar(cartao, "faturaAtual", valor.negate());
+                } else if (cartao.get("contaId") instanceof String contaId) {
+                    Map<String, Object> contaDoDebito = achar(c.getContas(), contaId);
+                    if (contaDoDebito != null) mudou = somar(contaDoDebito, "saldo", valor);
+                }
+            }
+        }
+
+        if (mudou) {
+            c.setVersao(c.getVersao() + 1);
+            repo.save(c);
+        }
+    }
+
+    /**
      * Saldo atual de uma conta bancária.
      * Retorna null se a conta não existir ou não tiver saldo numérico.
      * Usado para validar movimentações de meta antes de aplicá-las.

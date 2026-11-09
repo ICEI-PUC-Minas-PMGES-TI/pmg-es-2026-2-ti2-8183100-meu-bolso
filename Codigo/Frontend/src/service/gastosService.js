@@ -11,6 +11,7 @@
 
     import { gastosApi } from "./Api";
     import {
+    comProjecoes,
     dataDaOcorrencia,
     hojeISO,
     mesAtualChave,
@@ -85,6 +86,38 @@
     };
     }
 
+    /* ----- Orçamento por mês (localStorage) -----
+    Guardamos um mapa { "AAAA-MM": valor }. Para não perder o orçamento global
+    da versão antiga (um número só), migramos esse valor para o mês atual na
+    primeira vez que lemos. */
+    function lerMapaOrcamentos() {
+    const bruto = ler(CHAVES.orcamento, {});
+    if (typeof bruto === "number") {
+        // Formato antigo: número único -> vira o orçamento do mês atual.
+        const migrado = bruto > 0 ? { [mesAtualChave()]: bruto } : {};
+        gravar(CHAVES.orcamento, migrado);
+        return migrado;
+    }
+    return bruto && typeof bruto === "object" ? bruto : {};
+    }
+
+    function lerOrcamentoDoMes(mes) {
+    const alvo = mes || mesAtualChave();
+    return Number(lerMapaOrcamentos()[alvo]) || 0;
+    }
+
+    function gravarOrcamentoDoMes(mes, valor) {
+    const alvo = mes || mesAtualChave();
+    const mapa = lerMapaOrcamentos();
+    const numero = Number(valor) || 0;
+    if (numero > 0) {
+        mapa[alvo] = numero;
+    } else {
+        delete mapa[alvo];
+    }
+    gravar(CHAVES.orcamento, mapa);
+    }
+
     // A recorrência nasce a partir de um gasto: o dia do mês vem da data dele.
     function criarRecorrenciaDe(gasto) {
     return {
@@ -97,6 +130,7 @@
         diaDoMes: Number(gasto.data.slice(8, 10)),
         ativa: true,
         ultimoMes: gasto.data.slice(0, 7), // último mês que já tem lançamento
+        mesesPulados: [], // meses "removidos só neste mês"
     };
     }
 
@@ -111,6 +145,7 @@
     const atualizadas = recorrencias.map((rec) => {
         if (!rec.ativa) return rec;
 
+        const pulados = new Set(rec.mesesPulados ?? []);
         let ultimoMes = rec.ultimoMes;
         let proximo = mudarMes(ultimoMes, 1);
 
@@ -118,7 +153,9 @@
         dataDaOcorrencia(proximo, rec.diaDoMes) <= hoje &&
         novos.length < LIMITE_OCORRENCIAS
         ) {
-        novos.push({
+        // Mês marcado como "pular" (removido só neste mês): avança sem lançar.
+        if (!pulados.has(proximo)) {
+            novos.push({
             id: novoId(),
             descricao: rec.descricao,
             categoria: rec.categoria,
@@ -127,7 +164,8 @@
             valor: rec.valor,
             comentario: rec.comentario,
             recorrenciaId: rec.id,
-        });
+            });
+        }
         ultimoMes = proximo;
         proximo = mudarMes(proximo, 1);
         }
@@ -152,10 +190,16 @@
         gravar(CHAVES.recorrencias, recorrencias);
 
         return {
-        gastos,
+        // Projeta os recorrentes para os próximos meses (ocorrências virtuais).
+        gastos: comProjecoes(gastos, recorrencias),
         recorrencias,
-        orcamento: Number(ler(CHAVES.orcamento, 0)) || 0,
+        // Orçamento do mês atual (a tela busca os demais meses sob demanda).
+        orcamento: lerOrcamentoDoMes(mesAtualChave()),
         };
+    },
+
+    async obterOrcamento(mes) {
+        return lerOrcamentoDoMes(mes);
     },
 
     async criarGasto({ recorrente, ...dados }) {
@@ -247,8 +291,29 @@
         );
     },
 
-    async salvarOrcamento(valor) {
-        gravar(CHAVES.orcamento, Number(valor) || 0);
+    // "Remover só neste mês": marca o mês na recorrência e apaga o gasto real
+    // daquele mês (se já tiver sido lançado). Os demais meses seguem normais.
+    async pularMesRecorrencia(id, mes) {
+        gravar(
+        CHAVES.recorrencias,
+        ler(CHAVES.recorrencias, []).map((rec) => {
+            if (rec.id !== id) return rec;
+            const pulados = new Set(rec.mesesPulados ?? []);
+            pulados.add(mes);
+            return { ...rec, mesesPulados: [...pulados] };
+        }),
+        );
+
+        gravar(
+        CHAVES.gastos,
+        ler(CHAVES.gastos, []).filter(
+            (gasto) => !(gasto.recorrenciaId === id && gasto.data.startsWith(mes)),
+        ),
+        );
+    },
+
+    async salvarOrcamento(valor, mes) {
+        gravarOrcamentoDoMes(mes, valor);
     },
     };
 
@@ -267,7 +332,12 @@
     }
 
     function normalizarRecorrencia(rec) {
-    return { ...rec, valor: Number(rec.valor), comentario: rec.comentario ?? "" };
+    return {
+        ...rec,
+        valor: Number(rec.valor),
+        comentario: rec.comentario ?? "",
+        mesesPulados: rec.mesesPulados ?? [],
+    };
     }
 
     const remoto = {
@@ -279,11 +349,19 @@
         gastosApi.obterOrcamento(),
         ]);
 
+        const recorrenciasNorm = recorrencias.map(normalizarRecorrencia);
+
         return {
-        gastos: gastos.map(normalizarGasto),
-        recorrencias: recorrencias.map(normalizarRecorrencia),
+        // Projeta os recorrentes para os próximos meses (ocorrências virtuais).
+        gastos: comProjecoes(gastos.map(normalizarGasto), recorrenciasNorm),
+        recorrencias: recorrenciasNorm,
         orcamento: Number(orcamento.valorMensal) || 0,
         };
+    },
+
+    async obterOrcamento(mes) {
+        const orcamento = await gastosApi.obterOrcamento(mes);
+        return Number(orcamento.valorMensal) || 0;
     },
 
     async criarGasto(dados) {
@@ -328,8 +406,12 @@
         await gastosApi.excluirRecorrente(id);
     },
 
-    async salvarOrcamento(valor) {
-        await gastosApi.salvarOrcamento(Number(valor) || 0);
+    async pularMesRecorrencia(id, mes) {
+        await gastosApi.pularRecorrente(id, mes);
+    },
+
+    async salvarOrcamento(valor, mes) {
+        await gastosApi.salvarOrcamento(Number(valor) || 0, mes);
     },
     };
 

@@ -275,16 +275,26 @@ export const gastosApi = {
       autenticado: true,
     }),
 
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/gastos/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
+      autenticado: true,
+    }),
+
   excluirRecorrente: (id) =>
     requisicao(`/api/gastos/recorrentes/${id}`, {
       metodo: "DELETE",
       autenticado: true,
     }),
 
-  obterOrcamento: () => requisicao("/api/orcamento", { autenticado: true }),
+  // Orçamento de um mês ("AAAA-MM"). Sem mês, o back usa o mês atual.
+  obterOrcamento: (mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, { autenticado: true }),
 
-  salvarOrcamento: (valorMensal) =>
-    requisicao("/api/orcamento", {
+  salvarOrcamento: (valorMensal, mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, {
       metodo: "PUT",
       corpo: { valorMensal },
       autenticado: true,
@@ -305,6 +315,60 @@ export const assistenteApi = {
     requisicao(`/api/assistente/perguntas/${id}`, {
       metodo: "POST",
       corpo: { params },
+      autenticado: true,
+    }),
+};
+
+/* ========================================
+   RECEITAS E RECORRÊNCIAS
+   (usados por service/receitasService.js quando VITE_RECEITAS_API=true)
+   ======================================== */
+
+export const receitasApi = {
+  // O back-end gera as recorrências que já venceram antes de devolver a lista
+  listar: () => requisicao("/api/receitas", { autenticado: true }),
+
+  criar: (corpo) =>
+    requisicao("/api/receitas", { metodo: "POST", corpo, autenticado: true }),
+
+  atualizar: (id, corpo) =>
+    requisicao(`/api/receitas/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  atualizarComentario: (id, comentario) =>
+    requisicao(`/api/receitas/${id}/comentario`, {
+      metodo: "PATCH",
+      corpo: { comentario },
+      autenticado: true,
+    }),
+
+  excluir: (id) =>
+    requisicao(`/api/receitas/${id}`, { metodo: "DELETE", autenticado: true }),
+
+  listarRecorrentes: () =>
+    requisicao("/api/receitas/recorrentes", { autenticado: true }),
+
+  atualizarRecorrente: (id, corpo) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/receitas/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
+      autenticado: true,
+    }),
+
+  excluirRecorrente: (id) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "DELETE",
       autenticado: true,
     }),
 };

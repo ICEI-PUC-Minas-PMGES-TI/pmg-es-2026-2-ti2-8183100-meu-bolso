@@ -11,6 +11,7 @@ import CancelarResumo from "./pages/ResumoSemanal/CancelarResumo";
 // Páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Gastos from "./pages/Gastos/Gastos";
+import Receitas from "./pages/Receitas/Receitas";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
 import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
@@ -42,6 +43,7 @@ function App() {
           >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/gastos" element={<Gastos />} />
+            <Route path="/receitas" element={<Receitas />} />
             <Route path="/carteiras" element={<Carteiras />} />
             <Route path="/metas" element={<Metas />} />
             <Route

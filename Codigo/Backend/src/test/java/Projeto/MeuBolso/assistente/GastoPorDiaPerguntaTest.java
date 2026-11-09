@@ -42,9 +42,9 @@ class GastoPorDiaPerguntaTest {
         return new GastoPorDiaPergunta(orcamentoRepository, new GastosDoMes(gastoRepository, clock), clock);
     }
 
-    private void orcamento(String valor) {
-        when(orcamentoRepository.findByUsuarioId(USUARIO))
-            .thenReturn(Optional.of(new Orcamento(USUARIO, new BigDecimal(valor))));
+    private void orcamento(String mes, String valor) {
+        lenient().when(orcamentoRepository.findByUsuarioIdAndMes(USUARIO, mes))
+            .thenReturn(Optional.of(new Orcamento(USUARIO, mes, new BigDecimal(valor))));
     }
 
     private void gasto(LocalDate dia, String valor) {
@@ -59,7 +59,7 @@ class GastoPorDiaPerguntaTest {
     void dividePeloDiasRestantesIncluindoHoje() {
         // 19/nov (mês de 30 dias) -> 12 dias restantes; restante 480 -> 40,00/dia.
         LocalDate dia = LocalDate.of(2026, 11, 19);
-        orcamento("1500");
+        orcamento("2026-11", "1500");
         gasto(dia, "1020");
         RespostaPronta r = pergunta(em(dia)).responder(USUARIO, Map.of());
         assertThat(r.dados().get("diasRestantes")).isEqualTo(12);
@@ -73,7 +73,7 @@ class GastoPorDiaPerguntaTest {
     @Test
     void ultimoDiaDoMesEhUmDia() {
         LocalDate dia = LocalDate.of(2026, 11, 30);
-        orcamento("1500");
+        orcamento("2026-11", "1500");
         gasto(dia, "1020");
         RespostaPronta r = pergunta(em(dia)).responder(USUARIO, Map.of());
         assertThat(r.dados().get("diasRestantes")).isEqualTo(1);
@@ -84,7 +84,7 @@ class GastoPorDiaPerguntaTest {
     @Test
     void orcamentoEstouradoDaZeroPorDia() {
         LocalDate dia = LocalDate.of(2026, 11, 19);
-        orcamento("1500");
+        orcamento("2026-11", "1500");
         gasto(dia, "1620");
         RespostaPronta r = pergunta(em(dia)).responder(USUARIO, Map.of());
         assertThat((BigDecimal) r.dados().get("porDia")).isEqualByComparingTo("0");
@@ -96,7 +96,7 @@ class GastoPorDiaPerguntaTest {
     void arredondaParaBaixo() {
         // restante 100 em 3 dias (último dia = 28/fev/2026) -> 33,33.
         LocalDate dia = LocalDate.of(2026, 2, 26);
-        orcamento("100");
+        orcamento("2026-02", "100");
         gasto(dia, "0");
         RespostaPronta r = pergunta(em(dia)).responder(USUARIO, Map.of());
         assertThat(r.dados().get("diasRestantes")).isEqualTo(3);
@@ -105,7 +105,7 @@ class GastoPorDiaPerguntaTest {
 
     @Test
     void indisponivelSemOrcamento() {
-        when(orcamentoRepository.findByUsuarioId(USUARIO)).thenReturn(Optional.empty());
+        when(orcamentoRepository.findByUsuarioIdAndMes(USUARIO, "2026-11")).thenReturn(Optional.empty());
         assertThat(pergunta(em(LocalDate.of(2026, 11, 19))).disponivel(USUARIO)).isFalse();
     }
 }
