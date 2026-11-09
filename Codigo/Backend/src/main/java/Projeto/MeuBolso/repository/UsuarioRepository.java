@@ -10,4 +10,6 @@ public interface UsuarioRepository extends MongoRepository<Usuario, String> {
     boolean existsByEmail(String email);
     // Usado ao trocar o e-mail: detecta duplicidade ignorando o próprio usuário.
     boolean existsByEmailAndIdNot(String email, String id);
+    // Identificação do usuário pelo WhatsApp: busca pelo telefone normalizado.
+    Optional<Usuario> findByTelefone(String telefone);
 }
