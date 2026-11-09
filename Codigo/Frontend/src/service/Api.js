@@ -310,6 +310,52 @@ export const assistenteApi = {
 };
 
 /* ========================================
+   RECEITAS E RECORRÊNCIAS
+   (usados por service/receitasService.js quando VITE_RECEITAS_API=true)
+   ======================================== */
+
+export const receitasApi = {
+  // O back-end gera as recorrências que já venceram antes de devolver a lista
+  listar: () => requisicao("/api/receitas", { autenticado: true }),
+
+  criar: (corpo) =>
+    requisicao("/api/receitas", { metodo: "POST", corpo, autenticado: true }),
+
+  atualizar: (id, corpo) =>
+    requisicao(`/api/receitas/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  atualizarComentario: (id, comentario) =>
+    requisicao(`/api/receitas/${id}/comentario`, {
+      metodo: "PATCH",
+      corpo: { comentario },
+      autenticado: true,
+    }),
+
+  excluir: (id) =>
+    requisicao(`/api/receitas/${id}`, { metodo: "DELETE", autenticado: true }),
+
+  listarRecorrentes: () =>
+    requisicao("/api/receitas/recorrentes", { autenticado: true }),
+
+  atualizarRecorrente: (id, corpo) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  excluirRecorrente: (id) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "DELETE",
+      autenticado: true,
+    }),
+};
+
+/* ========================================
    CARTEIRAS
    ======================================== */
 
