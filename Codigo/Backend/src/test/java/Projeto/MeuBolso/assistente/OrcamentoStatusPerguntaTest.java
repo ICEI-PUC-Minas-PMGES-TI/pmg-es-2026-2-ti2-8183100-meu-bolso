@@ -46,8 +46,8 @@ class OrcamentoStatusPerguntaTest {
     }
 
     private void orcamento(String valor) {
-        when(orcamentoRepository.findByUsuarioId(USUARIO))
-            .thenReturn(Optional.of(new Orcamento(USUARIO, new BigDecimal(valor))));
+        when(orcamentoRepository.findByUsuarioIdAndMes(USUARIO, "2026-03"))
+            .thenReturn(Optional.of(new Orcamento(USUARIO, "2026-03", new BigDecimal(valor))));
     }
 
     private void gasto(String valor) {
@@ -127,7 +127,7 @@ class OrcamentoStatusPerguntaTest {
 
     @Test
     void indisponivelSemOrcamento() {
-        when(orcamentoRepository.findByUsuarioId(USUARIO)).thenReturn(Optional.empty());
+        when(orcamentoRepository.findByUsuarioIdAndMes(USUARIO, "2026-03")).thenReturn(Optional.empty());
         assertThat(pergunta.disponivel(USUARIO)).isFalse();
     }
 

@@ -1,6 +1,8 @@
 package Projeto.MeuBolso.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -30,6 +32,10 @@ public class Recorrencia {
     private boolean ativa = true;
     // Último mês já lançado ("AAAA-MM"). A geração só avança a partir daqui.
     private String ultimoMes;
+
+    // Meses ("AAAA-MM") que o usuário pediu para pular ("remover só neste mês").
+    // A geração nunca cria lançamento para um mês presente nesta lista.
+    private List<String> mesesPulados = new ArrayList<>();
 
     // Id da forma de pagamento (conta/cartão/dinheiro) na carteira.
     private String carteiraId;
@@ -73,4 +79,17 @@ public class Recorrencia {
 
     public String getCarteiraId() { return carteiraId; }
     public void setCarteiraId(String carteiraId) { this.carteiraId = carteiraId; }
+
+    public List<String> getMesesPulados() {
+        return mesesPulados == null ? new ArrayList<>() : mesesPulados;
+    }
+    public void setMesesPulados(List<String> mesesPulados) {
+        this.mesesPulados = mesesPulados == null ? new ArrayList<>() : mesesPulados;
+    }
+
+    /** Marca um mês ("AAAA-MM") para ser pulado pela geração. Idempotente. */
+    public void pularMes(String mes) {
+        if (mesesPulados == null) mesesPulados = new ArrayList<>();
+        if (mes != null && !mesesPulados.contains(mes)) mesesPulados.add(mes);
+    }
 }

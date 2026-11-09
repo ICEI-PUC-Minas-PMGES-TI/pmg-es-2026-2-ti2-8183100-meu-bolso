@@ -55,22 +55,26 @@ public class GastoRecorrenciaService {
 
             String ultimoMes = rec.getUltimoMes();
             String proximo = mudarMes(ultimoMes, 1);
+            List<String> pulados = rec.getMesesPulados();
 
             boolean avancou = false;
             while (dataDaOcorrencia(proximo, rec.getDiaDoMes()).compareTo(hojeIso) <= 0
                     && novos.size() < LIMITE_OCORRENCIAS) {
-                Gasto g = new Gasto(
-                    usuarioId,
-                    rec.getDescricao(),
-                    rec.getCategoria(),
-                    rec.getCarteira(),
-                    dataDaOcorrencia(proximo, rec.getDiaDoMes()),
-                    rec.getValor(),
-                    rec.getComentario(),
-                    rec.getId()
-                );
-                g.setCarteiraId(rec.getCarteiraId());
-                novos.add(g);
+                // Mês marcado como "pular" (removido só neste mês): avança sem lançar.
+                if (!pulados.contains(proximo)) {
+                    Gasto g = new Gasto(
+                        usuarioId,
+                        rec.getDescricao(),
+                        rec.getCategoria(),
+                        rec.getCarteira(),
+                        dataDaOcorrencia(proximo, rec.getDiaDoMes()),
+                        rec.getValor(),
+                        rec.getComentario(),
+                        rec.getId()
+                    );
+                    g.setCarteiraId(rec.getCarteiraId());
+                    novos.add(g);
+                }
                 ultimoMes = proximo;
                 proximo = mudarMes(proximo, 1);
                 avancou = true;

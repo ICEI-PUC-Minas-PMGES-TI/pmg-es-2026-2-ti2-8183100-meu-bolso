@@ -39,6 +39,11 @@ public class GastosDoMes {
         return noPeriodo(usuarioId, mes.atDay(1), mes.atEndOfMonth());
     }
 
+    /** Chave "AAAA-MM" do mês corrente (mesmo Clock usado em doMes/total). */
+    public String mesAtualChave() {
+        return YearMonth.now(clock).toString();
+    }
+
     /** Gastos do usuário num intervalo de datas (limites inclusivos). */
     public List<Gasto> noPeriodo(String usuarioId, LocalDate inicio, LocalDate fim) {
         return gastoRepository.findPorPeriodo(usuarioId, inicio.toString(), fim.toString());

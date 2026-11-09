@@ -168,7 +168,16 @@
                         </span>
                         )}
 
-                        {gasto.comentario && (
+                        {gasto.projetado && (
+                        <span
+                            className={styles["gastos-selo-previsto"]}
+                            title="Lançamento previsto: ainda não aconteceu"
+                        >
+                            Previsto
+                        </span>
+                        )}
+
+                        {gasto.comentario && !gasto.projetado && (
                         <button
                             type="button"
                             className={styles["gastos-botao-comentario"]}
@@ -201,22 +210,25 @@
 
                     <td data-label="Ações" className={styles["gastos-col-acoes"]}>
                     <span className={styles["gastos-acoes"]}>
+                        {/* Projetados (previstos) ainda não existem: só permitem excluir. */}
+                        {!gasto.projetado && (
                         <button
-                        type="button"
-                        className={styles["gastos-botao-icone"]}
-                        onClick={() => onEditar(gasto)}
-                        aria-label={`Editar gasto ${gasto.descricao}`}
-                        title="Editar"
+                            type="button"
+                            className={styles["gastos-botao-icone"]}
+                            onClick={() => onEditar(gasto)}
+                            aria-label={`Editar gasto ${gasto.descricao}`}
+                            title="Editar"
                         >
-                        <Pencil size={16} aria-hidden="true" />
+                            <Pencil size={16} aria-hidden="true" />
                         </button>
+                        )}
 
                         <button
                         type="button"
                         className={`${styles["gastos-botao-icone"]} ${styles["gastos-botao-excluir"]}`}
                         onClick={() => onExcluir(gasto)}
                         aria-label={`Excluir gasto ${gasto.descricao}`}
-                        title="Excluir"
+                        title={gasto.projetado ? "Remover recorrência" : "Excluir"}
                         >
                         <Trash2 size={16} aria-hidden="true" />
                         </button>
