@@ -60,22 +60,26 @@ public class ReceitaRecorrenciaService {
 
             String ultimoMes = rec.getUltimoMes();
             String proximo = mudarMes(ultimoMes, 1);
+            List<String> pulados = rec.getMesesPulados();
 
             boolean avancou = false;
             while (dataDaOcorrencia(proximo, rec.getDiaDoMes()).compareTo(hojeIso) <= 0
                     && novas.size() < LIMITE_OCORRENCIAS) {
-                Receita r = new Receita(
-                    usuarioId,
-                    rec.getDescricao(),
-                    rec.getCategoria(),
-                    rec.getCarteira(),
-                    dataDaOcorrencia(proximo, rec.getDiaDoMes()),
-                    rec.getValor(),
-                    rec.getComentario(),
-                    rec.getId()
-                );
-                r.setCarteiraId(rec.getCarteiraId());
-                novas.add(r);
+                // Mês marcado como "pular" (removido só neste mês): avança sem lançar.
+                if (!pulados.contains(proximo)) {
+                    Receita r = new Receita(
+                        usuarioId,
+                        rec.getDescricao(),
+                        rec.getCategoria(),
+                        rec.getCarteira(),
+                        dataDaOcorrencia(proximo, rec.getDiaDoMes()),
+                        rec.getValor(),
+                        rec.getComentario(),
+                        rec.getId()
+                    );
+                    r.setCarteiraId(rec.getCarteiraId());
+                    novas.add(r);
+                }
                 ultimoMes = proximo;
                 proximo = mudarMes(proximo, 1);
                 avancou = true;

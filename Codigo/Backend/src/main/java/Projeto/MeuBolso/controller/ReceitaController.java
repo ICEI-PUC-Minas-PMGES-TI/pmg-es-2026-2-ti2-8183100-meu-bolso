@@ -2,6 +2,7 @@ package Projeto.MeuBolso.controller;
 
 import Projeto.MeuBolso.model.Receita;
 import Projeto.MeuBolso.model.ReceitaDtos.ComentarioRequest;
+import Projeto.MeuBolso.model.ReceitaDtos.PularMesRequest;
 import Projeto.MeuBolso.model.ReceitaDtos.ReceitaRequest;
 import Projeto.MeuBolso.model.ReceitaDtos.ReceitaResponse;
 import Projeto.MeuBolso.model.ReceitaDtos.RecorrenciaRequest;
@@ -211,6 +212,35 @@ public class ReceitaController {
         return paraResponse(recorrenciaRepository.save(rec));
     }
 
+    // Pula um mês da recorrência ("remover só neste mês"). Marca o mês para não
+    // ser gerado e, se já houver uma receita lançada nesse mês para esta regra,
+    // remove-a e estorna na carteira. Não afeta meses passados nem os demais
+    // meses futuros.
+    @PostMapping("/recorrentes/{id}/pular")
+    public RecorrenciaResponse pularMes(@PathVariable String id,
+                                        @Valid @RequestBody PularMesRequest request,
+                                        Authentication authentication) {
+        String usuarioId = usuarioAutenticado(authentication).getId();
+
+        ReceitaRecorrencia rec = recorrenciaRepository.findByIdAndUsuarioId(id, usuarioId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recorrência não encontrada."));
+
+        String mes = request.mes();
+        rec.pularMes(mes);
+        ReceitaRecorrencia salva = recorrenciaRepository.save(rec);
+
+        // Se o mês já virou uma receita real desta recorrência, remove e estorna.
+        List<Receita> vinculadas = receitaRepository.findByUsuarioIdAndRecorrenciaId(usuarioId, id);
+        for (Receita r : vinculadas) {
+            if (r.getData() != null && r.getData().startsWith(mes)) {
+                receitaRepository.delete(r);
+                carteiraService.aplicarReceita(usuarioId, r.getCarteiraId(), r.getValor().negate());
+            }
+        }
+
+        return paraResponse(salva);
+    }
+
     // Exclui a regra. As receitas já lançadas continuam, só perdem o vínculo.
     @DeleteMapping("/recorrentes/{id}")
     public ResponseEntity<Void> excluirRecorrente(@PathVariable String id, Authentication authentication) {
@@ -286,6 +316,7 @@ public class ReceitaController {
             r.getDiaDoMes(),
             r.isAtiva(),
             r.getUltimoMes(),
+            r.getMesesPulados(),
             r.getCarteiraId()
         );
     }

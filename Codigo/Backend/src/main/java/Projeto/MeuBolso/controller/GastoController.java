@@ -4,6 +4,7 @@
     import Projeto.MeuBolso.model.GastoDtos.ComentarioRequest;
     import Projeto.MeuBolso.model.GastoDtos.GastoRequest;
     import Projeto.MeuBolso.model.GastoDtos.GastoResponse;
+    import Projeto.MeuBolso.model.GastoDtos.PularMesRequest;
     import Projeto.MeuBolso.model.GastoDtos.RecorrenciaRequest;
     import Projeto.MeuBolso.model.GastoDtos.RecorrenciaResponse;
     import Projeto.MeuBolso.model.Recorrencia;
@@ -203,6 +204,35 @@
             return paraResponse(recorrenciaRepository.save(rec));
         }
 
+        // Pula um mês da recorrência ("remover só neste mês"). Marca o mês para
+        // não ser gerado e, se já houver um gasto lançado nesse mês para esta
+        // regra, remove-o e estorna na carteira. Não afeta meses passados nem
+        // os demais meses futuros.
+        @PostMapping("/recorrentes/{id}/pular")
+        public RecorrenciaResponse pularMes(@PathVariable String id,
+                                            @Valid @RequestBody PularMesRequest request,
+                                            Authentication authentication) {
+            String usuarioId = usuarioAutenticado(authentication).getId();
+
+            Recorrencia rec = recorrenciaRepository.findByIdAndUsuarioId(id, usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recorrência não encontrada."));
+
+            String mes = request.mes();
+            rec.pularMes(mes);
+            Recorrencia salva = recorrenciaRepository.save(rec);
+
+            // Se o mês já virou um gasto real desta recorrência, remove e estorna.
+            List<Gasto> vinculados = gastoRepository.findByUsuarioIdAndRecorrenciaId(usuarioId, id);
+            for (Gasto g : vinculados) {
+                if (g.getData() != null && g.getData().startsWith(mes)) {
+                    gastoRepository.delete(g);
+                    carteiraService.aplicarGasto(usuarioId, g.getCarteiraId(), g.getValor().negate());
+                }
+            }
+
+            return paraResponse(salva);
+        }
+
         // Exclui a regra. Os gastos já lançados continuam, só perdem o vínculo.
         @DeleteMapping("/recorrentes/{id}")
         public ResponseEntity<Void> excluirRecorrente(@PathVariable String id, Authentication authentication) {
@@ -278,6 +308,7 @@
                 r.getDiaDoMes(),
                 r.isAtiva(),
                 r.getUltimoMes(),
+                r.getMesesPulados(),
                 r.getCarteiraId()
             );
         }

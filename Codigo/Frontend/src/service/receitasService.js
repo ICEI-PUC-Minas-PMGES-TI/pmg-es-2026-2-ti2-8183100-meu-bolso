@@ -14,6 +14,7 @@
 
 import { receitasApi } from "./Api";
 import {
+  comProjecoes,
   dataDaOcorrencia,
   hojeISO,
   mesAtualChave,
@@ -99,6 +100,7 @@ function criarRecorrenciaDe(receita) {
     diaDoMes: Number(receita.data.slice(8, 10)),
     ativa: true,
     ultimoMes: receita.data.slice(0, 7),
+    mesesPulados: [], // meses "removidos só neste mês"
   };
 }
 
@@ -112,6 +114,7 @@ export function processarRecorrencias(receitas, recorrencias, hoje = hojeISO()) 
   const atualizadas = recorrencias.map((rec) => {
     if (!rec.ativa) return rec;
 
+    const pulados = new Set(rec.mesesPulados ?? []);
     let ultimoMes = rec.ultimoMes;
     let proximo = mudarMes(ultimoMes, 1);
 
@@ -119,16 +122,19 @@ export function processarRecorrencias(receitas, recorrencias, hoje = hojeISO()) 
       dataDaOcorrencia(proximo, rec.diaDoMes) <= hoje &&
       novas.length < LIMITE_OCORRENCIAS
     ) {
-      novas.push({
-        id: novoId(),
-        descricao: rec.descricao,
-        categoria: rec.categoria,
-        carteira: rec.carteira,
-        data: dataDaOcorrencia(proximo, rec.diaDoMes),
-        valor: rec.valor,
-        comentario: rec.comentario,
-        recorrenciaId: rec.id,
-      });
+      // Mês marcado como "pular" (removido só neste mês): avança sem lançar.
+      if (!pulados.has(proximo)) {
+        novas.push({
+          id: novoId(),
+          descricao: rec.descricao,
+          categoria: rec.categoria,
+          carteira: rec.carteira,
+          data: dataDaOcorrencia(proximo, rec.diaDoMes),
+          valor: rec.valor,
+          comentario: rec.comentario,
+          recorrenciaId: rec.id,
+        });
+      }
       ultimoMes = proximo;
       proximo = mudarMes(proximo, 1);
     }
@@ -152,7 +158,8 @@ const local = {
     gravar(CHAVES.receitas, receitas);
     gravar(CHAVES.recorrencias, recorrencias);
 
-    return { receitas, recorrencias };
+    // Projeta os recorrentes para os próximos meses (ocorrências virtuais).
+    return { receitas: comProjecoes(receitas, recorrencias), recorrencias };
   },
 
   async criarReceita({ recorrente, ...dados }) {
@@ -240,6 +247,27 @@ const local = {
       ),
     );
   },
+
+  // "Remover só neste mês": marca o mês na recorrência e apaga a receita real
+  // daquele mês (se já tiver sido lançada). Os demais meses seguem normais.
+  async pularMesRecorrencia(id, mes) {
+    gravar(
+      CHAVES.recorrencias,
+      ler(CHAVES.recorrencias, []).map((rec) => {
+        if (rec.id !== id) return rec;
+        const pulados = new Set(rec.mesesPulados ?? []);
+        pulados.add(mes);
+        return { ...rec, mesesPulados: [...pulados] };
+      }),
+    );
+
+    gravar(
+      CHAVES.receitas,
+      ler(CHAVES.receitas, []).filter(
+        (receita) => !(receita.recorrenciaId === id && receita.data.startsWith(mes)),
+      ),
+    );
+  },
 };
 
 /* ========================================
@@ -257,7 +285,12 @@ function normalizarReceita(receita) {
 }
 
 function normalizarRecorrencia(rec) {
-  return { ...rec, valor: Number(rec.valor), comentario: rec.comentario ?? "" };
+  return {
+    ...rec,
+    valor: Number(rec.valor),
+    comentario: rec.comentario ?? "",
+    mesesPulados: rec.mesesPulados ?? [],
+  };
 }
 
 const remoto = {
@@ -266,9 +299,12 @@ const remoto = {
     const receitas = await receitasApi.listar();
     const recorrencias = await receitasApi.listarRecorrentes();
 
+    const recorrenciasNorm = recorrencias.map(normalizarRecorrencia);
+
     return {
-      receitas: receitas.map(normalizarReceita),
-      recorrencias: recorrencias.map(normalizarRecorrencia),
+      // Projeta os recorrentes para os próximos meses (ocorrências virtuais).
+      receitas: comProjecoes(receitas.map(normalizarReceita), recorrenciasNorm),
+      recorrencias: recorrenciasNorm,
     };
   },
 
@@ -312,6 +348,10 @@ const remoto = {
 
   async excluirRecorrencia(id) {
     await receitasApi.excluirRecorrente(id);
+  },
+
+  async pularMesRecorrencia(id, mes) {
+    await receitasApi.pularRecorrente(id, mes);
   },
 };
 

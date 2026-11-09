@@ -275,6 +275,14 @@ export const gastosApi = {
       autenticado: true,
     }),
 
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/gastos/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
+      autenticado: true,
+    }),
+
   excluirRecorrente: (id) =>
     requisicao(`/api/gastos/recorrentes/${id}`, {
       metodo: "DELETE",
@@ -345,6 +353,14 @@ export const receitasApi = {
     requisicao(`/api/receitas/recorrentes/${id}`, {
       metodo: "PUT",
       corpo,
+      autenticado: true,
+    }),
+
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/receitas/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
       autenticado: true,
     }),
 

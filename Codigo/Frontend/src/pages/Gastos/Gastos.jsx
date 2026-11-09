@@ -173,14 +173,48 @@
     }
 
     async function excluirGasto(gasto) {
+        // Gasto recorrente (real ou projetado): escolher entre só este mês ou sempre.
+        if (gasto.recorrenciaId) {
+        const soEsteMes = window.confirm(
+            `"${gasto.descricao}" é um gasto recorrente.\n\n` +
+            "Clique em OK para remover a recorrência APENAS neste mês.\n" +
+            "Clique em Cancelar para escolher remover de todos os meses.",
+        );
+
+        if (soEsteMes) {
+            await removerComAnimacao(gasto, () =>
+            gastosService.pularMesRecorrencia(
+                gasto.recorrenciaId,
+                gasto.data.slice(0, 7),
+            ),
+            );
+            return;
+        }
+
+        const paraSempre = window.confirm(
+            `Remover a recorrência de "${gasto.descricao}" para SEMPRE?\n\n` +
+            "Os próximos meses deixam de ser lançados. Os gastos já lançados continuam na lista.",
+        );
+        if (!paraSempre) return;
+
+        await removerComAnimacao(gasto, () =>
+            gastosService.excluirRecorrencia(gasto.recorrenciaId),
+        );
+        return;
+        }
+
         if (!window.confirm(`Deseja excluir "${gasto.descricao}"?`)) return;
 
-        // 1) toca a animação de saída; 2) só então apaga de verdade
+        await removerComAnimacao(gasto, () => gastosService.excluirGasto(gasto.id));
+    }
+
+    // Toca a animação de saída da linha e só então executa a ação de verdade.
+    async function removerComAnimacao(gasto, acao) {
         setRemovendo((atual) => new Set(atual).add(gasto.id));
         await esperar(DURACAO_SAIDA_MS);
 
         try {
-        await gastosService.excluirGasto(gasto.id);
+        await acao();
         await carregar();
         } catch (e) {
         setErro(e.message || "Não foi possível excluir o gasto.");

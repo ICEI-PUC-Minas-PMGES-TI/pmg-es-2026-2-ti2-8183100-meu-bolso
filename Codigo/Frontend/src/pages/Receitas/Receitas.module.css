@@ -492,6 +492,20 @@
   color: var(--cinza-700);
 }
 
+.receitas-selo-previsto {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-redondo);
+  border: 1px dashed var(--cinza-300, #cbd5e1);
+  background-color: transparent;
+  color: var(--cinza-500, #6b7280);
+}
+
 .receitas-botao-comentario {
   width: 32px;
   height: 32px;

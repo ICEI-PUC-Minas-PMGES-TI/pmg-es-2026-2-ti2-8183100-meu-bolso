@@ -168,7 +168,16 @@ export default function TabelaReceitas({
                       </span>
                     )}
 
-                    {receita.comentario && (
+                    {receita.projetado && (
+                      <span
+                        className={styles["receitas-selo-previsto"]}
+                        title="Lançamento previsto: ainda não aconteceu"
+                      >
+                        Previsto
+                      </span>
+                    )}
+
+                    {receita.comentario && !receita.projetado && (
                       <button
                         type="button"
                         className={styles["receitas-botao-comentario"]}
@@ -201,22 +210,25 @@ export default function TabelaReceitas({
 
                 <td data-label="Ações" className={styles["receitas-col-acoes"]}>
                   <span className={styles["receitas-acoes"]}>
-                    <button
-                      type="button"
-                      className={styles["receitas-botao-icone"]}
-                      onClick={() => onEditar(receita)}
-                      aria-label={`Editar receita ${receita.descricao}`}
-                      title="Editar"
-                    >
-                      <Pencil size={16} aria-hidden="true" />
-                    </button>
+                    {/* Projetadas (previstas) ainda não existem: só permitem excluir. */}
+                    {!receita.projetado && (
+                      <button
+                        type="button"
+                        className={styles["receitas-botao-icone"]}
+                        onClick={() => onEditar(receita)}
+                        aria-label={`Editar receita ${receita.descricao}`}
+                        title="Editar"
+                      >
+                        <Pencil size={16} aria-hidden="true" />
+                      </button>
+                    )}
 
                     <button
                       type="button"
                       className={`${styles["receitas-botao-icone"]} ${styles["receitas-botao-excluir"]}`}
                       onClick={() => onExcluir(receita)}
                       aria-label={`Excluir receita ${receita.descricao}`}
-                      title="Excluir"
+                      title={receita.projetado ? "Remover recorrência" : "Excluir"}
                     >
                       <Trash2 size={16} aria-hidden="true" />
                     </button>

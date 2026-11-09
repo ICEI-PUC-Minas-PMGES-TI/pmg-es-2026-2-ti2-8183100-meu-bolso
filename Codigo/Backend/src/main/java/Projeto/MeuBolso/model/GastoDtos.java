@@ -76,7 +76,13 @@ public final class GastoDtos {
         int diaDoMes,
         boolean ativa,
         String ultimoMes,
+        java.util.List<String> mesesPulados,
         String carteiraId
+    ) {}
+
+    /** Corpo do pedido para pular um mês ("remover só neste mês"). */
+    public record PularMesRequest(
+        @NotBlank @Pattern(regexp = "\\d{4}-\\d{2}", message = "Mês deve estar no formato AAAA-MM.") String mes
     ) {}
 
     /** Corpo e resposta do orçamento. */

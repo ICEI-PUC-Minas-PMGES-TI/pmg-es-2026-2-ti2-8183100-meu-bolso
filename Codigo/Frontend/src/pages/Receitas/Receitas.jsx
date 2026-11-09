@@ -159,14 +159,48 @@ export default function Receitas() {
   }
 
   async function excluirReceita(receita) {
+    // Receita recorrente (real ou projetada): escolher entre só este mês ou sempre.
+    if (receita.recorrenciaId) {
+      const soEsteMes = window.confirm(
+        `"${receita.descricao}" é uma receita recorrente.\n\n` +
+          "Clique em OK para remover a recorrência APENAS neste mês.\n" +
+          "Clique em Cancelar para escolher remover de todos os meses.",
+      );
+
+      if (soEsteMes) {
+        await removerComAnimacao(receita, () =>
+          receitasService.pularMesRecorrencia(
+            receita.recorrenciaId,
+            receita.data.slice(0, 7),
+          ),
+        );
+        return;
+      }
+
+      const paraSempre = window.confirm(
+        `Remover a recorrência de "${receita.descricao}" para SEMPRE?\n\n` +
+          "Os próximos meses deixam de ser lançados. As receitas já lançadas continuam na lista.",
+      );
+      if (!paraSempre) return;
+
+      await removerComAnimacao(receita, () =>
+        receitasService.excluirRecorrencia(receita.recorrenciaId),
+      );
+      return;
+    }
+
     if (!window.confirm(`Deseja excluir "${receita.descricao}"?`)) return;
 
-    // 1) toca a animação de saída; 2) só então apaga de verdade
+    await removerComAnimacao(receita, () => receitasService.excluirReceita(receita.id));
+  }
+
+  // Toca a animação de saída da linha e só então executa a ação de verdade.
+  async function removerComAnimacao(receita, acao) {
     setRemovendo((atual) => new Set(atual).add(receita.id));
     await esperar(DURACAO_SAIDA_MS);
 
     try {
-      await receitasService.excluirReceita(receita.id);
+      await acao();
       await carregar();
     } catch (e) {
       setErro(e.message || "Não foi possível excluir a receita.");
