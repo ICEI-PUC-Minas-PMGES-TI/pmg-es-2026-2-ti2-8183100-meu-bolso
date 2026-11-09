@@ -21,6 +21,7 @@ const FORM_INICIAL = {
   categoria: CATEGORIAS[0],
   forma: "avista", // "avista" | "parcelado"
   parcelas: 2,
+  juros: "", // % ao mês; vazio = sem juros
   carteiraId: "",
 };
 
@@ -60,6 +61,7 @@ function Simulacao() {
         valor: converterValor(form.valor),
         forma: form.forma,
         parcelas: Number(form.parcelas),
+        juros: form.juros,
         saldoAtual,
         metas,
       }),
