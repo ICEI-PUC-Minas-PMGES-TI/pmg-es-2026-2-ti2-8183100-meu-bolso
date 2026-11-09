@@ -52,15 +52,41 @@ class FluxoChatbotTest {
     }
 
     @Test
-    void zeroCancelaEmQualquerEtapa() {
+    void zeroEncerraAConversaEmQualquerEtapa() {
         enviar("oi");
         enviar("2");
         enviar("50");
         assertThat(c.getEtapa()).isEqualTo(Etapa.CATEGORIA);
-        assertThat(enviar("0")).startsWith("Operação cancelada.");
-        assertThat(c.getEtapa()).isEqualTo(Etapa.MENU);
+        assertThat(enviar("0")).isEqualTo("Encerrado! Digite \"meu bolso\" para iniciar o processo novamente.");
+        assertThat(c.getEtapa()).isEqualTo(Etapa.OCIOSO);
         assertThat(c.getOperacao()).isNull();
         assertThat(c.getValor()).isNull();
+    }
+
+    @Test
+    void zeroNoMenuTambemEncerraESairFuncionaIgual() {
+        enviar("oi");
+        assertThat(enviar("0")).startsWith("Encerrado!");
+        assertThat(c.getEtapa()).isEqualTo(Etapa.OCIOSO);
+        enviar("oi");
+        assertThat(enviar("SAIR")).startsWith("Encerrado!");
+    }
+
+    @Test
+    void menuVoltaAoMenuSemEncerrar() {
+        enviar("oi");
+        enviar("2");
+        enviar("50");
+        assertThat(enviar("menu")).startsWith("O que você deseja fazer?");
+        assertThat(c.getEtapa()).isEqualTo(Etapa.MENU);
+        assertThat(c.getValor()).isNull();
+    }
+
+    @Test
+    void semPalavraDeAtivacaoAMensagemDeEncerramentoMuda() {
+        fluxo = new FluxoChatbot(ops, "");
+        enviar("oi");
+        assertThat(enviar("0")).isEqualTo("Encerrado! Envie qualquer mensagem para iniciar o processo novamente.");
     }
 
     // ---------- 1 receita / 2 gasto ----------

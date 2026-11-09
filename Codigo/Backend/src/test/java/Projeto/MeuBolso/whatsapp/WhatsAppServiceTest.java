@@ -107,6 +107,26 @@ class WhatsAppServiceTest {
     }
 
     @Test
+    void depoisDoZeroSoAPalavraDeAtivacaoReabreAConversa() {
+        // Estado em memória que o "repositório" devolve e atualiza a cada mensagem.
+        ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
+        c.setUsuarioId("u1");
+        c.setEtapa(Etapa.MENU);
+        c.setAtualizadoEm(AGORA.minusSeconds(30));
+        when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
+        when(usuarioRepository.findById("u1")).thenReturn(Optional.of(usuario));
+        WhatsAppService s = servico("meu bolso", false);
+
+        assertThat(s.processar(msg("0"))).isEqualTo("Encerrado! Digite \"meu bolso\" para iniciar o processo novamente.");
+        assertThat(c.getEtapa()).isEqualTo(Etapa.OCIOSO);
+
+        assertThat(s.processar(msg("oi"))).isNull();
+        assertThat(s.processar(msg("1"))).isNull();
+        assertThat(s.processar(msg("meu bolso"))).startsWith("Olá, Gabriel!");
+        assertThat(c.getEtapa()).isEqualTo(Etapa.MENU);
+    }
+
+    @Test
     void comparacaoDaPalavraDeAtivacao() {
         assertThat(WhatsAppService.contemPalavraAtivacao("Quero usar o MeuBolso", "meu bolso")).isTrue();
         assertThat(WhatsAppService.contemPalavraAtivacao("meu  bolso", "Meu Bolso")).isTrue();

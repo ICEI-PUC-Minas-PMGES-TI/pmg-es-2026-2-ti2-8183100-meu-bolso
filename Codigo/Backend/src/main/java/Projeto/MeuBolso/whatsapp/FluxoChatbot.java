@@ -19,7 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
  * devolve a resposta a ser enviada. Não acessa banco nem WhatsApp diretamente:
  * as regras de negócio vêm de {@link OperacoesChatbot}.
  *
- * Fluxos (o "0" cancela e volta ao menu em qualquer etapa):
+ * Em qualquer etapa: "0" (ou "sair"/"cancelar") encerra a conversa, que só
+ * recomeça com a palavra de ativação; "menu" volta ao menu sem encerrar.
+ *
+ * Fluxos:
  *  1 Receita / 2 Gasto : valor -> categoria -> descrição -> conta -> confirmação
  *  3 Depósito em meta  : valor -> meta -> conta -> confirmação
  *  4 Retirada de meta  : valor -> meta -> conta -> confirmação
@@ -48,12 +51,26 @@ public class FluxoChatbot {
         5 - Transferir entre contas
         6 - Ver saldos e metas
 
-        Responda com o número da opção. Envie 0 a qualquer momento para cancelar.""";
+        Responda com o número da opção. Envie 0 a qualquer momento para encerrar.""";
 
     private final OperacoesChatbot ops;
 
+    // Texto exibido ao encerrar, explicando como recomeçar.
+    private final String mensagemEncerrado;
+
     public FluxoChatbot(OperacoesChatbot ops) {
+        this(ops, "meu bolso");
+    }
+
+    /**
+     * @param palavraAtivacao palavra que inicia a conversa (a mesma do
+     *                        WhatsAppService); vazia = qualquer mensagem inicia
+     */
+    public FluxoChatbot(OperacoesChatbot ops, String palavraAtivacao) {
         this.ops = ops;
+        this.mensagemEncerrado = palavraAtivacao == null || palavraAtivacao.isBlank()
+            ? "Encerrado! Envie qualquer mensagem para iniciar o processo novamente."
+            : "Encerrado! Digite \"" + palavraAtivacao.trim() + "\" para iniciar o processo novamente.";
     }
 
     /**
@@ -73,10 +90,17 @@ public class FluxoChatbot {
             return saudacao(nomeUsuario) + " Eu sou o bot do Meu Bolso. 💰\n\n" + MENU;
         }
 
-        if (ehCancelamento(t)) {
-            boolean havia = c.getEtapa() != Etapa.MENU;
+        // "0"/"sair"/"cancelar": encerra a conversa. Ela volta a OCIOSO e o bot
+        // só responde de novo quando receber a palavra de ativação.
+        if (ehEncerramento(t)) {
+            c.limparOperacao(Etapa.OCIOSO);
+            return mensagemEncerrado;
+        }
+
+        // "menu": descarta a operação em andamento e mostra o menu, sem encerrar.
+        if (t.equalsIgnoreCase("menu")) {
             c.limparOperacao(Etapa.MENU);
-            return (havia ? "Operação cancelada.\n\n" : "") + MENU;
+            return MENU;
         }
 
         return switch (c.getEtapa()) {
@@ -184,7 +208,7 @@ public class FluxoChatbot {
         boolean deposito = c.getOperacao() == Operacao.META_DEPOSITO;
         if (!deposito && meta.valor() != null && c.getValor().compareTo(meta.valor()) > 0) {
             return "A meta " + meta.nome() + " tem só " + FormatoBRL.moeda(meta.valor())
-                + " guardado. Escolha outra meta ou envie 0 para cancelar.\n\n" + lista(c.getOpcoes());
+                + " guardado. Escolha outra meta ou envie 0 para encerrar.\n\n" + lista(c.getOpcoes());
         }
         c.setMeta(meta);
         String pergunta = deposito
@@ -201,7 +225,7 @@ public class FluxoChatbot {
         boolean saiDaConta = c.getOperacao() == Operacao.META_DEPOSITO || c.getOperacao() == Operacao.TRANSFERENCIA;
         if (saiDaConta && carteira.valor() != null && c.getValor().compareTo(carteira.valor()) > 0) {
             return "Saldo insuficiente em " + carteira.nome() + " (" + FormatoBRL.moeda(carteira.valor())
-                + "). Escolha outra conta ou envie 0 para cancelar.\n\n" + lista(c.getOpcoes());
+                + "). Escolha outra conta ou envie 0 para encerrar.\n\n" + lista(c.getOpcoes());
         }
         c.setCarteira(carteira);
 
@@ -389,9 +413,9 @@ public class FluxoChatbot {
         return Integer.parseInt(t);
     }
 
-    private static boolean ehCancelamento(String t) {
+    private static boolean ehEncerramento(String t) {
         String s = t.toLowerCase(Locale.ROOT);
-        return s.equals("0") || s.equals("menu") || s.equals("cancelar") || s.equals("sair");
+        return s.equals("0") || s.equals("cancelar") || s.equals("sair");
     }
 
     private static String saudacao(String nome) {

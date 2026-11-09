@@ -60,7 +60,7 @@ public class WhatsAppService {
         this.conversaRepository = conversaRepository;
         this.usuarioRepository = usuarioRepository;
         this.waha = waha;
-        this.fluxo = new FluxoChatbot(operacoes);
+        this.fluxo = new FluxoChatbot(operacoes, palavraAtivacao);
         this.clock = clock;
         this.palavraAtivacao = palavraAtivacao == null ? "" : palavraAtivacao;
         this.responderNaoCadastrados = responderNaoCadastrados;
