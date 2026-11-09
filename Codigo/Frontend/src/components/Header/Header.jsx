@@ -13,6 +13,7 @@ const navItems = [
   { nome: "Visão geral", caminho: "/dashboard" },
   { nome: "Evolução", caminho: "/evolucao-financeira" },
   { nome: "Gastos", caminho: "/gastos" },
+  { nome: "Receitas", caminho: "/receitas" },
   { nome: "Planejamento", caminho: "/planejamento", futuro: true },
   { nome: "Carteiras", caminho: "/carteiras" },
   { nome: "Metas", caminho: "/metas" },

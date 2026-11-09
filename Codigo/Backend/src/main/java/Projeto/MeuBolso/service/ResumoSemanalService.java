@@ -131,7 +131,8 @@ public class ResumoSemanalService {
 
         BigDecimal gastoNoMes = soma(gastoRepository.findPorPeriodo(
             usuarioId, hoje.withDayOfMonth(1).toString(), hoje.toString()));
-        BigDecimal limite = orcamentoRepository.findByUsuarioId(usuarioId)
+        String mesAtual = hoje.toString().substring(0, 7); // "AAAA-MM"
+        BigDecimal limite = orcamentoRepository.findByUsuarioIdAndMes(usuarioId, mesAtual)
             .map(Orcamento::getValorMensal)
             .orElse(BigDecimal.ZERO);
         OrcamentoUso orcamento = new OrcamentoUso(gastoNoMes, limite, percentual(gastoNoMes, limite));

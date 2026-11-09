@@ -44,6 +44,8 @@
     const [formasPagamento, setFormasPagamento] = useState([]);
     const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
     const [ordenacao, setOrdenacao] = useState(ORDENACAO_INICIAL);
+    // Orçamento do mês selecionado (cada mês tem o seu, independente dos outros).
+    const [orcamentoMes, setOrcamentoMes] = useState(0);
 
     // Qual modal está aberto: { tipo: "gasto" | "comentario" | "recorrencias" | "orcamento", gasto? }
     const [modal, setModal] = useState(null);
@@ -95,6 +97,22 @@
         };
     }, []);
 
+    // Orçamento do mês selecionado: busca sempre que o mês muda.
+    useEffect(() => {
+        let ativo = true;
+        gastosService
+        .obterOrcamento(mesSelecionado)
+        .then((valor) => {
+            if (ativo) setOrcamentoMes(Number(valor) || 0);
+        })
+        .catch(() => {
+            if (ativo) setOrcamentoMes(0);
+        });
+        return () => {
+        ativo = false;
+        };
+    }, [mesSelecionado]);
+
     /* ---------- Dados derivados ---------- */
 
     const gastosDoMes = useMemo(
@@ -111,8 +129,8 @@
     const distribuicao = useMemo(() => calcularDistribuicao(gastosDoMes), [gastosDoMes]);
 
     const statusOrcamento = useMemo(
-        () => calcularStatusOrcamento(resumo.total, dados?.orcamento ?? 0),
-        [resumo.total, dados],
+        () => calcularStatusOrcamento(resumo.total, orcamentoMes),
+        [resumo.total, orcamentoMes],
     );
 
     const gastosVisiveis = useMemo(
@@ -157,8 +175,9 @@
     }
 
     async function salvarOrcamento(valor) {
-        await gastosService.salvarOrcamento(valor);
-        await carregar();
+        // Salva o orçamento só do mês selecionado e atualiza o card desse mês.
+        await gastosService.salvarOrcamento(valor, mesSelecionado);
+        setOrcamentoMes(Number(valor) || 0);
         setModal(null);
     }
 
@@ -173,14 +192,48 @@
     }
 
     async function excluirGasto(gasto) {
+        // Gasto recorrente (real ou projetado): escolher entre só este mês ou sempre.
+        if (gasto.recorrenciaId) {
+        const soEsteMes = window.confirm(
+            `"${gasto.descricao}" é um gasto recorrente.\n\n` +
+            "Clique em OK para remover a recorrência APENAS neste mês.\n" +
+            "Clique em Cancelar para escolher remover de todos os meses.",
+        );
+
+        if (soEsteMes) {
+            await removerComAnimacao(gasto, () =>
+            gastosService.pularMesRecorrencia(
+                gasto.recorrenciaId,
+                gasto.data.slice(0, 7),
+            ),
+            );
+            return;
+        }
+
+        const paraSempre = window.confirm(
+            `Remover a recorrência de "${gasto.descricao}" para SEMPRE?\n\n` +
+            "Os próximos meses deixam de ser lançados. Os gastos já lançados continuam na lista.",
+        );
+        if (!paraSempre) return;
+
+        await removerComAnimacao(gasto, () =>
+            gastosService.excluirRecorrencia(gasto.recorrenciaId),
+        );
+        return;
+        }
+
         if (!window.confirm(`Deseja excluir "${gasto.descricao}"?`)) return;
 
-        // 1) toca a animação de saída; 2) só então apaga de verdade
+        await removerComAnimacao(gasto, () => gastosService.excluirGasto(gasto.id));
+    }
+
+    // Toca a animação de saída da linha e só então executa a ação de verdade.
+    async function removerComAnimacao(gasto, acao) {
         setRemovendo((atual) => new Set(atual).add(gasto.id));
         await esperar(DURACAO_SAIDA_MS);
 
         try {
-        await gastosService.excluirGasto(gasto.id);
+        await acao();
         await carregar();
         } catch (e) {
         setErro(e.message || "Não foi possível excluir o gasto.");
@@ -273,7 +326,7 @@
             <div className={styles["gastos-painel"]}>
                 <StatusOrcamento
                 totalGasto={resumo.total}
-                orcamento={dados?.orcamento ?? 0}
+                orcamento={orcamentoMes}
                 status={statusOrcamento}
                 carregando={carregando}
                 onEditar={() => setModal({ tipo: "orcamento" })}
@@ -339,7 +392,8 @@
 
         {modal?.tipo === "orcamento" && (
             <ModalOrcamento
-            orcamentoAtual={dados?.orcamento ?? 0}
+            orcamentoAtual={orcamentoMes}
+            mesExtenso={formatarMesExtenso(mesSelecionado)}
             onFechar={fecharModal}
             onSalvar={salvarOrcamento}
             />
