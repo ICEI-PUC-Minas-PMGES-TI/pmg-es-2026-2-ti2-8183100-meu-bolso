@@ -46,6 +46,26 @@ function ComparacaoCenario({ saldoAtual, resultado }) {
         </div>
       </div>
 
+      {/* Resumo do parcelamento com juros: total pago e quanto foi juros */}
+      {resultado?.temJuros && (
+        <div className={styles.resumoJuros}>
+          <div className={styles.resumoLinha}>
+            <span className="texto-secundario texto-pequeno">
+              Total com juros ({resultado.nParcelas}x)
+            </span>
+            <strong>{formatarMoeda(resultado.valorTotal)}</strong>
+          </div>
+          <div className={styles.resumoLinha}>
+            <span className="texto-secundario texto-pequeno">
+              Juros pagos ({resultado.taxaJuros}% a.m.)
+            </span>
+            <strong className={styles.valorNegativo}>
+              {formatarMoeda(resultado.totalJuros)}
+            </strong>
+          </div>
+        </div>
+      )}
+
       {resultado?.saldoNegativo && (
         <p className={`mensagem mensagem-alerta ${styles.aviso}`}>
           Essa compra deixa o saldo da carteira negativo.
