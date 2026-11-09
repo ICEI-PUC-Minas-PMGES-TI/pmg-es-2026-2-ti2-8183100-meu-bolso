@@ -33,6 +33,21 @@ export async function listarCarteirasComSaldo() {
 }
 
 /**
+ * Lista apenas as contas cadastradas na carteira, no formato { id, nome, tipo },
+ * para seleção ao registrar um gasto ou uma receita.
+ *
+ * Gastos e receitas só podem ser lançados em uma conta: sem conta cadastrada,
+ * a lista vem vazia e a tela mostra o aviso para cadastrar uma na Carteira.
+ */
+export async function listarContas() {
+  let dados;
+  try { dados = await obterCarteiras(); } catch { return []; }
+  if (!dados) return [];
+
+  return (dados.contas ?? []).map((c) => ({ id: c.id, nome: c.apelido, tipo: "conta" }));
+}
+
+/**
  * Lista as formas de pagamento disponíveis (contas, cartões e dinheiro) no
  * formato { id, nome, tipo }, para seleção ao registrar um gasto.
  */

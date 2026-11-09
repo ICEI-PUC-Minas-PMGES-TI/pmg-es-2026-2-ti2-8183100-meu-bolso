@@ -2,7 +2,7 @@
     import { ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
 
     import gastosService from "../../service/gastosService";
-    import { listarFormasDePagamento } from "../../service/carteirasStorage";
+    import { listarContas } from "../../service/carteirasStorage";
     import {
     FILTROS_INICIAIS,
     ORDENACAO_INICIAL,
@@ -84,10 +84,10 @@
         };
     }, []);
 
-    // Formas de pagamento (contas/cartões/dinheiro) para os selects de carteira.
+    // Contas da carteira para os selects. Gasto só entra se houver conta.
     useEffect(() => {
         let ativo = true;
-        listarFormasDePagamento()
+        listarContas()
         .then((formas) => {
             if (ativo) setFormasPagamento(formas);
         })

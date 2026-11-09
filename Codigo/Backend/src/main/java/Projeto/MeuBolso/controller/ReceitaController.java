@@ -85,6 +85,12 @@ public class ReceitaController {
                                             Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
+        // Uma receita só pode entrar em uma conta existente na carteira.
+        if (!carteiraService.contaExiste(usuarioId, request.carteiraId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Cadastre uma conta na Carteira antes de registrar receitas.");
+        }
+
         Receita receita = new Receita(
             usuarioId,
             request.descricao().trim(),
@@ -116,6 +122,12 @@ public class ReceitaController {
 
         Receita receita = receitaRepository.findByIdAndUsuarioId(id, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Receita não encontrada."));
+
+        // Uma receita só pode entrar em uma conta existente na carteira.
+        if (!carteiraService.contaExiste(usuarioId, request.carteiraId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Cadastre uma conta na Carteira antes de registrar receitas.");
+        }
 
         String carteiraAntiga = receita.getCarteiraId();
         BigDecimal valorAntigo = receita.getValor();
