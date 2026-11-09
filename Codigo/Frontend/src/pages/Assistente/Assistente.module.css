@@ -3,19 +3,69 @@
 ======================================== */
 
 .assistente {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--espaco-6);
 }
 
-/* Cabeçalho da página */
-.cabecalho h1 {
-  font-size: var(--titulo-xl);
-  font-weight: 800;
+/* Fundo: dois blobs suaves em cantos opostos, atrás do conteúdo. */
+.assistente::before,
+.assistente::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  opacity: 0.4;
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: -1;
 }
 
-.cabecalho p {
-  margin-top: var(--espaco-1);
+.assistente::before {
+  top: -160px;
+  right: -140px;
+}
+
+.assistente::after {
+  bottom: -180px;
+  left: -160px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-6);
+}
+
+.heroTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+/* Título só para leitores de tela (visually hidden). */
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.subtitulo {
+  font-size: var(--texto-lg);
+  color: var(--cinza-700);
+  line-height: 1.5;
 }
 
 /* ---------- Perguntas ---------- */
@@ -25,46 +75,98 @@
   gap: var(--espaco-4);
 }
 
-.gradePerguntas {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--espaco-3);
+.perguntasCabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
 }
 
-.botaoPergunta {
+.perguntasTitulo {
   display: flex;
   align-items: center;
   gap: var(--espaco-2);
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.gradePerguntas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-3);
+  /* Em telas muito largas, não deixa os cartões esticarem demais. */
+  width: 100%;
+  max-width: var(--largura-maxima);
+}
+
+.cartao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
   text-align: left;
-  min-height: 56px;
-  padding: var(--espaco-3) var(--espaco-4);
-  border: 1px solid var(--cinza-300);
-  border-radius: var(--radius-medio);
+  min-height: 72px;
+  padding: var(--espaco-4);
+  border: 1px solid var(--cinza-200);
+  border-radius: 16px;
   background-color: var(--branco);
   color: var(--preto);
-  font-size: var(--texto-sm);
-  font-weight: 600;
+  box-shadow: var(--sombra-leve);
   transition:
-    background-color var(--transicao-rapida),
     border-color var(--transicao-rapida),
-    color var(--transicao-rapida);
+    box-shadow var(--transicao-rapida),
+    transform var(--transicao-rapida);
 }
 
-.botaoPergunta:hover:not(:disabled) {
-  background-color: var(--cinza-50);
-  border-color: var(--verde-escuro);
+.cartao:hover:not(:disabled) {
+  border-color: var(--verde-principal);
+  box-shadow: var(--sombra-hover);
+  transform: translateY(-1px);
 }
 
-.botaoPergunta:disabled {
+.cartao:focus-visible {
+  outline: 2px solid var(--verde-escuro);
+  outline-offset: 2px;
+}
+
+.cartao:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.botaoPerguntaAtivo,
-.botaoPerguntaAtivo:hover:not(:disabled) {
+.cartaoAtivo,
+.cartaoAtivo:hover:not(:disabled) {
+  border-color: var(--verde-principal);
   background-color: var(--verde-claro);
-  border-color: var(--verde-escuro);
+}
+
+.cartaoIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
   color: var(--verde-escuro);
+}
+
+.cartaoRotulo {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.cartaoSeta {
+  flex-shrink: 0;
+  color: var(--cinza-500);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao:hover:not(:disabled) {
+    transform: none;
+  }
 }
 
 /* Painel do parâmetro (select + botão) */
@@ -88,6 +190,8 @@
 
 .select {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--cinza-300);
@@ -107,8 +211,50 @@
   flex-direction: column;
 }
 
-.conversaVazia {
-  padding: var(--espaco-4) 0;
+/* Estado vazio da conversa: ícone entre duas linhas finas + texto. */
+.vazioConversa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-6) 0;
+}
+
+.vazioIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  position: relative;
+}
+
+/* Duas linhas finas nas laterais do ícone. */
+.vazioIcone::before,
+.vazioIcone::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 72px;
+  height: 1px;
+  background-color: var(--cinza-200);
+}
+
+.vazioIcone::before {
+  right: calc(100% + var(--espaco-3));
+}
+
+.vazioIcone::after {
+  left: calc(100% + var(--espaco-3));
+}
+
+.vazioTexto {
+  max-width: 420px;
+  text-align: center;
+  color: var(--cinza-700);
 }
 
 .baloes {
@@ -117,38 +263,79 @@
   gap: var(--espaco-3);
 }
 
-.balao {
-  max-width: 80%;
-  padding: var(--espaco-3) var(--espaco-4);
-  border-radius: var(--radius-medio);
-  font-size: var(--texto-sm);
-  line-height: 1.5;
+/* Indicador "calculando" (mesmo visual do balão do assistente). */
+.calculando {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
 }
 
-.balaoUsuario {
-  align-self: flex-end;
+.calculandoAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-redondo);
   background-color: var(--verde-escuro);
-  color: var(--branco);
-  border-bottom-right-radius: var(--radius-pequeno);
+  color: var(--verde-claro);
+  font-size: var(--texto-xs);
+  font-weight: 800;
 }
 
-.balaoAssistente {
-  align-self: flex-start;
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-100);
-  color: var(--preto);
-  border-bottom-left-radius: var(--radius-pequeno);
+.calculandoBalao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  box-shadow: var(--sombra-leve);
+  color: var(--cinza-700);
+  font-size: var(--texto-sm);
 }
 
-.balaoErro {
-  background-color: var(--erro-fundo);
-  border-color: var(--erro);
-  color: var(--erro);
+.pontos {
+  display: inline-flex;
+  gap: 3px;
 }
 
-.horario {
-  display: block;
-  margin-top: var(--espaco-1);
+.pontos span {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-principal);
+  animation: pontoPulo 1s ease-in-out infinite;
+}
+
+.pontos span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.pontos span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes pontoPulo {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pontos span {
+    animation: none;
+    opacity: 0.6;
+  }
 }
 
 /* ---------- Aviso fixo ---------- */
@@ -157,7 +344,7 @@
   align-items: center;
   gap: var(--espaco-2);
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cinza-700);
 }
 
 /* ---------- Rodapé ---------- */
@@ -178,17 +365,35 @@
 }
 
 /* ---------- Responsividade ---------- */
-@media (max-width: 768px) {
+/* Grade de cartões: 4 colunas no desktop, 2 até 900px, 1 até 480px. */
+@media (max-width: 900px) {
+  .gradePerguntas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
   .gradePerguntas {
     grid-template-columns: 1fr;
   }
+}
 
+@media (max-width: 600px) {
+  .hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
   .linhaParametro {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .balao {
-    max-width: 92%;
+  /* Alvos de toque de 44px no celular. */
+  .cartao {
+    min-height: 56px;
   }
 }

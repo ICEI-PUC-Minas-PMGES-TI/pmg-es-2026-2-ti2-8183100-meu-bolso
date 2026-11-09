@@ -1,0 +1,36 @@
+/* Orbe de partículas do Jarvis. Decorativo (aria-hidden). O canvas
+   preenche um recipiente quadrado; a sigla "J.A.R.V.I.S" fica por cima. */
+.orbe {
+  --orbe-tamanho: 208px;
+  position: relative;
+  width: var(--orbe-tamanho);
+  height: var(--orbe-tamanho);
+  flex-shrink: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rotulo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--verde-claro);
+  font-size: calc(var(--orbe-tamanho) * 0.11);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  text-shadow: 0 0 6px var(--verde-escuro);
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .orbe {
+    --orbe-tamanho: 150px;
+  }
+}

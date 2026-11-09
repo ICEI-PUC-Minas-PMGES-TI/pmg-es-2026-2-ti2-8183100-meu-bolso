@@ -56,3 +56,18 @@ src/
 ```
 
 > Observação: carteira, gastos e metas são persistidos via API; o `localStorage` guarda apenas a sessão (token e usuário).
+
+## Página do assistente
+
+Arquivos em `src/pages/Assistente/`:
+
+- `Assistente.jsx` — a tela: hero, cartões de sugestão, painel de parâmetros e a conversa. O mapa `PERGUNTAS_UI` liga cada `id` de pergunta a um ícone (lucide) e a um rótulo curto do cartão.
+- `Assistente.module.css` / `JarvisAvatar.module.css` / `MensagemAssistente.module.css` — estilos (só variáveis do `global.css`).
+- `AssistenteContext.js` — o contexto e o hook `useAssistente()`.
+- `AssistenteProvider.jsx` — provê a conversa. Fica acima do `Layout` (dentro da rota protegida), então a conversa persiste ao navegar e some ao sair. Ela vive **só em memória** (sem `localStorage`).
+- `MensagemAssistente.jsx` — um balão; a resposta do assistente é "digitada" progressivamente. O estado do texto digitado vive só aqui (componente em `memo`).
+- `JarvisAvatar.jsx` — o avatar; recebe a prop `estado`.
+
+`useAssistente()` expõe o estado derivado `estado`: `"parado"`, `"pensando"` (aguardando a API) ou `"falando"` (digitando a resposta). O `JarvisAvatar` reage a esse `estado` via prop — é o ponto onde o orbe animado será encaixado numa etapa futura.
+
+Para adicionar uma pergunta nova no visual, inclua uma entrada em `PERGUNTAS_UI` (`id: { Icone, rotulo }`) e, se quiser controlar a ordem, acrescente o `id` em `ORDEM`. Sem entrada no mapa, a pergunta usa o ícone `Sparkles` e o texto da API.
