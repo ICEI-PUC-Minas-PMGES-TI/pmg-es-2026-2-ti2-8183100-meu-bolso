@@ -1,10 +1,13 @@
 package Projeto.MeuBolso.service;
 
 import Projeto.MeuBolso.model.CarteiraUsuario;
+import Projeto.MeuBolso.model.Transferencia;
 import Projeto.MeuBolso.repository.CarteiraUsuarioRepository;
+import Projeto.MeuBolso.repository.TransferenciaRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -15,9 +18,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class CarteiraService {
 
     private final CarteiraUsuarioRepository repo;
+    private final TransferenciaRepository transferenciaRepo;
 
-    public CarteiraService(CarteiraUsuarioRepository repo) {
+    public CarteiraService(CarteiraUsuarioRepository repo, TransferenciaRepository transferenciaRepo) {
         this.repo = repo;
+        this.transferenciaRepo = transferenciaRepo;
     }
 
     /** valor > 0 = gastou; valor < 0 = estorno. Sem efeito em dinheiro ou item inexistente. */
@@ -158,6 +163,15 @@ public class CarteiraService {
         somar(destino, "saldo", valor);
         c.setVersao(c.getVersao() + 1);
         repo.save(c);
+
+        // Histórico: aparece como saída na origem e entrada no destino.
+        transferenciaRepo.save(new Transferencia(usuarioId,
+            origemId, apelido(origem), destinoId, apelido(destino), valor, Instant.now()));
+    }
+
+    private static String apelido(Map<String, Object> item) {
+        Object a = item.get("apelido");
+        return a == null ? "" : a.toString();
     }
 
     /**

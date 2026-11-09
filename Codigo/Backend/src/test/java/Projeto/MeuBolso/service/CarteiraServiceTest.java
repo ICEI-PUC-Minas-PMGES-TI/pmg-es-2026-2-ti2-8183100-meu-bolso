@@ -9,7 +9,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import Projeto.MeuBolso.model.CarteiraUsuario;
+import Projeto.MeuBolso.model.Transferencia;
 import Projeto.MeuBolso.repository.CarteiraUsuarioRepository;
+import Projeto.MeuBolso.repository.TransferenciaRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,13 +34,16 @@ class CarteiraServiceTest {
     @Mock
     CarteiraUsuarioRepository repo;
 
+    @Mock
+    TransferenciaRepository transferenciaRepo;
+
     CarteiraService service;
 
     CarteiraUsuario carteira;
 
     @BeforeEach
     void preparar() {
-        service = new CarteiraService(repo);
+        service = new CarteiraService(repo, transferenciaRepo);
         carteira = new CarteiraUsuario(USUARIO);
         carteira.setContas(lista(item("id", "conta-1", "tipo", "conta", "saldo", 1000.0)));
         carteira.setCartoes(lista(
@@ -169,6 +175,18 @@ class CarteiraServiceTest {
         assertThat(numero(carteira.getContas(), "conta-2", "saldo")).isEqualTo(350.0);
         assertThat(carteira.getVersao()).isEqualTo(1);
         verify(repo).save(carteira);
+
+        // Registra o histórico com os nomes das contas no momento da transferência.
+        ArgumentCaptor<Transferencia> captor = ArgumentCaptor.forClass(Transferencia.class);
+        verify(transferenciaRepo).save(captor.capture());
+        Transferencia t = captor.getValue();
+        assertThat(t.getUsuarioId()).isEqualTo(USUARIO);
+        assertThat(t.getOrigemId()).isEqualTo("conta-1");
+        assertThat(t.getOrigemNome()).isEqualTo("Inter");
+        assertThat(t.getDestinoId()).isEqualTo("conta-2");
+        assertThat(t.getDestinoNome()).isEqualTo("Nubank");
+        assertThat(t.getValor()).isEqualByComparingTo("300");
+        assertThat(t.getData()).isNotNull();
     }
 
     @Test
@@ -180,6 +198,7 @@ class CarteiraServiceTest {
             .hasMessageContaining("Saldo insuficiente");
         assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(1000.0);
         verify(repo, never()).save(any());
+        verifyNoInteractions(transferenciaRepo);
     }
 
     @Test
@@ -204,7 +223,8 @@ class CarteiraServiceTest {
     // ---------- auxiliares ----------
 
     private void adicionarSegundaConta() {
-        carteira.getContas().add(item("id", "conta-2", "tipo", "conta", "saldo", 50.0));
+        carteira.getContas().get(0).put("apelido", "Inter");
+        carteira.getContas().add(item("id", "conta-2", "tipo", "conta", "saldo", 50.0, "apelido", "Nubank"));
     }
 
     private void carregar() {

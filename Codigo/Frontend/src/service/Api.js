@@ -389,6 +389,13 @@ export async function salvarCarteiras(dados) {
   });
 }
 
+// Histórico unificado das carteiras (gastos, receitas, metas e transferências),
+// do mais recente para o mais antigo. Cada item:
+// { id, origem, descricao, categoria, data: "AAAA-MM-DD", valor (com sinal), entrada, carteiraId }
+export async function obterMovimentacoes() {
+  return requisicao("/api/movimentacoes", { autenticado: true });
+}
+
 /* ========================================
    RESUMO SEMANAL POR E-MAIL
    ======================================== */

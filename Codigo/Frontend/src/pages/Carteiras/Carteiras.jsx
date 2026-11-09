@@ -24,7 +24,7 @@ import {
   saldoDaContagem,
   totalCentavos,
 } from "../../data/denominacoes";
-import { obterCarteiras, salvarCarteiras, gastosApi } from "../../service/Api";
+import { obterCarteiras, salvarCarteiras, obterMovimentacoes } from "../../service/Api";
 
 import styles from "./Carteiras.module.css";
 
@@ -51,8 +51,9 @@ function Carteiras() {
   // Movimentações do dinheiro em espécie (crescem a cada adicionar/retirar).
   const [movsDinheiro, setMovsDinheiro] = useState([]);
 
-  // Gastos do usuário, usados para derivar os extratos de contas/cartões.
-  const [gastos, setGastos] = useState([]);
+  // Histórico unificado (gastos, receitas, metas e transferências), usado para
+  // derivar os extratos e a "última movimentação" de contas/cartões.
+  const [historico, setHistorico] = useState([]);
 
   // Controle de carga/salvamento com a API.
   const [carregado, setCarregado] = useState(false);
@@ -62,16 +63,16 @@ function Carteiras() {
   const filaRef = useRef(Promise.resolve());
   const [conflito, setConflito] = useState(false);
 
-  // Carrega gastos primeiro (para os extratos) e depois a carteira do usuário.
+  // Carrega o histórico primeiro (para os extratos) e depois a carteira do usuário.
   useEffect(() => {
     let ativo = true;
     (async () => {
       let lista = [];
-      try { lista = await gastosApi.listar(); } catch (e) { console.error("gastos:", e); }
+      try { lista = await obterMovimentacoes(); } catch (e) { console.error("movimentações:", e); }
       try {
         const dados = await obterCarteiras();
         if (!ativo) return;
-        setGastos(lista);
+        setHistorico(lista ?? []);
         setCartoes(dados?.cartoes ?? []);
         setContas(dados?.contas ?? []);
         setDinheiroEReservas(normalizarListaDinheiro(dados?.dinheiroEReservas));
@@ -257,7 +258,7 @@ function Carteiras() {
   const movimentacoes =
     itemSelecionado?.tipo === "dinheiro"
       ? movsDinheiro
-      : gastosDoItem(itemSelecionado, gastos, cartoes).slice(0, 50);
+      : movimentacoesDoItem(itemSelecionado, historico, cartoes).slice(0, 50);
 
   if (erroCarga) {
     return (
@@ -414,7 +415,7 @@ function Carteiras() {
               item={item}
               selecionado={itemSelecionado?.id === item.id}
               onSelecionar={() => setItemSelecionado(item)}
-              ultimaMov={gastosDoItem(item, gastos, cartoes)[0] ?? null}
+              ultimaMov={movimentacoesDoItem(item, historico, cartoes)[0] ?? null}
             />
           ))}
           <CardAdicionarConta
@@ -603,20 +604,22 @@ function chaveBanco(item) {
   return chaveDoBanco(item.instituicao || item.apelido);
 }
 
-// Converte um gasto da API em uma linha de movimentação (sempre saída).
-function gastoParaMovimentacao(g) {
+// Converte uma movimentação da API (/api/movimentacoes) numa linha do extrato.
+// O valor já vem com sinal (negativo = saída) e `entrada` indica a direção.
+function paraLinhaDoExtrato(m) {
   return {
-    id: g.id,
-    descricao: g.descricao,
-    categoria: g.categoria,
-    data: new Date(`${g.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
-    valor: -Number(g.valor),
-    entrada: false,
+    id: m.id,
+    descricao: m.descricao,
+    categoria: m.categoria,
+    data: new Date(`${m.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+    valor: Number(m.valor),
+    entrada: Boolean(m.entrada),
   };
 }
 
-// Gastos que afetam o item: ele próprio e, para conta, seus cartões de débito.
-function gastosDoItem(item, gastos, cartoes) {
+// Movimentações que afetam o item: ele próprio e, para conta, seus cartões de
+// débito. A lista da API já vem do mais recente para o mais antigo.
+function movimentacoesDoItem(item, historico, cartoes) {
   if (!item) return [];
   let ids = [item.id];
   if (item.tipo === "conta") {
@@ -626,7 +629,7 @@ function gastosDoItem(item, gastos, cartoes) {
   } else if (item.tipo !== "cartao") {
     return [];
   }
-  return gastos.filter((g) => ids.includes(g.carteiraId)).map(gastoParaMovimentacao);
+  return historico.filter((m) => ids.includes(m.carteiraId)).map(paraLinhaDoExtrato);
 }
 
 /**
