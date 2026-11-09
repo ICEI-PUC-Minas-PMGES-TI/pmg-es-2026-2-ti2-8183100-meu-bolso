@@ -113,6 +113,8 @@ function Assistente() {
   // Valor escolhido no <select> da pergunta selecionada.
   const [opcaoSelecionada, setOpcaoSelecionada] = useState("");
 
+  // Contêiner raiz da página: o orbe observa eventos de ponteiro/foco aqui.
+  const paginaRef = useRef(null);
   const fimDaConversa = useRef(null);
   // Primeira renderização desta montagem: rola sem animação (há histórico).
   const primeiroScroll = useRef(true);
@@ -246,10 +248,14 @@ function Assistente() {
       ?.aviso ?? AVISO_PADRAO;
 
   return (
-    <div className={styles.assistente} data-jarvis-estado={estado}>
+    <div
+      ref={paginaRef}
+      className={styles.assistente}
+      data-jarvis-estado={estado}
+    >
       {/* Hero: avatar + apresentação do Jarvis */}
       <header className={styles.hero}>
-        <OrbeJarvis estado={estado} />
+        <OrbeJarvis estado={estado} observarRef={paginaRef} />
         <div className={styles.heroTexto}>
           <h1 className={styles.titulo}>
             Jarvis<span className={styles.cursor} aria-hidden="true">_</span>
@@ -309,6 +315,7 @@ function Assistente() {
                     className={`${styles.cartao} ${
                       ativa ? styles.cartaoAtivo : ""
                     }`}
+                    data-orbe="atento"
                     onClick={(e) => aoClicarPergunta(pergunta, e.currentTarget)}
                     disabled={aguardando}
                     aria-pressed={ativa}

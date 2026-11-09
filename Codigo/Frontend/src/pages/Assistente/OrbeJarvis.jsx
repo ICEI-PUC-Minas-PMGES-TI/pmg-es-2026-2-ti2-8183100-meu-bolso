@@ -18,6 +18,10 @@ const PERSPECTIVA = 2.6;
 const DOIS_PI = Math.PI * 2;
 const ANGULO_OURO = Math.PI * (3 - Math.sqrt(5));
 
+function clamp(v, min, max) {
+  return v < min ? min : v > max ? max : v;
+}
+
 function menosMovimento() {
   return (
     typeof window !== "undefined" &&
@@ -44,7 +48,7 @@ function gerarPontos(n) {
   return pts;
 }
 
-function OrbeJarvis({ estado = "parado" }) {
+function OrbeJarvis({ estado = "parado", observarRef = null }) {
   const recipienteRef = useRef(null);
   const canvasRef = useRef(null);
   // Estado mutável da animação (sem causar re-render).
@@ -57,12 +61,93 @@ function OrbeJarvis({ estado = "parado" }) {
     visivelTela: true,
     css: null,
     cor: { escuro: "", principal: "", claro: "" },
+    // Interatividade (mouse/foco/clique). Suavizados no quadro.
+    alvoX: INCLINACAO_X,
+    alvoY: 0,
+    inclinacaoX: INCLINACAO_X,
+    inclinacaoY: 0,
+    atento: 0,
+    excitacao: 0,
+    pulso: 0,
   });
 
   // A prop só alimenta o ref.
   useEffect(() => {
     refs.current.estado = estado;
   }, [estado]);
+
+  // Interatividade: ponteiro, foco e clique no contêiner observado.
+  // Tudo escreve só em refs; sem setState e sem re-render.
+  useEffect(() => {
+    const alvo = observarRef?.current;
+    const orbe = recipienteRef.current;
+    if (!alvo || !orbe || menosMovimento()) return;
+    const dados = refs.current;
+
+    // Aponta o alvo de inclinação para um ponto da tela.
+    function mirar(clientX, clientY) {
+      const r = orbe.getBoundingClientRect();
+      const dx = (clientX - (r.left + r.width / 2)) / 400;
+      const dy = (clientY - (r.top + r.height / 2)) / 400;
+      dados.alvoY = clamp(dx, -0.6, 0.6);
+      dados.alvoX = 0.25 + clamp(dy, -0.5, 0.5);
+    }
+
+    function aoMover(e) {
+      if (e.pointerType === "touch") return;
+      mirar(e.clientX, e.clientY);
+    }
+
+    function aoSair() {
+      dados.alvoY = 0;
+      dados.alvoX = 0.25;
+      dados.atento = 0;
+    }
+
+    function aoFocusOut(e) {
+      if (!alvo.contains(e.relatedTarget)) aoSair();
+      if (e.target.closest?.('[data-orbe="atento"]')) dados.atento = 0;
+    }
+
+    function aoPointerOver(e) {
+      if (e.target.closest?.('[data-orbe="atento"]')) dados.atento = 1;
+    }
+
+    function aoPointerOut(e) {
+      if (e.target.closest?.('[data-orbe="atento"]')) dados.atento = 0;
+    }
+
+    function aoFocusIn(e) {
+      const cartao = e.target.closest?.('[data-orbe="atento"]');
+      if (!cartao) return;
+      dados.atento = 1;
+      const r = cartao.getBoundingClientRect();
+      mirar(r.left + r.width / 2, r.top + r.height / 2);
+    }
+
+    function aoClicar(e) {
+      if (e.target.closest?.('[data-orbe="atento"]')) dados.pulso = 1;
+    }
+
+    const op = { passive: true };
+    alvo.addEventListener("pointermove", aoMover, op);
+    alvo.addEventListener("pointerleave", aoSair, op);
+    alvo.addEventListener("pointerover", aoPointerOver, op);
+    alvo.addEventListener("pointerout", aoPointerOut, op);
+    alvo.addEventListener("focusin", aoFocusIn, op);
+    alvo.addEventListener("focusout", aoFocusOut, op);
+    alvo.addEventListener("click", aoClicar, op);
+
+    return () => {
+      alvo.removeEventListener("pointermove", aoMover, op);
+      alvo.removeEventListener("pointerleave", aoSair, op);
+      alvo.removeEventListener("pointerover", aoPointerOver, op);
+      alvo.removeEventListener("pointerout", aoPointerOut, op);
+      alvo.removeEventListener("focusin", aoFocusIn, op);
+      alvo.removeEventListener("focusout", aoFocusOut, op);
+      alvo.removeEventListener("click", aoClicar, op);
+    };
+  }, [observarRef]);
 
   useEffect(() => {
     const recipiente = recipienteRef.current;
@@ -101,6 +186,18 @@ function OrbeJarvis({ estado = "parado" }) {
       const t = dados.tempo;
       const est = dados.estado;
 
+      // Interatividade suavizada (sem efeito em prefers-reduced-motion).
+      if (!reduzido) {
+        dados.inclinacaoY += (dados.alvoY - dados.inclinacaoY) * 0.06;
+        dados.inclinacaoX += (dados.alvoX - dados.inclinacaoX) * 0.06;
+        dados.excitacao += (dados.atento - dados.excitacao) * 0.08;
+        dados.pulso *= 0.94;
+      }
+      const incX = reduzido ? INCLINACAO_X : dados.inclinacaoX;
+      const incY = reduzido ? 0 : dados.inclinacaoY;
+      const exc = reduzido ? 0 : dados.excitacao;
+      const pulso = reduzido ? 0 : dados.pulso;
+
       let respiracao = 1;
       let tremor = 0;
       let onda = 0;
@@ -113,6 +210,9 @@ function OrbeJarvis({ estado = "parado" }) {
         tremor = 1;
       }
 
+      const escala = 1 + exc * 0.03 + pulso * 0.08;
+      respiracao *= escala;
+
       ctx.clearRect(0, 0, largura, altura);
 
       // Disco de fundo.
@@ -121,18 +221,21 @@ function OrbeJarvis({ estado = "parado" }) {
       ctx.arc(cx, cy, raioBase * respiracao, 0, DOIS_PI);
       ctx.fill();
 
-      const cos = Math.cos(dados.giro);
-      const sen = Math.sin(dados.giro);
-      const cosX = Math.cos(INCLINACAO_X);
-      const senX = Math.sin(INCLINACAO_X);
+      const giro = dados.giro + exc * 0.006;
+      const cos = Math.cos(giro + incY);
+      const sen = Math.sin(giro + incY);
+      const cosX = Math.cos(incX);
+      const senX = Math.sin(incX);
+
+      const alfaExtra = exc * 0.1 + pulso * 0.25;
 
       ctx.fillStyle = dados.cor.principal;
       for (let i = 0; i < n; i++) {
         const p = pontos[i];
-        // Giro em torno de Y.
+        // Giro em torno de Y (+ inclinação Y interativa).
         const x1 = p.x * cos - p.z * sen;
         const z1 = p.x * sen + p.z * cos;
-        // Inclinação fixa em X.
+        // Inclinação em X (base + interativa).
         const y2 = p.y * cosX - z1 * senX;
         const z2 = p.y * senX + z1 * cosX;
 
@@ -151,7 +254,7 @@ function OrbeJarvis({ estado = "parado" }) {
         const py = cy + y2 * raio * f;
         const tamanho = (0.6 + 1.1 * prof) * f;
 
-        ctx.globalAlpha = 0.18 + 0.82 * prof;
+        ctx.globalAlpha = Math.min(1, 0.18 + 0.82 * prof + alfaExtra);
         ctx.beginPath();
         ctx.arc(px, py, tamanho, 0, DOIS_PI);
         ctx.fill();
