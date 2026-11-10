@@ -19,6 +19,7 @@ const navItems = [
   { nome: "Metas", caminho: "/metas" },
   { nome: "Simulador", caminho: "/simulador" },
   { nome: "Assistente IA", caminho: "/assistente" },
+  { nome: "WhatsApp", caminho: "/whatsapp" },
   { nome: "Aprender", caminho: "/aprender", futuro: true },
 ];
 

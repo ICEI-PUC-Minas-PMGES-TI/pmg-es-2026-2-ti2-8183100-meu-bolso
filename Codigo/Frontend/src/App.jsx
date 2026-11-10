@@ -18,6 +18,7 @@ import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
 import Simulacao from "./pages/Simulacao/Simulacao";
 import Assistente from "./pages/Assistente/Assistente";
 import AssistenteProvider from "./pages/Assistente/AssistenteProvider";
+import ComoUsarWhatsApp from "./pages/ComoUsarWhatsApp/ComoUsarWhatsApp";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
             />
             <Route path="/simulador" element={<Simulacao />} />
             <Route path="/assistente" element={<Assistente />} />
+            <Route path="/whatsapp" element={<ComoUsarWhatsApp />} />
 
             {/* Adicione quando criar as páginas:
             <Route path="/perfil" element={<Perfil />} />
