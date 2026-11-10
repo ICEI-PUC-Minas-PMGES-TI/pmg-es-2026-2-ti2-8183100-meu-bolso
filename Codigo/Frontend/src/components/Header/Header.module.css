@@ -59,6 +59,40 @@
 }
 
 /* ---------- Navegação (centro) ---------- */
+/* Container que ancora o dropdown no mobile. No desktop não tem efeito visual. */
+.navArea {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Botão hambúrguer: escondido no desktop, aparece só no responsivo. */
+.navToggle {
+  display: none;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: 10px 16px;
+  border: 1px solid var(--cinza-100);
+  background-color: var(--branco);
+  border-radius: var(--radius-redondo);
+  box-shadow: var(--sombra-leve);
+  color: var(--preto);
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transicao-rapida);
+}
+
+.navToggle:hover {
+  background-color: var(--cinza-50);
+}
+
+.navToggleTexto {
+  white-space: nowrap;
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -260,23 +294,121 @@
 }
 
 /* ---------- Responsividade ---------- */
+/* No mobile a navegação deixa de ser uma barra e passa a ser um dropdown:
+   o botão "Menu" aparece e os links ficam escondidos num compartimento que
+   abre ancorado abaixo do botão. */
 @media (max-width: 900px) {
   .header {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding: var(--espaco-4) var(--espaco-4) 0;
     gap: var(--espaco-3);
   }
 
+  .marca {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .navArea {
+    flex: 0 0 auto;
+  }
+
+  /* Mostra o botão hambúrguer. */
+  .navToggle {
+    display: inline-flex;
+  }
+
+  /* A nav vira o conteúdo do dropdown: escondida por padrão. */
   .nav {
-    order: 3;
+    position: absolute;
+    top: calc(100% + var(--espaco-2));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--espaco-1);
+    width: max(220px, 60vw);
+    max-width: calc(100vw - var(--espaco-6));
+    padding: var(--espaco-2);
+
+    background-color: var(--branco);
+    border: 1px solid var(--cinza-100);
+    border-radius: var(--radius-medio);
+    box-shadow: var(--sombra-card);
+
+    animation: menuAparece var(--transicao-rapida) ease;
+  }
+
+  /* Aberta: vira um flex em coluna com os links empilhados. */
+  .navAberta {
+    display: flex;
+  }
+
+  .navLink {
     width: 100%;
-    justify-content: flex-start;
-    overflow-x: auto;
+    padding: 12px 14px;
+    border-radius: var(--radius-pequeno);
+    text-align: left;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: var(--espaco-3) var(--espaco-3) 0;
+    gap: var(--espaco-2);
+  }
+
+  .marcaTexto {
+    font-size: var(--texto-xs);
+  }
+
+  .logoCirculo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Em telas bem estreitas, o botão fica só com o ícone. */
+  .navToggleTexto {
+    display: none;
+  }
+
+  .navToggle {
+    padding: 10px;
   }
 }
 
 @media (max-width: 480px) {
   .usuarioNome {
     display: none;
+  }
+
+  /* A pílula do usuário vira só o avatar + chevron, bem compacta */
+  .usuarioBotao {
+    padding: 5px 8px 5px 5px;
+    gap: var(--espaco-1);
+  }
+
+  /* Menu do perfil acompanha a largura da tela sem vazar */
+  .menu {
+    width: min(240px, calc(100vw - var(--espaco-6)));
+  }
+}
+
+@media (max-width: 360px) {
+  /* Marca reduzida ao logo quando o espaço é mínimo */
+  .marcaTexto {
+    display: none;
+  }
+
+  .marca {
+    padding: 6px;
   }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { ChevronDown, UserPen, LogOut } from "lucide-react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { ChevronDown, UserPen, LogOut, Menu, X } from "lucide-react";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
@@ -23,6 +23,7 @@ const navItems = [
 
 function Header() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Dados do usuário logado. Mantidos em estado para refletir edições de
   // perfil na hora (o Header lê do localStorage, que muda ao salvar).
@@ -34,10 +35,14 @@ function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const perfilRef = useRef(null);
 
+  // Controle do menu de navegação (dropdown no mobile).
+  const [navAberta, setNavAberta] = useState(false);
+  const navRef = useRef(null);
+
   // Controle do modal de editar perfil.
   const [perfilAberto, setPerfilAberto] = useState(false);
 
-  // Fecha o menu ao clicar fora ou apertar Esc.
+  // Fecha o menu do perfil ao clicar fora ou apertar Esc.
   useEffect(() => {
     if (!menuAberto) return;
 
@@ -57,6 +62,32 @@ function Header() {
       document.removeEventListener("keydown", aoTeclar);
     };
   }, [menuAberto]);
+
+  // Fecha o menu de navegação (mobile) ao clicar fora ou apertar Esc.
+  useEffect(() => {
+    if (!navAberta) return;
+
+    function aoClicarFora(e) {
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setNavAberta(false);
+      }
+    }
+    function aoTeclar(e) {
+      if (e.key === "Escape") setNavAberta(false);
+    }
+
+    document.addEventListener("mousedown", aoClicarFora);
+    document.addEventListener("keydown", aoTeclar);
+    return () => {
+      document.removeEventListener("mousedown", aoClicarFora);
+      document.removeEventListener("keydown", aoTeclar);
+    };
+  }, [navAberta]);
+
+  // Ao trocar de rota, garante que o menu de navegação feche.
+  useEffect(() => {
+    setNavAberta(false);
+  }, [location.pathname]);
 
   function handleSair() {
     sair(); // apaga o token e os dados do usuário
@@ -78,31 +109,54 @@ function Header() {
         <span className={styles.marcaTexto}>Meu Bolso</span>
       </div>
 
-      {/* Centro: navegação (pílula) */}
-      <nav className={styles.nav} aria-label="Navegação principal">
-        {navItems.map((item) =>
-          item.futuro ? (
-            <span
-              key={item.nome}
-              className={`${styles.navLink} ${styles.navLinkFuturo}`}
-              aria-disabled="true"
-              title="Em breve"
-            >
-              {item.nome}
-            </span>
+      {/* Centro: navegação. Em telas largas é uma pílula com os links;
+          no mobile vira um botão que abre um dropdown com os mesmos links. */}
+      <div className={styles.navArea} ref={navRef}>
+        <button
+          type="button"
+          className={styles.navToggle}
+          onClick={() => setNavAberta((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={navAberta}
+          aria-label={navAberta ? "Fechar navegação" : "Abrir navegação"}
+        >
+          {navAberta ? (
+            <X size={20} aria-hidden="true" />
           ) : (
-            <NavLink
-              key={item.nome}
-              to={item.caminho}
-              className={({ isActive }) =>
-                `${styles.navLink} ${isActive ? styles.navLinkAtivo : ""}`
-              }
-            >
-              {item.nome}
-            </NavLink>
-          ),
-        )}
-      </nav>
+            <Menu size={20} aria-hidden="true" />
+          )}
+          <span className={styles.navToggleTexto}>Menu</span>
+        </button>
+
+        <nav
+          className={`${styles.nav} ${navAberta ? styles.navAberta : ""}`}
+          aria-label="Navegação principal"
+        >
+          {navItems.map((item) =>
+            item.futuro ? (
+              <span
+                key={item.nome}
+                className={`${styles.navLink} ${styles.navLinkFuturo}`}
+                aria-disabled="true"
+                title="Em breve"
+              >
+                {item.nome}
+              </span>
+            ) : (
+              <NavLink
+                key={item.nome}
+                to={item.caminho}
+                onClick={() => setNavAberta(false)}
+                className={({ isActive }) =>
+                  `${styles.navLink} ${isActive ? styles.navLinkAtivo : ""}`
+                }
+              >
+                {item.nome}
+              </NavLink>
+            ),
+          )}
+        </nav>
+      </div>
 
       {/* Direita: usuário (pílula que abre um menu) */}
       <div className={styles.usuario} ref={perfilRef}>
