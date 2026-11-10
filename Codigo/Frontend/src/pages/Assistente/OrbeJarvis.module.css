@@ -1,7 +1,17 @@
-/* Orbe de partículas do Jarvis. Decorativo (aria-hidden). O canvas
-   preenche um recipiente quadrado; a sigla "J.A.R.V.I.S" fica por cima. */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+/* Orbe do Jarvis. Decorativo (aria-hidden). Fundo transparente: anel
+   branco com brilho, interior verde translúcido, poeira preta ao redor.
+   A sigla "J.A.R.V.I.S" fica centralizada por cima do canvas. */
 .orbe {
-  --orbe-tamanho: 208px;
+  --orbe-tamanho: 230px;
+  /* Paleta do orbe. */
+  --orbe-disco: #16301f;
+  --orbe-anel: var(--verde-principal);
+  --orbe-nucleo: var(--branco);
+  --orbe-ponto: var(--verde-claro);
+  --orbe-poeira: var(--preto);
+  --orbe-texto: var(--verde-claro);
   position: relative;
   width: var(--orbe-tamanho);
   height: var(--orbe-tamanho);
@@ -20,17 +30,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--verde-claro);
-  font-size: calc(var(--orbe-tamanho) * 0.11);
+  color: var(--orbe-texto);
+  font-family: 'Orbitron', var(--fonte-principal);
+  font-size: calc(var(--orbe-tamanho) * 0.072);
   font-weight: 500;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   white-space: nowrap;
-  text-shadow: 0 0 6px var(--verde-escuro);
+  text-shadow: 0 0 6px var(--orbe-disco);
   pointer-events: none;
 }
 
 @media (max-width: 480px) {
   .orbe {
-    --orbe-tamanho: 150px;
+    --orbe-tamanho: 170px;
   }
 }
