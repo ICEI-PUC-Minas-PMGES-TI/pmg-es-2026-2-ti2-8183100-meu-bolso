@@ -6,9 +6,11 @@ import Projeto.MeuBolso.model.PerfilDtos.TrocarSenhaRequest;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.TokenService;
+import Projeto.MeuBolso.util.Telefone;
 
 import jakarta.validation.Valid;
 import java.util.Locale;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,6 +56,13 @@ public class UsuarioController {
         // Só valida duplicidade se o e-mail mudou (ignorando o próprio usuário).
         if (!novoEmail.equals(u.getEmail()) && repository.existsByEmailAndIdNot(novoEmail, u.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Este e-mail já está cadastrado.");
+        }
+
+        // O telefone identifica o usuário no chatbot do WhatsApp: não pode repetir.
+        // Só valida se mudou, para não travar a edição de quem já tinha duplicidade antiga.
+        boolean telefoneMudou = !Objects.equals(Telefone.normalizar(request.telefone()), u.getTelefone());
+        if (telefoneMudou && repository.telefoneEmUsoPorOutraConta(request.telefone(), u.getId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Este telefone já está cadastrado em outra conta.");
         }
 
         u.setNome(request.nome().trim());
