@@ -369,6 +369,39 @@
     grid-template-columns: 1fr;
     gap: var(--espaco-8);
   }
+
+  /* Reduz a sangria lateral para não gerar scroll horizontal nessas larguras */
+  .carteiras {
+    margin-inline: calc(-1 * var(--espaco-5));
+  }
+
+  /* O card da carteira não precisa de 600px de altura quando empilha */
+  .secaoCarteira {
+    min-height: 0;
+    padding: var(--espaco-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .carteiras {
+    gap: var(--espaco-6);
+    margin-inline: calc(-1 * var(--espaco-4));
+  }
+
+  /* Títulos proporcionais à largura, sem alterar o layout do desktop */
+  .topo h1 {
+    font-size: var(--titulo-lg);
+  }
+
+  .resumoValor {
+    font-size: var(--titulo-md);
+  }
+
+  /* A carteira física nunca estoura a largura disponível */
+  .secaoCarteira > :not(.secaoTopo):not(.carteiraLegenda) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -386,8 +419,47 @@
   }
 
   .grade,
-  .secaoDinheiro .grade {
+  .secaoDinheiro .grade,
+  .secaoContas .grade {
     grid-template-columns: 1fr;
+  }
+
+  /* Resumo fica mais compacto na vertical em telas estreitas */
+  .cardResumo {
+    padding: var(--espaco-4);
+  }
+
+  .resumoIcone {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .carteiras {
+    margin-inline: calc(-1 * var(--espaco-3));
+    gap: var(--espaco-5);
+  }
+
+  .topo h1 {
+    font-size: var(--titulo-md);
+  }
+
+  .secaoTopo h2 {
+    font-size: var(--titulo-sm);
+  }
+
+  .secaoCarteira {
+    padding: var(--espaco-4);
+  }
+
+  /* Botões de dinheiro empilham para alvos de toque maiores */
+  .dinheiroAcoes {
+    grid-template-columns: 1fr;
+  }
+
+  .resumoValor {
+    font-size: var(--titulo-sm);
   }
 }
 
