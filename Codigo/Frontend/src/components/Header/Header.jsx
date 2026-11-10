@@ -14,13 +14,11 @@ const navItems = [
   { nome: "Evolução", caminho: "/evolucao-financeira" },
   { nome: "Gastos", caminho: "/gastos" },
   { nome: "Receitas", caminho: "/receitas" },
-  { nome: "Planejamento", caminho: "/planejamento", futuro: true },
   { nome: "Carteiras", caminho: "/carteiras" },
   { nome: "Metas", caminho: "/metas" },
   { nome: "Simulador", caminho: "/simulador" },
   { nome: "Assistente IA", caminho: "/assistente" },
   { nome: "WhatsApp", caminho: "/whatsapp" },
-  { nome: "Aprender", caminho: "/aprender", futuro: true },
 ];
 
 function Header() {
