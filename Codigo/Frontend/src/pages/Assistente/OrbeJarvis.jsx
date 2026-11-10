@@ -25,8 +25,8 @@ const BRILHO_ANEL = 0.9;
 const PONTOS = 1.3;
 const BRILHO_PONTOS = 0.9;
 const MARGEM_ESCURA = 2;
-const LINHA_BRANCA = 1.4;
-const BRILHO_VOLTA = 1.0;
+const LINHA_BORDA = 2.0;
+const BRILHO_VOLTA = 1.3;
 
 function clamp(v, min, max) {
   return v < min ? min : v > max ? max : v;
@@ -48,7 +48,7 @@ function menosMovimento() {
 const COR_PADRAO = {
   "--orbe-disco": [22, 48, 31],
   "--orbe-anel": [127, 168, 120],
-  "--orbe-nucleo": [255, 255, 255],
+  "--orbe-borda": [143, 212, 138],
   "--orbe-ponto": [233, 241, 231],
   "--orbe-poeira": [16, 24, 23],
   "--orbe-texto": [233, 241, 231],
@@ -214,7 +214,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
     const paleta = {
       "--orbe-disco": resolverCor(recipiente, "--orbe-disco"),
       "--orbe-anel": resolverCor(recipiente, "--orbe-anel"),
-      "--orbe-nucleo": resolverCor(recipiente, "--orbe-nucleo"),
+      "--orbe-borda": resolverCor(recipiente, "--orbe-borda"),
       "--orbe-ponto": resolverCor(recipiente, "--orbe-ponto"),
       "--orbe-poeira": resolverCor(recipiente, "--orbe-poeira"),
       "--orbe-texto": resolverCor(recipiente, "--orbe-texto"),
@@ -320,7 +320,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         const th = (i / N) * DOIS_PI;
         const r =
           rad(th, t, amp, au, R) * escala +
-          (LINHA_BRANCA * fator(th, t)) / 2 +
+          (LINHA_BORDA * fator(th, t)) / 2 +
           MARGEM_ESCURA;
         const x = cx + Math.cos(th) * r;
         const y = cy + Math.sin(th) * r;
@@ -456,7 +456,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         R,
         escala,
         7 * BRILHO_VOLTA,
-        cor("--orbe-anel", 0.14),
+        cor("--orbe-anel", 0.22),
       );
       camadaAnel(
         cx,
@@ -467,7 +467,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         R,
         escala,
         3.5 * BRILHO_VOLTA,
-        cor("--orbe-anel", 0.28),
+        cor("--orbe-anel", 0.4),
       );
       camadaAnel(
         cx,
@@ -477,8 +477,8 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         au,
         R,
         escala,
-        LINHA_BRANCA,
-        cor("--orbe-nucleo", Math.min(BRILHO_ANEL + exc * 0.1 + pulso * 0.25, 1)),
+        LINHA_BORDA,
+        cor("--orbe-borda", Math.min(BRILHO_ANEL + exc * 0.1 + pulso * 0.25, 1)),
       );
 
       // (e) Partículas do anel.
@@ -487,7 +487,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         const r = rad(p.a, t, amp, au, R) * escala * (1 + p.o);
         const alfa =
           (0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t / 400 + p.ph))) * BRILHO_PONTOS;
-        ctx.fillStyle = cor("--orbe-ponto", alfa);
+        ctx.fillStyle = cor(p.o > 0 ? "--orbe-anel" : "--orbe-borda", alfa);
         ctx.beginPath();
         ctx.arc(
           cx + Math.cos(p.a) * r,

@@ -8,7 +8,8 @@
   /* Paleta do orbe. */
   --orbe-disco: #16301f;
   --orbe-anel: var(--verde-principal);
-  --orbe-nucleo: var(--branco);
+  /* alternativas: #b7e4b1 (mais suave), var(--verde-principal) (mais escuro) */
+  --orbe-borda: #8fd48a;
   --orbe-ponto: var(--verde-claro);
   --orbe-poeira: var(--preto);
   --orbe-texto: var(--verde-claro);
