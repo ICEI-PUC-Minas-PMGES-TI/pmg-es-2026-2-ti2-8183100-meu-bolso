@@ -267,16 +267,103 @@
     gap: var(--espaco-3);
   }
 
+  /* A marca e o usuário dividem a primeira linha; a nav desce inteira. */
+  .marca {
+    flex: 1 1 auto;
+  }
+
   .nav {
     order: 3;
     width: 100%;
     justify-content: flex-start;
+    flex-wrap: nowrap;
     overflow-x: auto;
+    /* Rolagem horizontal suave e sem corte brusco nas bordas */
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    /* Esvaece as pontas para sinalizar que há mais itens ao lado */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 14px,
+      #000 calc(100% - 14px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 14px,
+      #000 calc(100% - 14px),
+      transparent 100%
+    );
+  }
+
+  .navLink {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+
+  /* Barra de rolagem fininha para não ocupar espaço vertical na pílula */
+  .nav::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .nav::-webkit-scrollbar-thumb {
+    border-radius: var(--radius-redondo);
+    background-color: var(--cinza-300);
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: var(--espaco-3) var(--espaco-3) 0;
+    gap: var(--espaco-2);
+  }
+
+  .marcaTexto {
+    font-size: var(--texto-xs);
+  }
+
+  .logoCirculo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .navLink {
+    padding: 8px 12px;
   }
 }
 
 @media (max-width: 480px) {
   .usuarioNome {
     display: none;
+  }
+
+  /* A pílula do usuário vira só o avatar + chevron, bem compacta */
+  .usuarioBotao {
+    padding: 5px 8px 5px 5px;
+    gap: var(--espaco-1);
+  }
+
+  /* Menu do perfil acompanha a largura da tela sem vazar */
+  .menu {
+    width: min(240px, calc(100vw - var(--espaco-6)));
+  }
+}
+
+@media (max-width: 360px) {
+  /* Marca reduzida ao logo quando o espaço é mínimo */
+  .marcaTexto {
+    display: none;
+  }
+
+  .marca {
+    padding: 6px;
   }
 }
