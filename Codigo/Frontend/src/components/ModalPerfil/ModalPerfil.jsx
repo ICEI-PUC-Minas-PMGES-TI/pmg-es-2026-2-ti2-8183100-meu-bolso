@@ -31,8 +31,8 @@ import AvatarUsuario from "../AvatarUsuario/AvatarUsuario";
  * que também atualiza o token/sessão local (o e-mail é a identidade
  * no JWT, então o back-end reemite o token).
  *
- * O avatar tem só o visual com lápis no hover; o upload de foto ainda
- * não está implementado.
+ * O avatar permite trocar a foto (upload com recorte/redimensionamento)
+ * e removê-la; o estado é refletido na hora via onAtualizado.
  *
  * props:
  *  - aberto: boolean
