@@ -51,6 +51,9 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
+  // Erro específico da troca de senha: exibido dentro do cartão de
+  // segurança, junto dos campos, para o usuário ver sem rolar a tela.
+  const [erroSenha, setErroSenha] = useState("");
   // Campos de senha ficam ocultos até o usuário clicar em "Alterar senha".
   const [mostrarSenha, setMostrarSenha] = useState(false);
   // Foto de perfil atual e estado de envio do upload.
@@ -65,6 +68,7 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
     (async () => {
       setCarregando(true);
       setErro("");
+      setErroSenha("");
       // Toda abertura começa limpa: senha recolhida e campos zerados.
       setMostrarSenha(false);
       try {
@@ -100,6 +104,7 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setErro("");
+    setErroSenha("");
 
     const nome = form.nome.trim();
     const email = form.email.trim();
@@ -114,12 +119,14 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
       mostrarSenha &&
       (form.senhaAtual || form.novaSenha || form.confirmarSenha);
 
+    // Erros de senha vão para o cartão de segurança (erroSenha), junto
+    // dos campos, em vez do rodapé do modal.
     if (querTrocarSenha) {
-      if (!form.senhaAtual) return setErro("Informe a senha atual.");
+      if (!form.senhaAtual) return setErroSenha("Informe a senha atual.");
       if (form.novaSenha.length < 8)
-        return setErro("A nova senha deve ter ao menos 8 caracteres.");
+        return setErroSenha("A nova senha deve ter ao menos 8 caracteres.");
       if (form.novaSenha !== form.confirmarSenha)
-        return setErro("A confirmação da nova senha não confere.");
+        return setErroSenha("A confirmação da nova senha não confere.");
     }
 
     setSalvando(true);
@@ -138,7 +145,10 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
       if (onAtualizado) onAtualizado(perfil);
       onFechar();
     } catch (e2) {
-      setErro(e2.message || "Não foi possível salvar as alterações.");
+      const mensagem = e2.message || "Não foi possível salvar as alterações.";
+      // Se a falha veio da troca de senha, mostra no cartão de segurança.
+      if (querTrocarSenha) setErroSenha(mensagem);
+      else setErro(mensagem);
     } finally {
       setSalvando(false);
     }
@@ -441,11 +451,19 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
                       </div>
                     </div>
 
+                    {erroSenha && (
+                      <p className={styles.erro} role="alert">
+                        <AlertCircle size={16} aria-hidden="true" />
+                        {erroSenha}
+                      </p>
+                    )}
+
                     <button
                       type="button"
                       className={styles.btnCancelarSenha}
                       onClick={() => {
                         setMostrarSenha(false);
+                        setErroSenha("");
                         atualizar("senhaAtual", "");
                         atualizar("novaSenha", "");
                         atualizar("confirmarSenha", "");
