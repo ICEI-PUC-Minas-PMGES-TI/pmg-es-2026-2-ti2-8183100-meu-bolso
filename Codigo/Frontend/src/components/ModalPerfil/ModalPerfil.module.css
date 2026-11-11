@@ -1,44 +1,141 @@
 /* ========================================
    MODAL EDITAR PERFIL
+   Estrutura: cabeçalho fixo + corpo rolável + rodapé fixo
 ======================================== */
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.45);
+  background: rgba(16, 24, 23, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--espaco-4);
   z-index: 220;
+  animation: overlayEntra var(--transicao-padrao) ease;
+}
+
+@keyframes overlayEntra {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
   width: 100%;
-  max-width: 640px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-width: 600px;
+  max-height: 92vh;
 
   background-color: var(--branco);
   border-radius: var(--radius-grande);
-  box-shadow: var(--sombra-card);
-  padding: var(--espaco-6);
+  box-shadow:
+    0 24px 70px rgba(16, 24, 23, 0.22),
+    0 4px 14px rgba(16, 24, 23, 0.08);
 
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-5);
+  overflow: hidden;
+
+  animation: modalEntra 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes modalEntra {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Cabeçalho (fixo no topo) ---------- */
 .cabecalho {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--espaco-3);
+
+  padding: var(--espaco-5) var(--espaco-6);
+  background: linear-gradient(
+    150deg,
+    var(--verde-claro) 0%,
+    var(--verde-fundo) 55%,
+    var(--branco) 100%
+  );
+  border-bottom: 1px solid var(--cinza-100);
 }
 
-.cabecalho h2 {
+.cabecalhoIdentidade {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  min-width: 0;
+}
+
+.cabecalhoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cabecalhoTexto h2 {
   font-size: var(--titulo-sm);
+  font-weight: 800;
+  color: var(--verde-escuro);
+  letter-spacing: -0.01em;
+}
+
+.cabecalhoNome {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto-suave);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fotoAcoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  margin-top: 2px;
+}
+
+.fotoLink {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--texto-xs);
   font-weight: 700;
+  color: var(--verde-escuro);
+}
+
+.fotoLink:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.fotoLinkRemover {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--cinza-500);
+}
+
+.fotoLinkRemover:hover {
+  color: var(--erro);
 }
 
 .botaoFechar {
@@ -49,13 +146,17 @@
   height: 38px;
   flex-shrink: 0;
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-pequeno);
   color: var(--cinza-700);
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
 }
 
 .botaoFechar:hover {
-  background-color: var(--cinza-100);
+  background-color: var(--branco);
+  color: var(--preto);
 }
 
 /* ---------- Avatar ---------- */
@@ -63,16 +164,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--espaco-2);
+  flex-shrink: 0;
 }
 
 /* Botão redondo com a foto; mostra o lápis no hover. */
 .avatarBotao {
   position: relative;
-  width: 96px;
-  height: 96px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  border: 2px solid var(--verde-principal);
+  border: 3px solid var(--branco);
+  box-shadow: 0 4px 14px rgba(71, 107, 67, 0.25);
   padding: 0;
   overflow: hidden;
   background: var(--cinza-100);
@@ -83,6 +185,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border: none;
 }
 
 /* Camada escura com o ícone de lápis, aparece ao passar o mouse. */
@@ -103,33 +206,79 @@
   opacity: 1;
 }
 
-.avatarDica {
+/* ---------- Corpo (rolável) ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.corpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+  overflow-y: auto;
+  flex: 1 1 auto;
+}
+
+/* ---------- Cartões ---------- */
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+
+  padding: var(--espaco-5);
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+  transition:
+    border-color var(--transicao-padrao),
+    box-shadow var(--transicao-padrao);
+}
+
+.cartao:focus-within {
+  border-color: var(--verde-principal);
+  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.12);
+}
+
+.cartaoCabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.cartaoIcone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.cartaoTitulo {
+  font-size: var(--texto-base);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.cartaoDescricao {
   font-size: var(--texto-xs);
   color: var(--cinza-500);
 }
 
-/* ---------- Formulário ---------- */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-5);
-}
-
-.secao {
+.cartaoCorpo {
   display: flex;
   flex-direction: column;
   gap: var(--espaco-4);
 }
 
-.secaoTitulo {
-  font-size: var(--texto-sm);
-  font-weight: 700;
-  color: var(--preto);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-/* Dois campos lado a lado em telas largas. */
+/* ---------- Campos de formulário ---------- */
 .linha {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -143,35 +292,71 @@
 }
 
 .campo label {
-  font-size: var(--texto-sm);
-  font-weight: 600;
+  font-size: var(--texto-xs);
+  font-weight: 700;
   color: var(--preto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
-.campo input {
+/* Input com ícone discreto à esquerda */
+.inputIcone {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcone svg {
+  position: absolute;
+  left: 12px;
+  color: var(--cinza-500);
+  pointer-events: none;
+  transition: color var(--transicao-rapida);
+}
+
+.inputIcone input {
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  background-color: var(--branco);
+  min-height: 46px;
+  padding: 10px 12px 10px 38px;
+  background-color: var(--cinza-50);
   color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  border: 1px solid var(--cinza-200);
   border-radius: var(--radius-pequeno);
   outline: none;
+  transition:
+    border-color var(--transicao-padrao),
+    box-shadow var(--transicao-padrao),
+    background-color var(--transicao-padrao);
 }
 
-.campo input:focus {
+.inputIcone input::placeholder {
+  color: var(--cinza-500);
+}
+
+.inputIcone input:hover:not(:disabled) {
+  border-color: var(--cinza-300);
+}
+
+.inputIcone input:focus {
+  background-color: var(--branco);
   border-color: var(--verde-principal);
-  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.18);
 }
 
-.separador {
-  height: 1px;
+.inputIcone input:focus + svg,
+.inputIcone:focus-within svg {
+  color: var(--verde-escuro);
+}
+
+.inputIcone input:disabled {
   background-color: var(--cinza-100);
+  cursor: not-allowed;
 }
 
 .dica {
   font-size: var(--texto-xs);
   color: var(--cinza-500);
+  line-height: 1.5;
 }
 
 /* Botão que revela os campos de troca de senha. */
@@ -181,24 +366,43 @@
   gap: var(--espaco-2);
   align-self: flex-start;
 
-  min-height: 42px;
-  padding: 10px 16px;
+  min-height: 44px;
+  padding: 10px 18px;
 
   background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  color: var(--verde-escuro);
+  border: 1px solid var(--verde-principal);
   border-radius: var(--radius-pequeno);
 
   font-size: var(--texto-sm);
-  font-weight: 600;
+  font-weight: 700;
 
-  transition: background-color var(--transicao-rapida);
+  transition:
+    background-color var(--transicao-rapida),
+    box-shadow var(--transicao-rapida);
 }
 
 .btnAlterarSenha:hover:not(:disabled) {
   background-color: var(--verde-claro);
-  color: var(--verde-escuro);
-  border-color: var(--verde-principal);
+  box-shadow: 0 2px 8px rgba(71, 107, 67, 0.15);
+}
+
+.senhaCampos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  animation: expandir var(--transicao-padrao) ease;
+}
+
+@keyframes expandir {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Link para recolher os campos de senha. */
@@ -218,35 +422,49 @@
 }
 
 .erro {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
   font-size: var(--texto-sm);
   color: var(--erro);
   background-color: var(--erro-fundo);
+  border: 1px solid rgba(201, 66, 66, 0.2);
   border-radius: var(--radius-pequeno);
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
-.sucesso {
-  font-size: var(--texto-sm);
-  color: var(--sucesso);
-  background-color: var(--sucesso-fundo);
-  border-radius: var(--radius-pequeno);
-  padding: 10px 12px;
+.erro svg {
+  flex-shrink: 0;
 }
 
-.formAcoes {
+/* ---------- Rodapé fixo ---------- */
+.rodape {
   display: flex;
   justify-content: flex-end;
   gap: var(--espaco-3);
-  margin-top: var(--espaco-2);
+
+  padding: var(--espaco-4) var(--espaco-6);
+  background-color: var(--branco);
+  border-top: 1px solid var(--cinza-100);
+  box-shadow: 0 -6px 20px rgba(16, 24, 23, 0.04);
+  flex-shrink: 0;
 }
 
 .btnVoltar,
 .btnSalvar {
-  min-height: 44px;
-  padding: 12px 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  min-height: 46px;
+  padding: 12px 22px;
   border-radius: var(--radius-pequeno);
   font-size: var(--texto-sm);
-  font-weight: 600;
+  font-weight: 700;
+  transition:
+    background-color var(--transicao-rapida),
+    box-shadow var(--transicao-rapida),
+    transform var(--transicao-rapida);
 }
 
 .btnVoltar {
@@ -255,23 +473,67 @@
   border: 1px solid var(--cinza-300);
 }
 
-.btnVoltar:hover {
+.btnVoltar:hover:not(:disabled) {
   background-color: var(--cinza-50);
 }
 
 .btnSalvar {
-  background-color: var(--preto);
+  background-color: var(--verde-principal);
   color: var(--branco);
   border: 1px solid transparent;
+  box-shadow: 0 4px 12px rgba(71, 107, 67, 0.25);
 }
 
 .btnSalvar:hover:not(:disabled) {
-  background-color: var(--verde-escuro);
+  background-color: var(--verde-hover);
+  box-shadow: 0 6px 16px rgba(71, 107, 67, 0.3);
+  transform: translateY(-1px);
 }
 
 /* ---------- Responsividade ---------- */
 @media (max-width: 560px) {
+  .overlay {
+    padding: 0;
+  }
+
+  .modal {
+    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+  }
+
   .linha {
     grid-template-columns: 1fr;
+  }
+
+  .cabecalho {
+    padding: var(--espaco-4) var(--espaco-4);
+  }
+
+  .corpo {
+    padding: var(--espaco-4);
+  }
+
+  .rodape {
+    padding: var(--espaco-4);
+  }
+
+  .btnVoltar,
+  .btnSalvar {
+    flex: 1 1 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .modal,
+  .senhaCampos {
+    animation: none;
+  }
+
+  .btnSalvar:hover:not(:disabled) {
+    transform: none;
   }
 }

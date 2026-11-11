@@ -212,6 +212,8 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
     }
   }
 
+  const nomeExibido = form.nome?.trim() || "Seu perfil";
+
   return (
     <div className={styles.overlay} onClick={onFechar}>
       <div
@@ -221,8 +223,64 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
         aria-label="Editar perfil"
         onClick={(ev) => ev.stopPropagation()}
       >
+        {/* Cabeçalho com avatar e identidade do usuário */}
         <header className={styles.cabecalho}>
-          <h2>Editar perfil</h2>
+          <div className={styles.cabecalhoIdentidade}>
+            {/* Avatar: clique abre o seletor de arquivo e envia a nova foto. */}
+            <div className={styles.avatarArea}>
+              <button
+                type="button"
+                className={styles.avatarBotao}
+                title="Alterar foto"
+                aria-label="Alterar foto"
+                onClick={() => inputFotoRef.current?.click()}
+                disabled={enviandoFoto}
+              >
+                <AvatarUsuario
+                  foto={foto}
+                  nome={form.nome}
+                  tamanho={72}
+                  className={styles.avatarImg}
+                />
+                <span className={styles.avatarOverlay}>
+                  <Pencil size={18} aria-hidden="true" />
+                </span>
+              </button>
+              <input
+                ref={inputFotoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={aoEscolherFoto}
+              />
+            </div>
+
+            <div className={styles.cabecalhoTexto}>
+              <h2>Editar perfil</h2>
+              <p className={styles.cabecalhoNome}>{nomeExibido}</p>
+              <div className={styles.fotoAcoes}>
+                <button
+                  type="button"
+                  className={styles.fotoLink}
+                  onClick={() => inputFotoRef.current?.click()}
+                  disabled={enviandoFoto}
+                >
+                  {enviandoFoto ? "Enviando..." : "Alterar foto"}
+                </button>
+                {foto && !enviandoFoto && (
+                  <button
+                    type="button"
+                    className={styles.fotoLinkRemover}
+                    onClick={removerFoto}
+                  >
+                    <Trash2 size={13} aria-hidden="true" />
+                    Remover
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <button
             className={styles.botaoFechar}
             type="button"
@@ -233,168 +291,186 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
           </button>
         </header>
 
-        {/* Avatar: clique abre o seletor de arquivo e envia a nova foto. */}
-        <div className={styles.avatarArea}>
-          <button
-            type="button"
-            className={styles.avatarBotao}
-            title="Alterar foto"
-            aria-label="Alterar foto"
-            onClick={() => inputFotoRef.current?.click()}
-            disabled={enviandoFoto}
-          >
-            <AvatarUsuario
-              foto={foto}
-              nome={form.nome}
-              tamanho={96}
-              className={styles.avatarImg}
-            />
-            <span className={styles.avatarOverlay}>
-              <Pencil size={22} aria-hidden="true" />
-            </span>
-          </button>
-          <input
-            ref={inputFotoRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            onChange={aoEscolherFoto}
-          />
-          <span className={styles.avatarDica}>
-            {enviandoFoto ? "Enviando..." : "Alterar foto"}
-          </span>
-          {foto && !enviandoFoto && (
-            <button
-              type="button"
-              className={styles.btnCancelarSenha}
-              onClick={removerFoto}
-            >
-              Remover foto
-            </button>
-          )}
-        </div>
-
-        <form className={styles.form} onSubmit={handleSubmit}>
-          {/* Dados básicos */}
-          <div className={styles.secao}>
-            <span className={styles.secaoTitulo}>Dados pessoais</span>
-
-            <div className={styles.campo}>
-              <label htmlFor="perfil-nome">Nome</label>
-              <input
-                id="perfil-nome"
-                type="text"
-                value={form.nome}
-                onChange={(ev) => atualizar("nome", ev.target.value)}
-                disabled={carregando}
-              />
-            </div>
-
-            <div className={styles.linha}>
-              <div className={styles.campo}>
-                <label htmlFor="perfil-email">E-mail</label>
-                <input
-                  id="perfil-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(ev) => atualizar("email", ev.target.value)}
-                  disabled={carregando}
-                />
+        <form className={styles.form} onSubmit={handleSubmit} id="form-perfil">
+          <div className={styles.corpo}>
+            {/* ===== Informações pessoais ===== */}
+            <section className={styles.cartao}>
+              <div className={styles.cartaoCabecalho}>
+                <span className={styles.cartaoIcone}>
+                  <User size={18} aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className={styles.cartaoTitulo}>Informações pessoais</h3>
+                  <p className={styles.cartaoDescricao}>
+                    Seus dados de contato e identificação.
+                  </p>
+                </div>
               </div>
 
-              <div className={styles.campo}>
-                <label htmlFor="perfil-telefone">Telefone</label>
-                <input
-                  id="perfil-telefone"
-                  type="tel"
-                  value={form.telefone}
-                  onChange={(ev) => atualizar("telefone", ev.target.value)}
-                  disabled={carregando}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.separador} />
-
-          {/* Troca de senha (opcional): escondida atrás de um botão */}
-          <div className={styles.secao}>
-            <span className={styles.secaoTitulo}>Alterar senha</span>
-
-            {!mostrarSenha ? (
-              <button
-                type="button"
-                className={styles.btnAlterarSenha}
-                onClick={() => setMostrarSenha(true)}
-                disabled={carregando}
-              >
-                <KeyRound size={16} aria-hidden="true" />
-                Alterar senha
-              </button>
-            ) : (
-              <>
-                <p className={styles.dica}>
-                  Preencha para definir uma nova senha.
-                </p>
-
+              <div className={styles.cartaoCorpo}>
                 <div className={styles.campo}>
-                  <label htmlFor="perfil-senha-atual">Senha atual</label>
-                  <input
-                    id="perfil-senha-atual"
-                    type="password"
-                    autoComplete="current-password"
-                    value={form.senhaAtual}
-                    onChange={(ev) => atualizar("senhaAtual", ev.target.value)}
-                  />
+                  <label htmlFor="perfil-nome">Nome completo</label>
+                  <div className={styles.inputIcone}>
+                    <User size={16} aria-hidden="true" />
+                    <input
+                      id="perfil-nome"
+                      type="text"
+                      placeholder="Seu nome completo"
+                      value={form.nome}
+                      onChange={(ev) => atualizar("nome", ev.target.value)}
+                      disabled={carregando}
+                    />
+                  </div>
                 </div>
 
                 <div className={styles.linha}>
                   <div className={styles.campo}>
-                    <label htmlFor="perfil-nova-senha">Nova senha</label>
-                    <input
-                      id="perfil-nova-senha"
-                      type="password"
-                      autoComplete="new-password"
-                      value={form.novaSenha}
-                      onChange={(ev) => atualizar("novaSenha", ev.target.value)}
-                    />
+                    <label htmlFor="perfil-email">E-mail</label>
+                    <div className={styles.inputIcone}>
+                      <Mail size={16} aria-hidden="true" />
+                      <input
+                        id="perfil-email"
+                        type="email"
+                        placeholder="voce@email.com"
+                        value={form.email}
+                        onChange={(ev) => atualizar("email", ev.target.value)}
+                        disabled={carregando}
+                      />
+                    </div>
                   </div>
 
                   <div className={styles.campo}>
-                    <label htmlFor="perfil-confirmar-senha">Confirmar nova senha</label>
-                    <input
-                      id="perfil-confirmar-senha"
-                      type="password"
-                      autoComplete="new-password"
-                      value={form.confirmarSenha}
-                      onChange={(ev) => atualizar("confirmarSenha", ev.target.value)}
-                    />
+                    <label htmlFor="perfil-telefone">Telefone</label>
+                    <div className={styles.inputIcone}>
+                      <Phone size={16} aria-hidden="true" />
+                      <input
+                        id="perfil-telefone"
+                        type="tel"
+                        placeholder="(00) 00000-0000"
+                        value={form.telefone}
+                        onChange={(ev) => atualizar("telefone", ev.target.value)}
+                        disabled={carregando}
+                      />
+                    </div>
                   </div>
                 </div>
+              </div>
+            </section>
 
-                <button
-                  type="button"
-                  className={styles.btnCancelarSenha}
-                  onClick={() => {
-                    setMostrarSenha(false);
-                    atualizar("senhaAtual", "");
-                    atualizar("novaSenha", "");
-                    atualizar("confirmarSenha", "");
-                  }}
-                >
-                  Cancelar alteração de senha
-                </button>
-              </>
+            {/* ===== Segurança e senha ===== */}
+            <section className={styles.cartao}>
+              <div className={styles.cartaoCabecalho}>
+                <span className={styles.cartaoIcone}>
+                  <ShieldCheck size={18} aria-hidden="true" />
+                </span>
+                <div>
+                  <h3 className={styles.cartaoTitulo}>Segurança e senha</h3>
+                  <p className={styles.cartaoDescricao}>
+                    Mantenha sua conta protegida.
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.cartaoCorpo}>
+                {!mostrarSenha ? (
+                  <button
+                    type="button"
+                    className={styles.btnAlterarSenha}
+                    onClick={() => setMostrarSenha(true)}
+                    disabled={carregando}
+                  >
+                    <KeyRound size={16} aria-hidden="true" />
+                    Alterar senha
+                  </button>
+                ) : (
+                  <div className={styles.senhaCampos}>
+                    <p className={styles.dica}>
+                      Preencha para definir uma nova senha. Mínimo de 8
+                      caracteres.
+                    </p>
+
+                    <div className={styles.campo}>
+                      <label htmlFor="perfil-senha-atual">Senha atual</label>
+                      <div className={styles.inputIcone}>
+                        <KeyRound size={16} aria-hidden="true" />
+                        <input
+                          id="perfil-senha-atual"
+                          type="password"
+                          autoComplete="current-password"
+                          value={form.senhaAtual}
+                          onChange={(ev) =>
+                            atualizar("senhaAtual", ev.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.linha}>
+                      <div className={styles.campo}>
+                        <label htmlFor="perfil-nova-senha">Nova senha</label>
+                        <div className={styles.inputIcone}>
+                          <KeyRound size={16} aria-hidden="true" />
+                          <input
+                            id="perfil-nova-senha"
+                            type="password"
+                            autoComplete="new-password"
+                            value={form.novaSenha}
+                            onChange={(ev) =>
+                              atualizar("novaSenha", ev.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.campo}>
+                        <label htmlFor="perfil-confirmar-senha">
+                          Confirmar nova senha
+                        </label>
+                        <div className={styles.inputIcone}>
+                          <KeyRound size={16} aria-hidden="true" />
+                          <input
+                            id="perfil-confirmar-senha"
+                            type="password"
+                            autoComplete="new-password"
+                            value={form.confirmarSenha}
+                            onChange={(ev) =>
+                              atualizar("confirmarSenha", ev.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={styles.btnCancelarSenha}
+                      onClick={() => {
+                        setMostrarSenha(false);
+                        atualizar("senhaAtual", "");
+                        atualizar("novaSenha", "");
+                        atualizar("confirmarSenha", "");
+                      }}
+                    >
+                      Cancelar alteração de senha
+                    </button>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* ===== Resumo semanal por e-mail ===== */}
+            <ResumoSemanalConfig />
+
+            {erro && (
+              <p className={styles.erro} role="alert">
+                <AlertCircle size={16} aria-hidden="true" />
+                {erro}
+              </p>
             )}
           </div>
 
-          <div className={styles.separador} />
-
-          <ResumoSemanalConfig />
-
-          {erro && <p className={styles.erro}>{erro}</p>}
-
-          <div className={styles.formAcoes}>
+          {/* Rodapé fixo com as ações principais */}
+          <div className={styles.rodape}>
             <button
               type="button"
               className={styles.btnVoltar}
@@ -408,7 +484,8 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
               className={styles.btnSalvar}
               disabled={carregando || salvando}
             >
-              {salvando ? "Salvando..." : "Confirmar"}
+              <Check size={18} aria-hidden="true" />
+              {salvando ? "Salvando..." : "Salvar alterações"}
             </button>
           </div>
         </form>
