@@ -67,8 +67,8 @@
   padding: 3px;
   flex-shrink: 0;
 
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-pequeno);
 }
 
@@ -81,7 +81,7 @@
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 
   transition:
     background-color var(--transicao-rapida),
@@ -94,8 +94,8 @@
 
 .seletorBotaoAtivo,
 .seletorBotaoAtivo:hover {
-  background-color: var(--branco);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
   box-shadow: var(--sombra-leve);
 }
 
@@ -124,7 +124,7 @@
 
 .estadoTitulo {
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .estadoIcone {
@@ -170,29 +170,29 @@
 
 /* Grade e eixos */
 .grade {
-  stroke: var(--cinza-100);
+  stroke: var(--cor-borda-suave);
   stroke-width: 1;
 }
 
 /* Linha do zero destacada quando o gráfico tem saldo negativo */
 .gradeZero {
-  stroke: var(--cinza-300);
+  stroke: var(--cor-borda-forte);
   stroke-width: 1.5;
 }
 
 .rotuloY {
   font-size: var(--texto-xs);
-  fill: var(--cinza-500);
+  fill: var(--cor-texto-secundario);
 }
 
 .rotuloX {
   font-size: var(--texto-xs);
-  fill: var(--cinza-500);
+  fill: var(--cor-texto-secundario);
 }
 
 /* Guia vertical do ponto ativo */
 .guia {
-  stroke: var(--cinza-300);
+  stroke: var(--cor-borda-forte);
   stroke-width: 1;
   stroke-dasharray: 3 3;
 }
@@ -213,7 +213,7 @@
 }
 
 .ponto {
-  fill: var(--branco);
+  fill: var(--cor-superficie);
   stroke: var(--verde-principal);
   stroke-width: 2.5;
   transition: r var(--transicao-rapida);
@@ -232,8 +232,8 @@
   position: absolute;
   width: 120px; /* manter igual a larguraTooltip no .jsx */
   pointer-events: none;
-  background: var(--preto);
-  color: var(--branco);
+  background: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   border-radius: var(--radius-pequeno);
   padding: 7px 10px;
   text-align: center;
@@ -243,7 +243,7 @@
 .tooltipMes {
   display: block;
   font-size: var(--texto-xs);
-  color: var(--cinza-300);
+  color: var(--cor-texto-desabilitado);
 }
 
 .tooltipValor {
@@ -314,7 +314,7 @@
   align-items: center;
   gap: var(--espaco-2);
   font-size: var(--texto-sm);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .legendaCor {
@@ -355,7 +355,7 @@
 }
 
 .rotuloXAtivo {
-  fill: var(--preto);
+  fill: var(--cor-texto-principal);
   font-weight: 600;
 }
 

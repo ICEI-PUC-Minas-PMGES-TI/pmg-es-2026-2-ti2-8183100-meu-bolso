@@ -12,6 +12,7 @@
     --verde-escuro: #476b43;
     --verde-claro: #e9f1e7;
     --verde-fundo: #f4f8f3;
+    --verde-fundo-realce: #e6f0e8;
 
     /* Cores neutras */
     --preto: #101817;
@@ -30,13 +31,55 @@
     --sucesso-fundo: #e5f5e9;
 
     --erro: #c94242;
+    --erro-escuro: #a93232;
     --erro-fundo: #fdeaea;
+    --erro-fundo-suave: #fff0f0;
 
     --alerta: #d69a24;
+    --alerta-escuro: #805b13;
     --alerta-fundo: #fff5dc;
 
     --informacao: #3979b5;
     --informacao-fundo: #e8f2fc;
+
+    /* ----------------------------------------
+    Cores por FUNÇÃO (tokens semânticos)
+    Os componentes devem usar estes tokens, e não a paleta acima
+    (--branco, --preto, --cinza-*). Assim o tema escuro só precisa
+    redefinir este bloco. Valores atuais = paleta clara, sem mudança visual.
+
+    Atenção: os nomes evitam --cor, --cor-texto e --cor-fundo, que já são
+    variáveis locais em pages/Gastos/Gastos.module.css.
+    ---------------------------------------- */
+
+    /* Fundos */
+    --cor-fundo-pagina: var(--verde-fundo);        /* fundo do site */
+    --cor-superficie: var(--branco);               /* cards, modais, header, inputs */
+    --cor-superficie-suave: var(--cinza-50);       /* áreas internas, linhas alternadas */
+    --cor-superficie-realce: var(--cinza-100);     /* hover, chips, desabilitado */
+    --cor-superficie-forte: var(--cinza-200);      /* trilhos, separadores preenchidos */
+    --cor-superficie-contraste: var(--cinza-300);  /* elementos neutros mais escuros */
+    --cor-superficie-inversa: var(--preto);        /* botão primário, tooltips, chips ativos */
+
+    /* Textos */
+    --cor-texto-principal: var(--preto);
+    --cor-texto-forte: var(--preto-suave);         /* rótulos e títulos */
+    --cor-texto-medio: var(--cinza-700);
+    --cor-texto-secundario: var(--cinza-500);
+    --cor-texto-desabilitado: var(--cinza-300);
+    --cor-texto-sutil: var(--cinza-200);
+    --cor-texto-inverso: var(--branco);            /* texto sobre fundo escuro ou colorido */
+
+    /* Bordas */
+    --cor-borda: var(--cinza-200);
+    --cor-borda-suave: var(--cinza-100);
+    --cor-borda-forte: var(--cinza-300);
+    --cor-borda-enfase: var(--preto);
+
+    /* Sobreposições (fundo atrás de modais e painéis) */
+    --cor-overlay-leve: rgba(16, 24, 23, 0.4);
+    --cor-overlay: rgba(16, 24, 23, 0.45);
+    --cor-overlay-forte: rgba(16, 24, 23, 0.5);
 
     /* Tipografia */
     --fonte-principal: 'Inter', Arial, sans-serif;
@@ -68,12 +111,15 @@
     --radius-grande: 20px;
     --radius-redondo: 9999px;
 
-    --borda-padrao: 1px solid var(--cinza-200);
+    --borda-padrao: 1px solid var(--cor-borda);
 
     /* Sombras */
     --sombra-leve: 0 2px 8px rgba(16, 24, 23, 0.05);
     --sombra-card: 0 10px 35px rgba(16, 24, 23, 0.08);
     --sombra-hover: 0 12px 30px rgba(16, 24, 23, 0.12);
+    --sombra-painel: -10px 0 40px rgba(16, 24, 23, 0.12);          /* painéis laterais */
+    --sombra-foco: 0 0 0 3px rgba(127, 168, 120, 0.15);           /* anel de foco dos campos */
+    --sombra-foco-erro: 0 0 0 3px rgba(220, 38, 38, 0.15);
 
     /* Layout */
     --largura-maxima: 1400px;
@@ -111,8 +157,8 @@
     font-size: var(--texto-base);
     line-height: 1.5;
 
-    background-color: var(--verde-fundo);
-    color: var(--preto);
+    background-color: var(--cor-fundo-pagina);
+    color: var(--cor-texto-principal);
 
     -webkit-font-smoothing: antialiased;
     }
@@ -182,7 +228,7 @@
     h4,
     h5,
     h6 {
-    color: var(--preto);
+    color: var(--cor-texto-principal);
     line-height: 1.25;
     font-weight: 700;
     }
@@ -200,7 +246,7 @@
     }
 
     .texto-secundario {
-    color: var(--cinza-500);
+    color: var(--cor-texto-secundario);
     }
 
     .texto-pequeno {
@@ -223,7 +269,7 @@
     }
 
     .card {
-    background-color: var(--branco);
+    background-color: var(--cor-superficie);
     border: var(--borda-padrao);
     border-radius: var(--radius-medio);
     padding: var(--espaco-6);
@@ -268,8 +314,8 @@
     }
 
     .btn-primario {
-    background-color: var(--preto);
-    color: var(--branco);
+    background-color: var(--cor-superficie-inversa);
+    color: var(--cor-texto-inverso);
     }
 
     .btn-primario:hover:not(:disabled) {
@@ -278,7 +324,7 @@
 
     .btn-verde {
     background-color: var(--verde-principal);
-    color: var(--preto);
+    color: var(--cor-texto-principal);
     }
 
     .btn-verde:hover:not(:disabled) {
@@ -286,22 +332,22 @@
     }
 
     .btn-secundario {
-    background-color: var(--branco);
-    color: var(--preto);
-    border-color: var(--cinza-300);
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto-principal);
+    border-color: var(--cor-borda-forte);
     }
 
     .btn-secundario:hover:not(:disabled) {
-    background-color: var(--cinza-50);
+    background-color: var(--cor-superficie-suave);
     }
 
     .btn-perigo {
     background-color: var(--erro);
-    color: var(--branco);
+    color: var(--cor-texto-inverso);
     }
 
     .btn-perigo:hover:not(:disabled) {
-    background-color: #a93232;
+    background-color: var(--erro-escuro);
     }
 
     .btn-full {
@@ -321,7 +367,7 @@
     .form-label {
     font-size: var(--texto-sm);
     font-weight: 600;
-    color: var(--preto-suave);
+    color: var(--cor-texto-forte);
     }
 
     .form-input {
@@ -329,10 +375,10 @@
     min-height: 44px;
     padding: 12px 14px;
 
-    background-color: var(--branco);
-    color: var(--preto);
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto-principal);
 
-    border: 1px solid var(--cinza-300);
+    border: 1px solid var(--cor-borda-forte);
     border-radius: var(--radius-pequeno);
 
     outline: none;
@@ -344,15 +390,15 @@
 
     .form-input:focus {
     border-color: var(--verde-principal);
-    box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+    box-shadow: var(--sombra-foco);
     }
 
     .form-input::placeholder {
-    color: var(--cinza-500);
+    color: var(--cor-texto-secundario);
     }
 
     .form-input:disabled {
-    background-color: var(--cinza-100);
+    background-color: var(--cor-superficie-realce);
     cursor: not-allowed;
     }
 
@@ -379,7 +425,7 @@
 
     .mensagem-alerta {
     background-color: var(--alerta-fundo);
-    color: #805b13;
+    color: var(--alerta-escuro);
     }
 
     .mensagem-info {

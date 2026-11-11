@@ -6,7 +6,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.4);
+  background: var(--cor-overlay-leve);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--transicao-padrao), visibility var(--transicao-padrao);
@@ -27,9 +27,9 @@
   width: 420px;
   max-width: 100%;
 
-  background-color: var(--branco);
-  border-left: 1px solid var(--cinza-200);
-  box-shadow: -10px 0 40px rgba(16, 24, 23, 0.12);
+  background-color: var(--cor-superficie);
+  border-left: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-painel);
 
   display: flex;
   flex-direction: column;
@@ -64,12 +64,12 @@
   border: none;
   background: transparent;
   border-radius: var(--radius-pequeno);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .botaoFechar:hover,
 .botaoMenu:hover {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
 }
 
 .cabecalhoTexto {
@@ -84,12 +84,12 @@
 .titulo {
   font-size: var(--titulo-sm);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .subtitulo {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .acoes {
@@ -106,8 +106,8 @@
   flex-direction: column;
   min-width: 160px;
 
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-pequeno);
   box-shadow: var(--sombra-card);
   overflow: hidden;
@@ -122,11 +122,11 @@
   background: transparent;
   text-align: left;
   font-size: var(--texto-sm);
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .menu button:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .menuPerigo {
@@ -139,8 +139,8 @@
   align-items: center;
   gap: var(--espaco-4);
   padding: var(--espaco-4);
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
 }
 
@@ -166,7 +166,7 @@
 .visualNome {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .tag {
@@ -185,7 +185,7 @@
 
 .tag-media {
   background-color: var(--alerta-fundo);
-  color: #805b13;
+  color: var(--alerta-escuro);
 }
 
 .tag-baixa {
@@ -203,7 +203,7 @@
 .progressoBarra {
   width: 100%;
   height: 10px;
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
   border-radius: var(--radius-redondo);
   overflow: hidden;
 }
@@ -220,7 +220,7 @@
   justify-content: space-between;
   gap: var(--espaco-2);
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* ---------- Resumo financeiro ---------- */
@@ -229,8 +229,8 @@
   flex-direction: column;
   gap: var(--espaco-2);
   padding: var(--espaco-4);
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
 }
 
@@ -243,13 +243,13 @@
 
 .linhaRotulo {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .linhaValor {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .linhaDestaque {
@@ -271,7 +271,7 @@
 
 .vazio {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .listaMov {
@@ -285,7 +285,7 @@
   justify-content: space-between;
   gap: var(--espaco-3);
   padding: var(--espaco-3) 0;
-  border-top: 1px solid var(--cinza-100);
+  border-top: 1px solid var(--cor-borda-suave);
 }
 
 .itemMov:first-child {
@@ -302,12 +302,12 @@
 .movDescricao {
   font-size: var(--texto-sm);
   font-weight: 500;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .movMeta {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .movValor {
@@ -321,7 +321,7 @@
 }
 
 .movSaida {
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .verTodas {
@@ -334,9 +334,9 @@
   min-height: 42px;
   padding: 10px 16px;
 
-  background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: var(--radius-pequeno);
 
   font-size: var(--texto-sm);
@@ -344,7 +344,7 @@
 }
 
 .verTodas:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 /* ---------- Responsividade ---------- */

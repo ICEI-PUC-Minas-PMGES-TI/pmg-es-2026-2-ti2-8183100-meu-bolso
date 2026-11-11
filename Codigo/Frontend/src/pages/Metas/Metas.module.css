@@ -99,7 +99,7 @@
 
 .tag-media {
   background-color: var(--alerta-fundo);
-  color: #805b13;
+  color: var(--alerta-escuro);
 }
 
 .tag-baixa {
@@ -111,7 +111,7 @@
 .progresso {
   width: 100%;
   height: 10px;
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
   border-radius: var(--radius-redondo);
   overflow: hidden;
 }
@@ -146,7 +146,7 @@
   font-size: var(--texto-xs);
   font-weight: 700;
   background-color: var(--sucesso);
-  color: var(--branco);
+  color: var(--cor-texto-inverso);
   white-space: nowrap;
 }
 

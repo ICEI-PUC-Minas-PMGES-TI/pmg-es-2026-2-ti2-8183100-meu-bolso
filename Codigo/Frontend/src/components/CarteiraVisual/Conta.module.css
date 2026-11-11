@@ -10,8 +10,8 @@
   aspect-ratio: 1.586 / 1;
   padding: var(--espaco-5);
 
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
 }
 
@@ -37,12 +37,12 @@
 .apelido {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .instituicao {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* ---------- Versão compacta (topo do painel) ---------- */

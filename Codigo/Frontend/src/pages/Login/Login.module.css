@@ -13,7 +13,7 @@
 
   background:
     radial-gradient(circle at top left, rgba(127, 168, 120, 0.20), transparent 35%),
-    var(--verde-fundo);
+    var(--cor-fundo-pagina);
 }
 
 /* ========================================
@@ -36,10 +36,10 @@
   width: 100%;
   max-width: 440px;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   padding: 36px;
 
-  border: 1px solid var(--cinza-100);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-card);
 }
@@ -71,14 +71,14 @@
 }
 
 .login-header h1 {
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .login-header p {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -105,7 +105,7 @@
 }
 
 .input-group label {
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -114,10 +114,10 @@
   width: 100%;
   padding: 13px 16px;
 
-  color: var(--preto);
-  background-color: var(--cinza-50);
+  color: var(--cor-texto-principal);
+  background-color: var(--cor-superficie-suave);
 
-  border: 1px solid var(--cinza-100);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: 12px;
 
   outline: none;
@@ -125,18 +125,18 @@
 }
 
 .input-group input::placeholder {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .input-group input:focus {
   border-color: var(--verde-principal);
-  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+  box-shadow: var(--sombra-foco);
 }
 
 /* Texto de ajuda abaixo de um campo (ex.: telefone do WhatsApp) */
 .input-ajuda {
   font-size: 0.8rem;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* ========================================
@@ -169,7 +169,7 @@
   align-items: flex-start;
   gap: 10px;
 
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -201,8 +201,8 @@
   border: none;
   border-radius: 999px;
 
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
 
   font-weight: 600;
   font-size: 1rem;
@@ -224,7 +224,7 @@
 .login-register {
   margin-top: 28px;
   text-align: center;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.9rem;
 }
 
@@ -242,7 +242,7 @@
    ======================================== */
 .login-error {
   padding: 10px 12px;
-  background-color: #fff0f0;
+  background-color: var(--erro-fundo-suave);
   color: var(--erro);
   border-radius: var(--radius-pequeno);
   font-size: 0.875rem;
@@ -255,8 +255,8 @@
   margin-top: 20px;
   padding: 12px 14px;
 
-  background-color: var(--cinza-50);
-  color: var(--cinza-500);
+  background-color: var(--cor-superficie-suave);
+  color: var(--cor-texto-secundario);
 
   border-radius: var(--radius-pequeno);
   font-size: 0.78rem;
@@ -277,8 +277,8 @@
 
   padding: clamp(32px, 4vw, 48px);
 
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
 
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-card);
@@ -307,7 +307,7 @@
 }
 
 .login-marketing-titulo {
-  color: var(--branco);
+  color: var(--cor-texto-inverso);
   font-size: clamp(2.2rem, 3vw, 3rem);
   font-weight: 700;
   line-height: 1.1;
@@ -316,7 +316,7 @@
 
 .login-marketing-descricao {
   max-width: 380px;
-  color: var(--cinza-300);
+  color: var(--cor-texto-desabilitado);
   font-size: 1rem;
   line-height: 1.6;
 }
@@ -335,7 +335,7 @@
   position: relative;
   padding-left: 22px;
 
-  color: var(--cinza-200);
+  color: var(--cor-texto-sutil);
   font-size: 0.9rem;
 }
 
@@ -358,7 +358,7 @@
   margin-top: auto;
   padding-top: 32px;
 
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.8rem;
   line-height: 1.5;
 }
@@ -442,7 +442,7 @@
    ======================================== */
 .login-sucesso {
   padding: 10px 12px;
-  background-color: var(--verde-fundo);
+  background-color: var(--cor-fundo-pagina);
   color: var(--verde-escuro);
   border-radius: var(--radius-pequeno);
   font-size: 0.875rem;

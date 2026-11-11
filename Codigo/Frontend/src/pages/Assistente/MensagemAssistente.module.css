@@ -51,9 +51,9 @@
 }
 
 .balaoAssistente {
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto-principal);
   box-shadow: var(--sombra-leve);
   border-bottom-left-radius: 4px;
 }
@@ -63,13 +63,13 @@
   border: 1px solid var(--erro);
   /* Texto escuro para contraste >= 4.5:1; a borda/fundo vermelhos é que
      sinalizam o erro. */
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   border-bottom-left-radius: 4px;
 }
 
 .horario {
   font-size: var(--texto-xs);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 /* Texto exclusivo para leitores de tela. */

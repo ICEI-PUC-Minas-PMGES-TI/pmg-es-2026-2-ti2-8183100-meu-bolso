@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.4);
+  background: var(--cor-overlay-leve);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--transicao-padrao), visibility var(--transicao-padrao);
@@ -26,9 +26,9 @@
   width: 420px;
   max-width: 100%;
 
-  background-color: var(--branco);
-  border-left: 1px solid var(--cinza-200);
-  box-shadow: -10px 0 40px rgba(16, 24, 23, 0.12);
+  background-color: var(--cor-superficie);
+  border-left: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-painel);
 
   display: flex;
   flex-direction: column;
@@ -62,13 +62,13 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: var(--cinza-50);
-  color: var(--preto);
+  background-color: var(--cor-superficie-suave);
+  color: var(--cor-texto-principal);
   cursor: pointer;
 }
 
 .botaoFechar:hover {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
 }
 
 /* Lista */
@@ -82,7 +82,7 @@
 
 .vazio {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .linha {
@@ -92,15 +92,15 @@
   width: 100%;
   padding: var(--espaco-3);
   text-align: left;
-  border: 1px solid var(--cinza-200);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   cursor: pointer;
   transition: border-color var(--transicao-padrao), background-color var(--transicao-padrao);
 }
 
 .linha:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .logo {
@@ -111,7 +111,7 @@
   height: 36px;
   flex-shrink: 0;
   border-radius: 50%;
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
   overflow: hidden;
 }
 
@@ -133,7 +133,7 @@
 .nome {
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -142,7 +142,7 @@
 .saldo {
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .etiqueta {
@@ -156,13 +156,13 @@
 }
 
 .seta {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   flex-shrink: 0;
 }
 
 /* Rodapé */
 .rodape {
-  border-top: 1px solid var(--cinza-100);
+  border-top: 1px solid var(--cor-borda-suave);
   padding-top: var(--espaco-4);
 }
 
@@ -175,8 +175,8 @@
   min-height: 44px;
   padding: 10px 16px;
   border-radius: var(--radius-pequeno);
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   font-size: var(--texto-sm);
   font-weight: 600;
   cursor: pointer;

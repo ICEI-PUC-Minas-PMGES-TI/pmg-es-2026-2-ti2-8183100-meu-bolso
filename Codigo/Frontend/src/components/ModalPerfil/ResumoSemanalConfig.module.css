@@ -5,13 +5,13 @@
 }
 
 .titulo {
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   font-size: 0.95rem;
   font-weight: 600;
 }
 
 .dica {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -33,14 +33,14 @@
 }
 
 .status {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   font-size: 0.82rem;
 }
 
 .aviso {
   padding: 10px 12px;
-  background-color: var(--cinza-50);
-  color: var(--cinza-500);
+  background-color: var(--cor-superficie-suave);
+  color: var(--cor-texto-secundario);
   border-radius: var(--radius-pequeno);
   font-size: 0.8rem;
   line-height: 1.5;
@@ -54,9 +54,9 @@
 
 .botaoSecundario {
   padding: 8px 14px;
-  background: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-100);
+  background: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -75,7 +75,7 @@
 
 .erro {
   padding: 10px 12px;
-  background-color: #fff0f0;
+  background-color: var(--erro-fundo-suave);
   color: var(--erro);
   border-radius: var(--radius-pequeno);
   font-size: 0.85rem;
@@ -83,7 +83,7 @@
 
 .sucesso {
   padding: 10px 12px;
-  background-color: var(--verde-fundo);
+  background-color: var(--cor-fundo-pagina);
   color: var(--verde-escuro);
   border-radius: var(--radius-pequeno);
   font-size: 0.85rem;
@@ -94,9 +94,9 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
   border-radius: var(--radius-pequeno);
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   font-size: 0.85rem;
 }
 
@@ -108,5 +108,5 @@
 .esqueleto {
   height: 56px;
   border-radius: 12px;
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }

@@ -18,8 +18,8 @@
 .marca,
 .nav,
 .usuario {
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-100);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-redondo);
   box-shadow: var(--sombra-leve);
 }
@@ -54,7 +54,7 @@
 .marcaTexto {
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   white-space: nowrap;
 }
 
@@ -74,11 +74,11 @@
   align-items: center;
   gap: var(--espaco-2);
   padding: 10px 16px;
-  border: 1px solid var(--cinza-100);
-  background-color: var(--branco);
+  border: 1px solid var(--cor-borda-suave);
+  background-color: var(--cor-superficie);
   border-radius: var(--radius-redondo);
   box-shadow: var(--sombra-leve);
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   font-size: var(--texto-sm);
   font-weight: 700;
   cursor: pointer;
@@ -86,7 +86,7 @@
 }
 
 .navToggle:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .navToggleTexto {
@@ -108,7 +108,7 @@
 
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   white-space: nowrap;
 
   transition:
@@ -123,19 +123,19 @@
 
 .navLinkAtivo,
 .navLinkAtivo:hover {
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
 }
 
 /* Itens de páginas que ainda não existem */
 .navLinkFuturo {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   cursor: default;
 }
 
 .navLinkFuturo:hover {
   background-color: transparent;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* ---------- Usuário (direita) ---------- */
@@ -156,13 +156,13 @@
   border: none;
   background: transparent;
   border-radius: var(--radius-redondo);
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 
   transition: background-color var(--transicao-rapida);
 }
 
 .usuarioBotao:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .avatar {
@@ -181,7 +181,7 @@
 }
 
 .chevron {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   transition: transform var(--transicao-rapida);
 }
 
@@ -201,8 +201,8 @@
   flex-direction: column;
   padding: var(--espaco-2);
 
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-100);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-medio);
   box-shadow: var(--sombra-card);
 
@@ -241,20 +241,20 @@
 .menuNome {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   text-align: center;
 }
 
 .menuEmail {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   text-align: center;
   word-break: break-all;
 }
 
 .menuSeparador {
   height: 1px;
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
   margin: var(--espaco-1) 0;
 }
 
@@ -272,7 +272,7 @@
 
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 
   transition:
     background-color var(--transicao-rapida),
@@ -334,8 +334,8 @@
     max-width: calc(100vw - var(--espaco-6));
     padding: var(--espaco-2);
 
-    background-color: var(--branco);
-    border: 1px solid var(--cinza-100);
+    background-color: var(--cor-superficie);
+    border: 1px solid var(--cor-borda-suave);
     border-radius: var(--radius-medio);
     box-shadow: var(--sombra-card);
 
