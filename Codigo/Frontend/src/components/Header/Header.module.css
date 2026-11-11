@@ -225,41 +225,81 @@
 /* ---------- Menu suspenso do perfil ---------- */
 .menu {
   position: absolute;
-  top: calc(100% + var(--espaco-2));
+  top: calc(100% + var(--espaco-3));
   right: 0;
   z-index: 100;
 
-  width: 240px;
+  width: 280px;
   display: flex;
   flex-direction: column;
   padding: var(--espaco-2);
 
   background-color: var(--cor-superficie);
   border: 1px solid var(--cor-borda-suave);
-  border-radius: var(--radius-medio);
-  box-shadow: var(--sombra-card);
+  border-radius: var(--radius-grande);
+  box-shadow:
+    0 18px 50px rgba(16, 24, 23, 0.14),
+    0 2px 8px rgba(16, 24, 23, 0.06);
 
-  animation: menuAparece var(--transicao-rapida) ease;
+  transform-origin: top right;
+  animation: menuAparece 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu::before {
+  /* Setinha discreta apontando para a pílula do usuário */
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 24px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--cor-superficie);
+  border-left: 1px solid var(--cor-borda-suave);
+  border-top: 1px solid var(--cor-borda-suave);
+  transform: rotate(45deg);
 }
 
 @keyframes menuAparece {
   from {
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-8px) scale(0.97);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Topo: avatar grande + nome + e-mail, centralizados */
+@keyframes menuFecha {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+}
+
+.menuFechando {
+  animation: menuFecha 0.16s ease forwards;
+}
+
+/* Topo: avatar grande + nome + e-mail, sobre um leve degradê verde */
 .menuTopo {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--espaco-1);
-  padding: var(--espaco-4) var(--espaco-3) var(--espaco-3);
+  padding: var(--espaco-5) var(--espaco-4) var(--espaco-4);
+  margin-bottom: var(--espaco-1);
+
+  background: linear-gradient(
+    160deg,
+    var(--verde-fundo) 0%,
+    var(--cor-superficie) 100%
+  );
+  border-radius: var(--radius-medio);
 }
 
 .menuAvatar {
@@ -267,8 +307,9 @@
   height: 64px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--verde-principal);
-  margin-bottom: var(--espaco-1);
+  border: 3px solid var(--cor-superficie);
+  box-shadow: 0 4px 14px rgba(71, 107, 67, 0.25);
+  margin-bottom: var(--espaco-2);
 }
 
 .menuNome {
@@ -276,6 +317,7 @@
   font-weight: 700;
   color: var(--cor-texto-principal);
   text-align: center;
+  line-height: 1.3;
 }
 
 .menuEmail {
@@ -287,8 +329,8 @@
 
 .menuSeparador {
   height: 1px;
-  background-color: var(--cor-superficie-realce);
-  margin: var(--espaco-1) 0;
+  background-color: var(--cor-borda-suave);
+  margin: var(--espaco-1) var(--espaco-2);
 }
 
 .menuItem {
@@ -296,11 +338,11 @@
   align-items: center;
   gap: var(--espaco-3);
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 12px;
 
   border: none;
   background: transparent;
-  border-radius: var(--radius-pequeno);
+  border-radius: var(--radius-medio);
   text-align: left;
 
   font-size: var(--texto-sm);
@@ -309,7 +351,14 @@
 
   transition:
     background-color var(--transicao-rapida),
-    color var(--transicao-rapida);
+    color var(--transicao-rapida),
+    transform var(--transicao-rapida);
+}
+
+.menuItem svg {
+  flex-shrink: 0;
+  color: var(--cor-texto-secundario);
+  transition: color var(--transicao-rapida);
 }
 
 .menuItem:hover {
@@ -317,12 +366,24 @@
   color: var(--verde-escuro);
 }
 
+.menuItem:hover svg {
+  color: var(--verde-escuro);
+}
+
 .menuItemPerigo {
+  color: var(--erro);
+}
+
+.menuItemPerigo svg {
   color: var(--erro);
 }
 
 .menuItemPerigo:hover {
   background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.menuItemPerigo:hover svg {
   color: var(--erro);
 }
 

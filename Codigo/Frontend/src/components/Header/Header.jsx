@@ -33,8 +33,29 @@ function Header() {
   const nomeExibido = usuario?.nome || usuario?.email || "Usuário";
 
   // Controle do menu suspenso do perfil.
+  // `menuAberto` monta o menu; `menuFechando` roda a animação de saída
+  // antes de desmontar, para abrir e fechar de forma suave.
   const [menuAberto, setMenuAberto] = useState(false);
+  const [menuFechando, setMenuFechando] = useState(false);
   const perfilRef = useRef(null);
+
+  // Fecha o menu com animação: marca como "fechando", espera a transição
+  // e só então desmonta.
+  function fecharMenu() {
+    setMenuFechando(true);
+    window.setTimeout(() => {
+      setMenuAberto(false);
+      setMenuFechando(false);
+    }, 150);
+  }
+
+  function alternarMenu() {
+    if (menuAberto) {
+      fecharMenu();
+    } else {
+      setMenuAberto(true);
+    }
+  }
 
   // Controle do menu de navegação (dropdown no mobile).
   const [navAberta, setNavAberta] = useState(false);
@@ -53,11 +74,11 @@ function Header() {
 
     function aoClicarFora(e) {
       if (perfilRef.current && !perfilRef.current.contains(e.target)) {
-        setMenuAberto(false);
+        fecharMenu();
       }
     }
     function aoTeclar(e) {
-      if (e.key === "Escape") setMenuAberto(false);
+      if (e.key === "Escape") fecharMenu();
     }
 
     document.addEventListener("mousedown", aoClicarFora);
@@ -101,6 +122,7 @@ function Header() {
 
   function handleEditarPerfil() {
     setMenuAberto(false);
+    setMenuFechando(false);
     setPerfilAberto(true);
   }
 
@@ -183,7 +205,7 @@ function Header() {
           <button
             type="button"
             className={styles.usuarioBotao}
-            onClick={() => setMenuAberto((v) => !v)}
+            onClick={alternarMenu}
             aria-haspopup="menu"
             aria-expanded={menuAberto}
             aria-label="Abrir menu do perfil"
@@ -203,7 +225,10 @@ function Header() {
           </button>
 
           {menuAberto && (
-            <div className={styles.menu} role="menu">
+            <div
+              className={`${styles.menu} ${menuFechando ? styles.menuFechando : ""}`}
+              role="menu"
+            >
               {/* Cabeçalho do menu: avatar + nome */}
               <div className={styles.menuTopo}>
                 <AvatarUsuario
