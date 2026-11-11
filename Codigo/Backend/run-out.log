@@ -1,0 +1,374 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< Projeto:MeuBolso >--------------------------
+[INFO] Building MeuBolso 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.3.4:run (default-cli) > test-compile @ MeuBolso >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ MeuBolso ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ MeuBolso ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ MeuBolso ---
+[INFO] skip non existing resourceDirectory C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ MeuBolso ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.3.4:run (default-cli) < test-compile @ MeuBolso <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.3.4:run (default-cli) @ MeuBolso ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-11T14:56:15.226-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] Projeto.MeuBolso.MeuBolsoApplication     : Starting MeuBolsoApplication using Java 25 with PID 21104 (C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes started by David Aurélio in C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend)
+2026-11-11T14:56:15.228-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] Projeto.MeuBolso.MeuBolsoApplication     : No active profile set, falling back to 1 default profile: "default"
+2026-11-11T14:56:15.261-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-11-11T14:56:15.262-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-11-11T14:56:15.690-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-11-11T14:56:15.744-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 50 ms. Found 13 MongoDB repository interfaces.
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/David%20Aurelio/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.30/tomcat-embed-core-10.1.30.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2026-11-11T14:56:16.147-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-11-11T14:56:16.157-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-11T14:56:16.157-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-11-11T14:56:16.189-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-11-11T14:56:16.189-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 927 ms
+2026-11-11T14:56:16.360-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "5.0.1"}, "os": {"type": "Windows", "name": "Windows 10", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Oracle Corporation/25+37-LTS-3491"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=majority, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='danieltsuruga_db_user', source='admin', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=null, commandListeners=[], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@7d8677f0, com.mongodb.Jep395RecordCodecProvider@79769760, com.mongodb.KotlinCodecProvider@1310d6fb]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[127.0.0.1:27017], srvHost=daniel.lofhd6r.mongodb.net, srvServiceName=mongodb, mode=MULTIPLE, requiredClusterType=REPLICA_SET, requiredReplicaSetName='atlas-77peic-shard-0', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=true, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null}
+2026-11-11T14:56:16.377-03:00  INFO 21104 --- [MeuBolso] [d6r.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017 to client view of cluster
+2026-11-11T14:56:16.396-03:00  INFO 21104 --- [MeuBolso] [d6r.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017 to client view of cluster
+2026-11-11T14:56:16.398-03:00  INFO 21104 --- [MeuBolso] [d6r.mongodb.net] org.mongodb.driver.cluster               : Adding discovered server ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017 to client view of cluster
+2026-11-11T14:56:16.475-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-11-11T14:56:16.565-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] org.mongodb.driver.cluster               : Waiting for server to become available for operation with ID 2. Remaining time: 30000 ms. Selector: WritableServerSelector, topology description: {type=REPLICA_SET, servers=[{address=ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING}, {address=ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING}, {address=ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING}].
+2026-11-11T14:56:16.748-03:00  INFO 21104 --- [MeuBolso] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017
+
+com.mongodb.MongoSocketWriteException: Exception sending message
+	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:691) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:564) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:396) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:346) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:203) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-5.0.1.jar:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:130) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:376) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:319) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:314) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1295) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.onConsumeCertificate(CertificateMessage.java:1172) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.consume(CertificateMessage.java:1115) ~[na:na]
+	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:421) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:477) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:448) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:199) ~[na:na]
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:924) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1293) ~[na:na]
+	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:165) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:561) ~[mongodb-driver-core-5.0.1.jar:na]
+	... 10 common frames omitted
+Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:387) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:270) ~[na:na]
+	at java.base/sun.security.validator.Validator.validate(Validator.java:256) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:230) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:132) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1279) ~[na:na]
+	... 24 common frames omitted
+Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:148) ~[na:na]
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.engineBuild(SunCertPathBuilder.java:129) ~[na:na]
+	at java.base/java.security.cert.CertPathBuilder.build(CertPathBuilder.java:299) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:382) ~[na:na]
+	... 29 common frames omitted
+
+2026-11-11T14:56:16.748-03:00  INFO 21104 --- [MeuBolso] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017
+
+com.mongodb.MongoSocketWriteException: Exception sending message
+	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:691) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:564) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:396) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:346) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:203) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-5.0.1.jar:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:130) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:376) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:319) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:314) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1295) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.onConsumeCertificate(CertificateMessage.java:1172) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.consume(CertificateMessage.java:1115) ~[na:na]
+	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:421) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:477) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:448) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:199) ~[na:na]
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:924) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1293) ~[na:na]
+	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:165) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:561) ~[mongodb-driver-core-5.0.1.jar:na]
+	... 10 common frames omitted
+Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:387) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:270) ~[na:na]
+	at java.base/sun.security.validator.Validator.validate(Validator.java:256) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:230) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:132) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1279) ~[na:na]
+	... 24 common frames omitted
+Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:148) ~[na:na]
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.engineBuild(SunCertPathBuilder.java:129) ~[na:na]
+	at java.base/java.security.cert.CertPathBuilder.build(CertPathBuilder.java:299) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:382) ~[na:na]
+	... 29 common frames omitted
+
+2026-11-11T14:56:16.748-03:00  INFO 21104 --- [MeuBolso] [ngodb.net:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017
+
+com.mongodb.MongoSocketWriteException: Exception sending message
+	at com.mongodb.internal.connection.InternalStreamConnection.translateWriteException(InternalStreamConnection.java:691) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:564) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendCommandMessage(InternalStreamConnection.java:396) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendAndReceive(InternalStreamConnection.java:346) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.sendAndReceive(CommandHelper.java:92) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.CommandHelper.executeCommand(CommandHelper.java:48) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.initializeConnectionDescription(InternalStreamConnectionInitializer.java:130) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.startHandshake(InternalStreamConnectionInitializer.java:78) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:203) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.lookupServerDescription(DefaultServerMonitor.java:193) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitorRunnable.run(DefaultServerMonitor.java:153) ~[mongodb-driver-core-5.0.1.jar:na]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+Caused by: javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:130) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:376) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:319) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:314) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1295) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.onConsumeCertificate(CertificateMessage.java:1172) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.consume(CertificateMessage.java:1115) ~[na:na]
+	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:421) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:477) ~[na:na]
+	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:448) ~[na:na]
+	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:199) ~[na:na]
+	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:172) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1506) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1421) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:455) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl.ensureNegotiated(SSLSocketImpl.java:924) ~[na:na]
+	at java.base/sun.security.ssl.SSLSocketImpl$AppOutputStream.write(SSLSocketImpl.java:1293) ~[na:na]
+	at com.mongodb.internal.connection.SocketStream.write(SocketStream.java:165) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.sendMessage(InternalStreamConnection.java:561) ~[mongodb-driver-core-5.0.1.jar:na]
+	... 10 common frames omitted
+Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:387) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:270) ~[na:na]
+	at java.base/sun.security.validator.Validator.validate(Validator.java:256) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:230) ~[na:na]
+	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:132) ~[na:na]
+	at java.base/sun.security.ssl.CertificateMessage$T13CertificateConsumer.checkServerCerts(CertificateMessage.java:1279) ~[na:na]
+	... 24 common frames omitted
+Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:148) ~[na:na]
+	at java.base/sun.security.provider.certpath.SunCertPathBuilder.engineBuild(SunCertPathBuilder.java:129) ~[na:na]
+	at java.base/java.security.cert.CertPathBuilder.build(CertPathBuilder.java:299) ~[na:na]
+	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:382) ~[na:na]
+	... 29 common frames omitted
+
+2026-11-11T14:56:46.566-03:00  WARN 21104 --- [MeuBolso] [  restartedMain] ConfigServletWebServerApplicationContext : Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'assistenteController' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\AssistenteController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'assistenteService' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\AssistenteService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'comparativoMesPergunta' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\ComparativoMesPergunta.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastosDoMes' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\GastosDoMes.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+2026-11-11T14:56:46.569-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] o.apache.catalina.core.StandardService   : Stopping service [Tomcat]
+2026-11-11T14:56:46.576-03:00  INFO 21104 --- [MeuBolso] [  restartedMain] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-11-11T14:56:46.589-03:00 ERROR 21104 --- [MeuBolso] [  restartedMain] o.s.boot.SpringApplication               : Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'assistenteController' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\AssistenteController.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'assistenteService' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\AssistenteService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'comparativoMesPergunta' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\ComparativoMesPergunta.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastosDoMes' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\GastosDoMes.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:975) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:971) ~[spring-context-6.1.13.jar:6.1.13]
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:625) ~[spring-context-6.1.13.jar:6.1.13]
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146) ~[spring-boot-3.3.4.jar:3.3.4]
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:754) ~[spring-boot-3.3.4.jar:3.3.4]
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:456) ~[spring-boot-3.3.4.jar:3.3.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:335) ~[spring-boot-3.3.4.jar:3.3.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363) ~[spring-boot-3.3.4.jar:3.3.4]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352) ~[spring-boot-3.3.4.jar:3.3.4]
+	at Projeto.MeuBolso.MeuBolsoApplication.main(MeuBolsoApplication.java:10) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50) ~[spring-boot-devtools-3.3.4.jar:3.3.4]
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'assistenteService' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\AssistenteService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'comparativoMesPergunta' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\ComparativoMesPergunta.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastosDoMes' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\GastosDoMes.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 22 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'comparativoMesPergunta' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\ComparativoMesPergunta.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastosDoMes' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\GastosDoMes.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.addCandidateEntry(DefaultListableBeanFactory.java:1689) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.findAutowireCandidates(DefaultListableBeanFactory.java:1653) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveMultipleBeanCollection(DefaultListableBeanFactory.java:1543) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveMultipleBeans(DefaultListableBeanFactory.java:1511) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1392) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 36 common frames omitted
+Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'gastosDoMes' defined in file [C:\Users\David Aurelio\Desktop\pmg-es-2026-2-ti2-8183100-meu-bolso\Codigo\Backend\target\classes\Projeto\MeuBolso\assistente\GastosDoMes.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:795) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:237) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1375) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1212) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 54 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'gastoRepository' defined in Projeto.MeuBolso.repository.GastoRepository defined in @EnableMongoRepositories declared on MongoRepositoriesRegistrar.EnableMongoRepositoriesConfiguration: Cannot resolve reference to bean 'mongoTemplate' while setting bean property 'mongoOperations'
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:377) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveValueIfNecessary(BeanDefinitionValueResolver.java:135) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyPropertyValues(AbstractAutowireCapableBeanFactory.java:1705) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1454) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:599) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1443) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1353) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:904) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:782) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 68 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'mongoTemplate' defined in class path resource [org/springframework/boot/autoconfigure/data/mongo/MongoDatabaseFactoryDependentConfiguration.class]: Failed to instantiate [org.springframework.data.mongodb.core.MongoTemplate]: Factory method 'mongoTemplate' threw exception with message: Timed out while waiting for a server that matches WritableServerSelector. Client view of cluster state is {type=REPLICA_SET, servers=[{address=ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:648) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:636) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1355) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1185) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:562) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:522) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:337) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:335) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.BeanDefinitionValueResolver.resolveReference(BeanDefinitionValueResolver.java:365) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 82 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.data.mongodb.core.MongoTemplate]: Factory method 'mongoTemplate' threw exception with message: Timed out while waiting for a server that matches WritableServerSelector. Client view of cluster state is {type=REPLICA_SET, servers=[{address=ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:178) ~[spring-beans-6.1.13.jar:6.1.13]
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:644) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 92 common frames omitted
+Caused by: org.springframework.dao.DataAccessResourceFailureException: Timed out while waiting for a server that matches WritableServerSelector. Client view of cluster state is {type=REPLICA_SET, servers=[{address=ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}]
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.translateExceptionIfPossible(MongoExceptionTranslator.java:88) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.MongoTemplate.potentiallyConvertRuntimeException(MongoTemplate.java:3008) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.MongoTemplate.execute(MongoTemplate.java:605) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.DefaultIndexOperations.execute(DefaultIndexOperations.java:217) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.DefaultIndexOperations.ensureIndex(DefaultIndexOperations.java:121) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator.createIndex(MongoPersistentEntityIndexCreator.java:153) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator.checkForAndCreateIndexes(MongoPersistentEntityIndexCreator.java:143) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator.checkForIndexes(MongoPersistentEntityIndexCreator.java:127) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator.<init>(MongoPersistentEntityIndexCreator.java:96) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexCreator.<init>(MongoPersistentEntityIndexCreator.java:73) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.MongoTemplate.<init>(MongoTemplate.java:265) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.boot.autoconfigure.data.mongo.MongoDatabaseFactoryDependentConfiguration.mongoTemplate(MongoDatabaseFactoryDependentConfiguration.java:56) ~[spring-boot-autoconfigure-3.3.4.jar:3.3.4]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565) ~[na:na]
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:146) ~[spring-beans-6.1.13.jar:6.1.13]
+	... 93 common frames omitted
+Caused by: com.mongodb.MongoTimeoutException: Timed out while waiting for a server that matches WritableServerSelector. Client view of cluster state is {type=REPLICA_SET, servers=[{address=ac-unppk30-shard-00-02.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-01.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}, {address=ac-unppk30-shard-00-00.lofhd6r.mongodb.net:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketWriteException: Exception sending message}, caused by {javax.net.ssl.SSLHandshakeException: (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}, caused by {sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target}}]
+	at com.mongodb.internal.connection.BaseCluster.createAndLogTimeoutException(BaseCluster.java:392) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.BaseCluster.selectServer(BaseCluster.java:148) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.connection.AbstractMultiServerCluster.selectServer(AbstractMultiServerCluster.java:54) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.binding.ClusterBinding.getWriteConnectionSource(ClusterBinding.java:126) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.client.internal.ClientSessionBinding.getConnectionSource(ClientSessionBinding.java:128) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.client.internal.ClientSessionBinding.getWriteConnectionSource(ClientSessionBinding.java:102) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.internal.operation.SyncOperationHelper.withConnection(SyncOperationHelper.java:103) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.operation.CreateIndexesOperation.execute(CreateIndexesOperation.java:129) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.internal.operation.CreateIndexesOperation.execute(CreateIndexesOperation.java:68) ~[mongodb-driver-core-5.0.1.jar:na]
+	at com.mongodb.client.internal.MongoClientDelegate$DelegateOperationExecutor.execute(MongoClientDelegate.java:173) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.client.internal.MongoCollectionImpl.executeCreateIndexes(MongoCollectionImpl.java:912) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.client.internal.MongoCollectionImpl.createIndexes(MongoCollectionImpl.java:895) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.client.internal.MongoCollectionImpl.createIndexes(MongoCollectionImpl.java:890) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at com.mongodb.client.internal.MongoCollectionImpl.createIndex(MongoCollectionImpl.java:875) ~[mongodb-driver-sync-5.0.1.jar:na]
+	at org.springframework.data.mongodb.core.DefaultIndexOperations.lambda$ensureIndex$0(DefaultIndexOperations.java:131) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	at org.springframework.data.mongodb.core.MongoTemplate.execute(MongoTemplate.java:603) ~[spring-data-mongodb-4.3.4.jar:4.3.4]
+	... 105 common frames omitted
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  33.550 s
+[INFO] Finished at: 2026-11-11T14:56:46-03:00
+[INFO] ------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Mail, Eye, Send, CheckCircle2, Info } from "lucide-react";
 
 import { resumoSemanalApi } from "../../service/Api";
 import styles from "./ResumoSemanalConfig.module.css";
@@ -156,39 +157,64 @@ export default function ResumoSemanalConfig() {
   }
 
   return (
-    <div className={styles.secao}>
-      <span className={styles.titulo}>Resumo semanal por e-mail</span>
-      <p className={styles.dica}>
-        Receba toda segunda-feira um resumo dos seus gastos e metas.
-      </p>
+    <section className={styles.cartao}>
+      <div className={styles.cartaoCabecalho}>
+        <span className={styles.cartaoIcone}>
+          <Mail size={18} aria-hidden="true" />
+        </span>
+        <div>
+          <h3 className={styles.cartaoTitulo}>Resumo semanal por e-mail</h3>
+          <p className={styles.cartaoDescricao}>
+            Receba toda segunda-feira um resumo dos seus gastos e metas.
+          </p>
+        </div>
+      </div>
 
       {carregando ? (
         <div className={styles.esqueleto} aria-busy="true" />
       ) : (
-        <>
-          <label className={styles.interruptor}>
-            <input
-              type="checkbox"
-              role="switch"
-              checked={ativo}
-              disabled={ocupado}
-              onChange={alternarEnvio}
-            />
-            <span>Receber resumo semanal</span>
-          </label>
+        <div className={styles.cartaoCorpo}>
+          {/* Linha do switch: estado + controle */}
+          <div className={styles.switchLinha}>
+            <div className={styles.switchInfo}>
+              <span
+                className={`${styles.badge} ${ativo ? styles.badgeAtivo : styles.badgeInativo}`}
+              >
+                {ativo ? "Ativado" : "Desativado"}
+              </span>
+              <span className={styles.switchTexto}>
+                {ativo
+                  ? `Próximo envio: segunda-feira, 8h${email ? ` · ${email}` : ""}`
+                  : "Você não está recebendo o resumo semanal."}
+              </span>
+            </div>
 
-          <p className={styles.status}>
-            {ativo
-              ? `Próximo envio: segunda-feira, 8h${email ? ` para ${email}` : ""}`
-              : "Desativado"}
-          </p>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={ativo}
+              aria-label="Receber resumo semanal"
+              className={`${styles.switch} ${ativo ? styles.switchOn : ""}`}
+              onClick={alternarEnvio}
+              disabled={ocupado}
+            >
+              <span className={styles.switchBolinha} />
+            </button>
+          </div>
+
           {ultimoEnvio && (
-            <p className={styles.status}>Último envio: {formatarData(ultimoEnvio)}</p>
+            <p className={styles.ultimoEnvio}>
+              Último envio em {formatarData(ultimoEnvio)}
+            </p>
           )}
 
           {!SINCRONIZACAO_ATIVA && (
             <p className={styles.aviso}>
-              Os gastos só aparecem no resumo quando a sincronização com o servidor está ativa.
+              <Info size={15} aria-hidden="true" />
+              <span>
+                Os gastos só aparecem no resumo quando a sincronização com o
+                servidor está ativa.
+              </span>
             </p>
           )}
 
@@ -199,6 +225,7 @@ export default function ResumoSemanalConfig() {
               onClick={alternarPrevia}
               disabled={ocupado}
             >
+              <Eye size={15} aria-hidden="true" />
               {previa ? "Ocultar prévia" : "Ver prévia"}
             </button>
             <button
@@ -207,15 +234,25 @@ export default function ResumoSemanalConfig() {
               onClick={enviarAgora}
               disabled={ocupado}
             >
+              <Send size={15} aria-hidden="true" />
               Enviar agora
             </button>
           </div>
 
-          {erro && <p className={styles.erro} role="alert">{erro}</p>}
-          {aviso && <p className={styles.sucesso}>{aviso}</p>}
+          {erro && (
+            <p className={styles.erro} role="alert">
+              {erro}
+            </p>
+          )}
+          {aviso && (
+            <p className={styles.sucesso}>
+              <CheckCircle2 size={15} aria-hidden="true" />
+              {aviso}
+            </p>
+          )}
           {previa && <Previa resumo={previa} />}
-        </>
+        </div>
       )}
-    </div>
+    </section>
   );
 }
