@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Pencil, KeyRound } from "lucide-react";
 
-import { buscarPerfil, atualizarPerfil, trocarSenha } from "../../service/Api";
+import {
+  buscarPerfil,
+  atualizarPerfil,
+  atualizarFoto,
+  trocarSenha,
+  obterUsuario,
+} from "../../service/Api";
 import styles from "./ModalPerfil.module.css";
 import ResumoSemanalConfig from "./ResumoSemanalConfig";
+import AvatarUsuario from "../AvatarUsuario/AvatarUsuario";
 
 /**
  * Modal de edição de perfil (sobrepõe a tela atual, sem mudar de rota).
@@ -35,6 +42,10 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
   const [erro, setErro] = useState("");
   // Campos de senha ficam ocultos até o usuário clicar em "Alterar senha".
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  // Foto de perfil atual e estado de envio do upload.
+  const [foto, setFoto] = useState(() => obterUsuario()?.foto ?? null);
+  const [enviandoFoto, setEnviandoFoto] = useState(false);
+  const inputFotoRef = useRef(null);
 
   // Busca o perfil completo (inclui telefone, que não está no localStorage).
   useEffect(() => {
@@ -56,6 +67,7 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
             novaSenha: "",
             confirmarSenha: "",
           });
+          setFoto(p.foto ?? null);
         }
       } catch (e) {
         if (ativo) setErro(e.message || "Não foi possível carregar o perfil.");
@@ -121,7 +133,73 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
     }
   }
 
-  const avatarUrl = "/images/default-avatar.png";
+  // Recorta o quadrado central da imagem e redimensiona para 256x256,
+  // exportando JPEG (qualidade 0.85). Devolve uma data URL.
+  function processarImagem(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        try {
+          const lado = Math.min(img.width, img.height);
+          const sx = (img.width - lado) / 2;
+          const sy = (img.height - lado) / 2;
+          const canvas = document.createElement("canvas");
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, sx, sy, lado, lado, 0, 0, 256, 256);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        } catch (e) {
+          reject(e);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Não foi possível ler a imagem."));
+      };
+      img.src = url;
+    });
+  }
+
+  async function aoEscolherFoto(ev) {
+    const file = ev.target.files?.[0];
+    ev.target.value = ""; // permite reescolher o mesmo arquivo
+    if (!file) return;
+
+    setErro("");
+    if (!file.type.startsWith("image/")) {
+      setErro("Escolha um arquivo de imagem.");
+      return;
+    }
+
+    setEnviandoFoto(true);
+    try {
+      const dataUrl = await processarImagem(file);
+      const resposta = await atualizarFoto(dataUrl);
+      setFoto(resposta?.foto ?? null);
+      if (onAtualizado) onAtualizado();
+    } catch (e) {
+      setErro(e.message || "Não foi possível atualizar a foto.");
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
+
+  async function removerFoto() {
+    setErro("");
+    setEnviandoFoto(true);
+    try {
+      await atualizarFoto(null);
+      setFoto(null);
+      if (onAtualizado) onAtualizado();
+    } catch (e) {
+      setErro(e.message || "Não foi possível remover a foto.");
+    } finally {
+      setEnviandoFoto(false);
+    }
+  }
 
   return (
     <div className={styles.overlay} onClick={onFechar}>
@@ -144,20 +222,45 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
           </button>
         </header>
 
-        {/* Avatar (visual; upload ainda não disponível) */}
+        {/* Avatar: clique abre o seletor de arquivo e envia a nova foto. */}
         <div className={styles.avatarArea}>
           <button
             type="button"
             className={styles.avatarBotao}
-            title="Alterar foto (em breve)"
-            aria-label="Alterar foto (em breve)"
+            title="Alterar foto"
+            aria-label="Alterar foto"
+            onClick={() => inputFotoRef.current?.click()}
+            disabled={enviandoFoto}
           >
-            <img src={avatarUrl} alt="" className={styles.avatarImg} />
+            <AvatarUsuario
+              foto={foto}
+              nome={form.nome}
+              tamanho={96}
+              className={styles.avatarImg}
+            />
             <span className={styles.avatarOverlay}>
               <Pencil size={22} aria-hidden="true" />
             </span>
           </button>
-          <span className={styles.avatarDica}>Alterar foto (em breve)</span>
+          <input
+            ref={inputFotoRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            hidden
+            onChange={aoEscolherFoto}
+          />
+          <span className={styles.avatarDica}>
+            {enviandoFoto ? "Enviando..." : "Alterar foto"}
+          </span>
+          {foto && !enviandoFoto && (
+            <button
+              type="button"
+              className={styles.btnCancelarSenha}
+              onClick={removerFoto}
+            >
+              Remover foto
+            </button>
+          )}
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>

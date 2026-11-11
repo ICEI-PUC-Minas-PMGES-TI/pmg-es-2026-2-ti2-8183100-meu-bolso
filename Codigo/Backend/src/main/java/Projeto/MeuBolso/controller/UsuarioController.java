@@ -1,10 +1,13 @@
 package Projeto.MeuBolso.controller;
 
+import Projeto.MeuBolso.model.PerfilDtos.AtualizarFotoRequest;
 import Projeto.MeuBolso.model.PerfilDtos.AtualizarPerfilRequest;
+import Projeto.MeuBolso.model.PerfilDtos.FotoResponse;
 import Projeto.MeuBolso.model.PerfilDtos.PerfilResponse;
 import Projeto.MeuBolso.model.PerfilDtos.TrocarSenhaRequest;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.UsuarioRepository;
+import Projeto.MeuBolso.service.FotoPerfilService;
 import Projeto.MeuBolso.service.TokenService;
 import Projeto.MeuBolso.util.Telefone;
 
@@ -28,19 +31,22 @@ public class UsuarioController {
     private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final FotoPerfilService fotoPerfilService;
 
     public UsuarioController(UsuarioRepository repository,
                              PasswordEncoder passwordEncoder,
-                             TokenService tokenService) {
+                             TokenService tokenService,
+                             FotoPerfilService fotoPerfilService) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.fotoPerfilService = fotoPerfilService;
     }
 
     @GetMapping("/me")
     public UsuarioResponseDTO me(Authentication authentication) {
         Usuario u = usuarioAutenticado(authentication);
-        return new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getTelefone());
+        return new UsuarioResponseDTO(u.getId(), u.getNome(), u.getEmail(), u.getTelefone(), u.getFoto());
     }
 
     // Atualiza nome, telefone e e-mail do usuário logado.
@@ -74,7 +80,20 @@ public class UsuarioController {
         // Token novo com o e-mail atual (pode ter mudado).
         String token = tokenService.gerar(salvo.getEmail());
 
-        return new PerfilResponse(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getTelefone(), token);
+        return new PerfilResponse(salvo.getId(), salvo.getNome(), salvo.getEmail(),
+            salvo.getTelefone(), salvo.getFoto(), token);
+    }
+
+    // Atualiza (ou remove) a foto de perfil do usuário logado.
+    // foto null/vazia remove; data URL inválida ou grande demais -> 400.
+    @PutMapping("/me/foto")
+    public FotoResponse atualizarFoto(@RequestBody AtualizarFotoRequest request,
+                                      Authentication authentication) {
+        Usuario u = usuarioAutenticado(authentication);
+        String foto = fotoPerfilService.normalizar(request.foto());
+        u.setFoto(foto);
+        Usuario salvo = repository.save(u);
+        return new FotoResponse(salvo.getFoto());
     }
 
     // Troca a senha do usuário logado, exigindo a senha atual.
@@ -101,5 +120,5 @@ public class UsuarioController {
     }
 
     // DTO seguro contra valores nulos
-    public record UsuarioResponseDTO(String id, String nome, String email, String telefone) {}
+    public record UsuarioResponseDTO(String id, String nome, String email, String telefone, String foto) {}
 }

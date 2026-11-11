@@ -86,6 +86,6 @@ public class AuthController {
 
         String token = tokenService.gerar(usuario.getEmail());
 
-        return new AuthResponse(token, "Bearer", usuario.getNome(), usuario.getEmail());
+        return new AuthResponse(token, "Bearer", usuario.getNome(), usuario.getEmail(), usuario.getFoto());
     }
 }

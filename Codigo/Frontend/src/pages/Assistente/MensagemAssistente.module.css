@@ -91,3 +91,12 @@
     max-width: 100%;
   }
 }
+
+/* No mobile, o balão do usuário não pode empurrar o avatar para fora:
+   deixa o balão encolher e manter a quebra de linha. */
+@media (max-width: 480px) {
+  .linhaUsuario .balao {
+    max-width: 100%;
+    min-width: 0;
+  }
+}

@@ -1,5 +1,7 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
+import { obterUsuario } from "../../service/Api";
+import AvatarUsuario from "../../components/AvatarUsuario/AvatarUsuario";
 import styles from "./MensagemAssistente.module.css";
 
 // Uma mensagem da conversa (usuário, assistente ou erro). As respostas do
@@ -57,11 +59,21 @@ function MensagemAssistente({ mensagem, finalizarDigitacao }) {
     return () => clearInterval(intervalo);
   }, [deveAnimar, texto, id, finalizarDigitacao]);
 
+  // Usuário logado: lido uma vez por montagem (estável entre os ticks da
+  // digitação; sem useEffect/setState).
+  const usuario = useMemo(() => obterUsuario(), []);
+
   // Usuário
   if (!ehAssistente) {
     return (
       <div className={`${styles.linha} ${styles.linhaUsuario}`}>
         <div className={`${styles.balao} ${styles.balaoUsuario}`}>{texto}</div>
+        <AvatarUsuario
+          foto={usuario?.foto}
+          nome={usuario?.nome}
+          tamanho={28}
+          className={styles.avatar}
+        />
       </div>
     );
   }

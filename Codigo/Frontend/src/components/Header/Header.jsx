@@ -5,6 +5,7 @@ import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
 import ModalPerfil from "../ModalPerfil/ModalPerfil";
+import AvatarUsuario from "../AvatarUsuario/AvatarUsuario";
 
 // Itens de navegação do topo.
 // Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
@@ -29,7 +30,6 @@ function Header() {
   // perfil na hora (o Header lê do localStorage, que muda ao salvar).
   const [usuario, setUsuario] = useState(() => obterUsuario());
   const nomeExibido = usuario?.nome || usuario?.email || "Usuário";
-  const avatarUrl = usuario?.avatar || "/images/default-avatar.png";
 
   // Controle do menu suspenso do perfil.
   const [menuAberto, setMenuAberto] = useState(false);
@@ -168,7 +168,12 @@ function Header() {
           aria-expanded={menuAberto}
           aria-label="Abrir menu do perfil"
         >
-          <img src={avatarUrl} alt="" className={styles.avatar} />
+          <AvatarUsuario
+            foto={usuario?.foto}
+            nome={nomeExibido}
+            tamanho={40}
+            className={styles.avatar}
+          />
           <span className={styles.usuarioNome}>{nomeExibido}</span>
           <ChevronDown
             size={16}
@@ -181,7 +186,12 @@ function Header() {
           <div className={styles.menu} role="menu">
             {/* Cabeçalho do menu: avatar + nome */}
             <div className={styles.menuTopo}>
-              <img src={avatarUrl} alt="" className={styles.menuAvatar} />
+              <AvatarUsuario
+                foto={usuario?.foto}
+                nome={nomeExibido}
+                tamanho={64}
+                className={styles.menuAvatar}
+              />
               <strong className={styles.menuNome}>{nomeExibido}</strong>
               {usuario?.email ? (
                 <span className={styles.menuEmail}>{usuario.email}</span>

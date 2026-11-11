@@ -23,9 +23,9 @@ export function obterUsuario() {
   }
 }
 
-function salvarSessao({ token, nome, email }) {
+function salvarSessao({ token, nome, email, foto }) {
   localStorage.setItem(CHAVE_TOKEN, token);
-  localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ nome, email }));
+  localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ nome, email, foto: foto ?? null }));
 }
 
 export function sair() {
@@ -219,12 +219,33 @@ export async function atualizarPerfil(dados) {
   if (perfil?.token) {
     localStorage.setItem(CHAVE_TOKEN, perfil.token);
   }
+  // Preserva a foto já salva quando a resposta não trouxer o campo.
+  const atual = obterUsuario();
+  const foto = perfil?.foto !== undefined ? perfil.foto : (atual?.foto ?? null);
   localStorage.setItem(
     CHAVE_USUARIO,
-    JSON.stringify({ nome: perfil.nome, email: perfil.email }),
+    JSON.stringify({ nome: perfil.nome, email: perfil.email, foto }),
   );
 
   return perfil;
+}
+
+// Atualiza (ou remove, com foto null) a foto de perfil. Após o PUT,
+// grava a nova foto no usuário do localStorage sem perder os demais campos.
+export async function atualizarFoto(foto) {
+  const resposta = await requisicao("/api/usuarios/me/foto", {
+    metodo: "PUT",
+    corpo: { foto },
+    autenticado: true,
+  });
+
+  const atual = obterUsuario() ?? {};
+  localStorage.setItem(
+    CHAVE_USUARIO,
+    JSON.stringify({ ...atual, foto: resposta?.foto ?? null }),
+  );
+
+  return resposta;
 }
 
 // Troca a senha. `dados` = { senhaAtual, novaSenha }.
