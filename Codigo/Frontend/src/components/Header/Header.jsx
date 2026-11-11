@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, UserPen, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, UserPen, LogOut, Menu, X, Moon, Sun } from "lucide-react";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
 import ModalPerfil from "../ModalPerfil/ModalPerfil";
 import AvatarUsuario from "../AvatarUsuario/AvatarUsuario";
+import useTema from "../../hooks/useTema";
 
 // Itens de navegação do topo.
 // Apenas "Visão geral" (/dashboard) existe hoje; os demais ficam como
@@ -41,6 +42,10 @@ function Header() {
 
   // Controle do modal de editar perfil.
   const [perfilAberto, setPerfilAberto] = useState(false);
+
+  // Tema claro/escuro (salvo no localStorage).
+  const { tema, alternarTema } = useTema();
+  const temaEscuro = tema === "escuro";
 
   // Fecha o menu do perfil ao clicar fora ou apertar Esc.
   useEffect(() => {
@@ -158,69 +163,85 @@ function Header() {
         </nav>
       </div>
 
-      {/* Direita: usuário (pílula que abre um menu) */}
-      <div className={styles.usuario} ref={perfilRef}>
+      {/* Direita: botão de tema + usuário (pílula que abre um menu) */}
+      <div className={styles.acoes}>
         <button
           type="button"
-          className={styles.usuarioBotao}
-          onClick={() => setMenuAberto((v) => !v)}
-          aria-haspopup="menu"
-          aria-expanded={menuAberto}
-          aria-label="Abrir menu do perfil"
+          className={styles.temaBotao}
+          onClick={alternarTema}
+          aria-label={temaEscuro ? "Ativar tema claro" : "Ativar tema escuro"}
+          title={temaEscuro ? "Tema claro" : "Tema escuro"}
         >
-          <AvatarUsuario
-            foto={usuario?.foto}
-            nome={nomeExibido}
-            tamanho={40}
-            className={styles.avatar}
-          />
-          <span className={styles.usuarioNome}>{nomeExibido}</span>
-          <ChevronDown
-            size={16}
-            className={`${styles.chevron} ${menuAberto ? styles.chevronAberto : ""}`}
-            aria-hidden="true"
-          />
+          {temaEscuro ? (
+            <Sun size={18} aria-hidden="true" />
+          ) : (
+            <Moon size={18} aria-hidden="true" />
+          )}
         </button>
 
-        {menuAberto && (
-          <div className={styles.menu} role="menu">
-            {/* Cabeçalho do menu: avatar + nome */}
-            <div className={styles.menuTopo}>
-              <AvatarUsuario
-                foto={usuario?.foto}
-                nome={nomeExibido}
-                tamanho={64}
-                className={styles.menuAvatar}
-              />
-              <strong className={styles.menuNome}>{nomeExibido}</strong>
-              {usuario?.email ? (
-                <span className={styles.menuEmail}>{usuario.email}</span>
-              ) : null}
+        <div className={styles.usuario} ref={perfilRef}>
+          <button
+            type="button"
+            className={styles.usuarioBotao}
+            onClick={() => setMenuAberto((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={menuAberto}
+            aria-label="Abrir menu do perfil"
+          >
+            <AvatarUsuario
+              foto={usuario?.foto}
+              nome={nomeExibido}
+              tamanho={40}
+              className={styles.avatar}
+            />
+            <span className={styles.usuarioNome}>{nomeExibido}</span>
+            <ChevronDown
+              size={16}
+              className={`${styles.chevron} ${menuAberto ? styles.chevronAberto : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+
+          {menuAberto && (
+            <div className={styles.menu} role="menu">
+              {/* Cabeçalho do menu: avatar + nome */}
+              <div className={styles.menuTopo}>
+                <AvatarUsuario
+                  foto={usuario?.foto}
+                  nome={nomeExibido}
+                  tamanho={64}
+                  className={styles.menuAvatar}
+                />
+                <strong className={styles.menuNome}>{nomeExibido}</strong>
+                {usuario?.email ? (
+                  <span className={styles.menuEmail}>{usuario.email}</span>
+                ) : null}
+              </div>
+
+              <div className={styles.menuSeparador} />
+
+              <button
+                type="button"
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={handleEditarPerfil}
+              >
+                <UserPen size={18} aria-hidden="true" />
+                Editar perfil
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.menuItem} ${styles.menuItemPerigo}`}
+                role="menuitem"
+                onClick={handleSair}
+              >
+                <LogOut size={18} aria-hidden="true" />
+                Sair
+              </button>
             </div>
-
-            <div className={styles.menuSeparador} />
-
-            <button
-              type="button"
-              className={styles.menuItem}
-              role="menuitem"
-              onClick={handleEditarPerfil}
-            >
-              <UserPen size={18} aria-hidden="true" />
-              Editar perfil
-            </button>
-
-            <button
-              type="button"
-              className={`${styles.menuItem} ${styles.menuItemPerigo}`}
-              role="menuitem"
-              onClick={handleSair}
-            >
-              <LogOut size={18} aria-hidden="true" />
-              Sair
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Modal de edição de perfil (sobrepõe a tela atual) */}

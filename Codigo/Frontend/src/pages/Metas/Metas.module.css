@@ -162,11 +162,11 @@
   }
   25% {
     transform: scale(1.03);
-    box-shadow: 0 0 0 4px rgba(50, 138, 82, 0.25), var(--sombra-hover);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sucesso) 25%, transparent), var(--sombra-hover);
   }
   55% {
     transform: scale(0.995);
-    box-shadow: 0 0 0 8px rgba(50, 138, 82, 0.12), var(--sombra-card);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--sucesso) 12%, transparent), var(--sombra-card);
   }
   100% {
     transform: scale(1);

@@ -205,7 +205,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--espaco-2);
-  background-color: #efeae2;
+  /* Cores do próprio WhatsApp (claro), trocadas no tema escuro abaixo */
+  --whatsapp-fundo: #efeae2;
+  --whatsapp-balao-voce: #d9fdd3;
+  --whatsapp-balao-bot: var(--cor-superficie);
+  background-color: var(--whatsapp-fundo);
   border-radius: var(--radius-grande);
   border: var(--borda-padrao);
 }
@@ -223,14 +227,21 @@
 
 .balaoVoce {
   align-self: flex-end;
-  background-color: #d9fdd3;
+  background-color: var(--whatsapp-balao-voce);
   border-top-right-radius: 4px;
 }
 
 .balaoBot {
   align-self: flex-start;
-  background-color: var(--cor-superficie);
+  background-color: var(--whatsapp-balao-bot);
   border-top-left-radius: 4px;
+}
+
+/* Modo escuro do WhatsApp */
+:global(:root[data-tema="escuro"]) .chat {
+  --whatsapp-fundo: #0b141a;
+  --whatsapp-balao-voce: #005c4b;
+  --whatsapp-balao-bot: #202c33;
 }
 
 /* Comandos */

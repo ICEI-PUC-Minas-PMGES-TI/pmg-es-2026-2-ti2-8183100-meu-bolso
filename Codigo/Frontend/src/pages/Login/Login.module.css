@@ -12,7 +12,7 @@
   padding: 24px 20px;
 
   background:
-    radial-gradient(circle at top left, rgba(127, 168, 120, 0.20), transparent 35%),
+    radial-gradient(circle at top left, color-mix(in srgb, var(--verde-principal) 20%, transparent), transparent 35%),
     var(--cor-fundo-pagina);
 }
 
@@ -282,6 +282,18 @@
 
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-card);
+}
+
+/* No tema escuro o painel continua escuro (a logo é branca): redefine os
+   tokens só dentro dele, com os valores claros, e destaca com uma borda. */
+:global(:root[data-tema="escuro"]) .login-marketing {
+  --cor-superficie-inversa: #070b0a;
+  --cor-texto-inverso: var(--branco);
+  --cor-texto-desabilitado: var(--cinza-300);
+  --cor-texto-sutil: var(--cinza-200);
+  --cor-texto-secundario: var(--cinza-500);
+
+  border: 1px solid var(--cor-borda);
 }
 
 .login-marketing-topo {

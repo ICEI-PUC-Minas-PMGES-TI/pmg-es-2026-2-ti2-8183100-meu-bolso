@@ -152,7 +152,7 @@
 
     .gastos-resumo-destaque .gastos-resumo-icone {
     background-color: var(--verde-principal);
-    color: var(--cor-texto-principal);
+    color: var(--cor-texto-sobre-verde);
     }
 
     .gastos-resumo-rotulo {
@@ -179,7 +179,7 @@
     }
 
     .gastos-resumo-destaque .gastos-resumo-rotulo {
-    color: rgba(255, 255, 255, 0.78);
+    color: color-mix(in srgb, var(--cor-texto-inverso) 78%, transparent);
     }
 
     .gastos-resumo-destaque .gastos-resumo-valor {
@@ -187,7 +187,7 @@
     }
 
     .gastos-resumo-destaque .gastos-resumo-detalhe {
-    color: rgba(255, 255, 255, 0.72);
+    color: color-mix(in srgb, var(--cor-texto-inverso) 72%, transparent);
     }
 
     /* ========================================
@@ -591,9 +591,9 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     border-radius: var(--radius-redondo);
-    border: 1px dashed var(--cor-borda-forte, #cbd5e1);
+    border: 1px dashed var(--cor-borda-forte);
     background-color: transparent;
-    color: var(--cor-texto-secundario, #6b7280);
+    color: var(--cor-texto-secundario);
     }
 
     .gastos-botao-comentario {
@@ -989,7 +989,7 @@
 
     .gastos-botao-comentario:hover {
         background-color: var(--verde-principal);
-        color: var(--cor-texto-principal);
+        color: var(--cor-texto-sobre-verde);
     }
 
     .gastos-botao-icone:hover {

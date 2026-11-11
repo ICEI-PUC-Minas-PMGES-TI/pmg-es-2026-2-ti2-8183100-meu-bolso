@@ -68,7 +68,9 @@
     --cor-texto-secundario: var(--cinza-500);
     --cor-texto-desabilitado: var(--cinza-300);
     --cor-texto-sutil: var(--cinza-200);
-    --cor-texto-inverso: var(--branco);            /* texto sobre fundo escuro ou colorido */
+    --cor-texto-inverso: var(--branco);            /* texto sobre --cor-superficie-inversa e cores de estado */
+    --cor-texto-sobre-verde: var(--preto);         /* fixo: texto sobre --verde-principal (igual nos dois temas) */
+    --cor-texto-sobre-foto: var(--branco);         /* fixo: ícones sobre overlay em cima de fotos */
 
     /* Bordas */
     --cor-borda: var(--cinza-200);
@@ -128,6 +130,83 @@
     /* Transições */
     --transicao-rapida: 0.15s ease;
     --transicao-padrao: 0.25s ease;
+
+    /* Controles nativos (scrollbar, date picker, select) no tema claro */
+    color-scheme: light;
+    }
+
+    /* ========================================
+    1.1 TEMA ESCURO
+    Ativado por data-tema="escuro" no <html> (hook useTema + script no
+    index.html). Redefine só os tokens semânticos e as cores de marca/estado;
+    a paleta clara (--branco, --preto, --cinza-*) continua igual.
+    Regra geral: fundos "-claro"/"-fundo" ficam escuros e tingidos, e as cores
+    usadas como texto ("-escuro", estados) ficam mais claras.
+    ======================================== */
+
+    :root[data-tema="escuro"] {
+    color-scheme: dark;
+
+    /* Marca */
+    --verde-principal: #7fa878;
+    --verde-hover: #93bb8c;
+    --verde-escuro: #a8cf9f;       /* vira o verde de texto/realce */
+    --verde-claro: #1f2e22;        /* fundo tingido de chips e ícones */
+    --verde-fundo: #0e1412;
+    --verde-fundo-realce: #16211a;
+
+    /* Estados */
+    --sucesso: #5cc283;
+    --sucesso-fundo: #13291b;
+
+    --erro: #ef6b6b;
+    --erro-escuro: #f58a8a;
+    --erro-fundo: #3a1a1a;
+    --erro-fundo-suave: #2e1616;
+
+    --alerta: #e8b34a;
+    --alerta-escuro: #f0c870;
+    --alerta-fundo: #33280f;
+
+    --informacao: #6aa8e0;
+    --informacao-fundo: #142536;
+
+    /* Fundos */
+    --cor-fundo-pagina: #0e1412;
+    --cor-superficie: #161e1c;
+    --cor-superficie-suave: #1b2422;
+    --cor-superficie-realce: #232d2a;
+    --cor-superficie-forte: #2c3734;
+    --cor-superficie-contraste: #3a4642;
+    --cor-superficie-inversa: #e8eeea;
+
+    /* Textos */
+    --cor-texto-principal: #e8eeea;
+    --cor-texto-forte: #d5ddd8;
+    --cor-texto-medio: #b3bdb7;
+    --cor-texto-secundario: #8d9892;
+    --cor-texto-desabilitado: #56615c;
+    --cor-texto-sutil: #3a4642;
+    --cor-texto-inverso: #101817;
+
+    /* Bordas */
+    --cor-borda: #2a3431;
+    --cor-borda-suave: #222b29;
+    --cor-borda-forte: #3a4642;
+    --cor-borda-enfase: #e8eeea;
+
+    /* Sobreposições */
+    --cor-overlay-leve: rgba(0, 0, 0, 0.5);
+    --cor-overlay: rgba(0, 0, 0, 0.55);
+    --cor-overlay-forte: rgba(0, 0, 0, 0.6);
+
+    /* Sombras: no escuro precisam ser mais fortes para aparecer */
+    --sombra-leve: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --sombra-card: 0 10px 35px rgba(0, 0, 0, 0.4);
+    --sombra-hover: 0 12px 30px rgba(0, 0, 0, 0.5);
+    --sombra-painel: -10px 0 40px rgba(0, 0, 0, 0.5);
+    --sombra-foco: 0 0 0 3px rgba(127, 168, 120, 0.3);
+    --sombra-foco-erro: 0 0 0 3px rgba(239, 107, 107, 0.3);
     }
 
     /* ========================================
@@ -324,7 +403,7 @@
 
     .btn-verde {
     background-color: var(--verde-principal);
-    color: var(--cor-texto-principal);
+    color: var(--cor-texto-sobre-verde);
     }
 
     .btn-verde:hover:not(:disabled) {

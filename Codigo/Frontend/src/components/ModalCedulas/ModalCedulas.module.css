@@ -133,7 +133,7 @@
   font-size: var(--texto-sm);
   font-weight: 700;
   color: var(--cor-texto-principal);
-  background-color: var(--cor-superficie, #fff);
+  background-color: var(--cor-superficie);
   border: 1px solid var(--cor-borda-suave);
   border-radius: 8px;
 }

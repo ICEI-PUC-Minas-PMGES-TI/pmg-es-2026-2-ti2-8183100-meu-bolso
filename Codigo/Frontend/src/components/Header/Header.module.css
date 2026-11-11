@@ -138,6 +138,39 @@
   color: var(--cor-texto-secundario);
 }
 
+/* ---------- Ações (direita): tema + usuário ---------- */
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  flex-shrink: 0;
+}
+
+/* Botão redondo de alternar tema, no mesmo estilo das pílulas */
+.temaBotao {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-suave);
+  border-radius: var(--radius-redondo);
+  box-shadow: var(--sombra-leve);
+  color: var(--cor-texto-medio);
+
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.temaBotao:hover {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
 /* ---------- Usuário (direita) ---------- */
 /* A pílula é o container posicionado; o menu suspenso ancora nela. */
 .usuario {
@@ -373,6 +406,15 @@
   .avatar {
     width: 34px;
     height: 34px;
+  }
+
+  .acoes {
+    gap: var(--espaco-1);
+  }
+
+  .temaBotao {
+    width: 40px;
+    height: 40px;
   }
 
   /* Em telas bem estreitas, o botão fica só com o ícone. */

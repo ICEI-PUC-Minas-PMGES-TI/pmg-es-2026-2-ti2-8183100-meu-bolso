@@ -92,7 +92,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--cor-texto-inverso);
+  color: var(--cor-texto-sobre-foto);
   background: var(--cor-overlay);
   opacity: 0;
   transition: opacity var(--transicao-rapida);

@@ -153,7 +153,7 @@
 
 .receitas-resumo-destaque .receitas-resumo-icone {
   background-color: var(--verde-principal);
-  color: var(--cor-texto-principal);
+  color: var(--cor-texto-sobre-verde);
 }
 
 .receitas-resumo-rotulo {
@@ -180,7 +180,7 @@
 }
 
 .receitas-resumo-destaque .receitas-resumo-rotulo {
-  color: rgba(255, 255, 255, 0.82);
+  color: color-mix(in srgb, var(--cor-texto-inverso) 82%, transparent);
 }
 
 .receitas-resumo-destaque .receitas-resumo-valor {
@@ -188,7 +188,7 @@
 }
 
 .receitas-resumo-destaque .receitas-resumo-detalhe {
-  color: rgba(255, 255, 255, 0.78);
+  color: color-mix(in srgb, var(--cor-texto-inverso) 78%, transparent);
 }
 
 /* ========================================
@@ -501,9 +501,9 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   border-radius: var(--radius-redondo);
-  border: 1px dashed var(--cor-borda-forte, #cbd5e1);
+  border: 1px dashed var(--cor-borda-forte);
   background-color: transparent;
-  color: var(--cor-texto-secundario, #6b7280);
+  color: var(--cor-texto-secundario);
 }
 
 .receitas-botao-comentario {
@@ -899,7 +899,7 @@
 
   .receitas-botao-comentario:hover {
     background-color: var(--verde-principal);
-    color: var(--cor-texto-principal);
+    color: var(--cor-texto-sobre-verde);
   }
 
   .receitas-botao-icone:hover {

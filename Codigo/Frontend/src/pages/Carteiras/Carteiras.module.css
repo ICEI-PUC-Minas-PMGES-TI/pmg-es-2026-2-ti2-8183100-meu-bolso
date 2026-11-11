@@ -291,6 +291,7 @@
 
 .dinheiroBtnPreenchido:hover {
   background-color: var(--verde-principal);
+  color: var(--cor-texto-sobre-verde);
 }
 
 .dinheiroBtnContorno {

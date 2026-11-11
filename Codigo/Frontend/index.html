@@ -5,6 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>codigo</title>
+    <!-- Aplica o tema salvo antes da página pintar (evita piscar no claro).
+         A chave é a mesma de src/hooks/useTema.js. -->
+    <script>
+      try {
+        if (localStorage.getItem("meubolso-tema") === "escuro") {
+          document.documentElement.dataset.tema = "escuro";
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

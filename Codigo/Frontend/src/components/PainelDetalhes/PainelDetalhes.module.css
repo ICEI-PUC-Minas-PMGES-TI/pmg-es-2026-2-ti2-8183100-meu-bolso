@@ -335,8 +335,8 @@
 }
 
 .confirmExcluir {
-  background-color: var(--erro, #dc2626);
-  color: #fff;
+  background-color: var(--erro);
+  color: var(--cor-texto-inverso);
   border: 1px solid transparent;
 }
 
