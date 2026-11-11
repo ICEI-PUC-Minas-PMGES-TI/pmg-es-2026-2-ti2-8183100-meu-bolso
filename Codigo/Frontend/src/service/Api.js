@@ -23,9 +23,9 @@ export function obterUsuario() {
   }
 }
 
-function salvarSessao({ token, nome, email }) {
+function salvarSessao({ token, nome, email, foto }) {
   localStorage.setItem(CHAVE_TOKEN, token);
-  localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ nome, email }));
+  localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ nome, email, foto: foto ?? null }));
 }
 
 export function sair() {
@@ -185,6 +185,23 @@ export async function excluirMeta(id) {
   });
 }
 
+// Registra uma movimentação (aporte/retirada) numa meta.
+// `dados` = { tipo: "deposito"|"retirada", valor, carteiraId, titulo }.
+// O back-end ajusta a carteira, atualiza a meta e grava o histórico numa só
+// operação, devolvendo { meta, movimentacao }.
+export async function movimentarMeta(id, dados) {
+  return requisicao(`/api/metas/${id}/movimentacoes`, {
+    metodo: "POST",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Lista o histórico de movimentações de uma meta (mais recente primeiro).
+export async function listarMovimentacoesMeta(id) {
+  return requisicao(`/api/metas/${id}/movimentacoes`, { autenticado: true });
+}
+
 /* ========================================
    PERFIL
    ======================================== */
@@ -202,12 +219,33 @@ export async function atualizarPerfil(dados) {
   if (perfil?.token) {
     localStorage.setItem(CHAVE_TOKEN, perfil.token);
   }
+  // Preserva a foto já salva quando a resposta não trouxer o campo.
+  const atual = obterUsuario();
+  const foto = perfil?.foto !== undefined ? perfil.foto : (atual?.foto ?? null);
   localStorage.setItem(
     CHAVE_USUARIO,
-    JSON.stringify({ nome: perfil.nome, email: perfil.email }),
+    JSON.stringify({ nome: perfil.nome, email: perfil.email, foto }),
   );
 
   return perfil;
+}
+
+// Atualiza (ou remove, com foto null) a foto de perfil. Após o PUT,
+// grava a nova foto no usuário do localStorage sem perder os demais campos.
+export async function atualizarFoto(foto) {
+  const resposta = await requisicao("/api/usuarios/me/foto", {
+    metodo: "PUT",
+    corpo: { foto },
+    autenticado: true,
+  });
+
+  const atual = obterUsuario() ?? {};
+  localStorage.setItem(
+    CHAVE_USUARIO,
+    JSON.stringify({ ...atual, foto: resposta?.foto ?? null }),
+  );
+
+  return resposta;
 }
 
 // Troca a senha. `dados` = { senhaAtual, novaSenha }.
@@ -258,18 +296,158 @@ export const gastosApi = {
       autenticado: true,
     }),
 
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/gastos/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
+      autenticado: true,
+    }),
+
   excluirRecorrente: (id) =>
     requisicao(`/api/gastos/recorrentes/${id}`, {
       metodo: "DELETE",
       autenticado: true,
     }),
 
-  obterOrcamento: () => requisicao("/api/orcamento", { autenticado: true }),
+  // Orçamento de um mês ("AAAA-MM"). Sem mês, o back usa o mês atual.
+  obterOrcamento: (mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, { autenticado: true }),
 
-  salvarOrcamento: (valorMensal) =>
-    requisicao("/api/orcamento", {
+  salvarOrcamento: (valorMensal, mes) =>
+    requisicao(`/api/orcamento${mes ? `?mes=${mes}` : ""}`, {
       metodo: "PUT",
       corpo: { valorMensal },
       autenticado: true,
+    }),
+};
+
+/* ========================================
+   ASSISTENTE (perguntas prontas)
+   ======================================== */
+
+export const assistenteApi = {
+  // Lista as perguntas disponíveis para o usuário, já com seus parâmetros.
+  listarPerguntas: () =>
+    requisicao("/api/assistente/perguntas", { autenticado: true }),
+
+  // Responde uma pergunta pelo id. `params` = { <nome>: <valor> }.
+  responder: (id, params) =>
+    requisicao(`/api/assistente/perguntas/${id}`, {
+      metodo: "POST",
+      corpo: { params },
+      autenticado: true,
+    }),
+};
+
+/* ========================================
+   RECEITAS E RECORRÊNCIAS
+   (usados por service/receitasService.js quando VITE_RECEITAS_API=true)
+   ======================================== */
+
+export const receitasApi = {
+  // O back-end gera as recorrências que já venceram antes de devolver a lista
+  listar: () => requisicao("/api/receitas", { autenticado: true }),
+
+  criar: (corpo) =>
+    requisicao("/api/receitas", { metodo: "POST", corpo, autenticado: true }),
+
+  atualizar: (id, corpo) =>
+    requisicao(`/api/receitas/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  atualizarComentario: (id, comentario) =>
+    requisicao(`/api/receitas/${id}/comentario`, {
+      metodo: "PATCH",
+      corpo: { comentario },
+      autenticado: true,
+    }),
+
+  excluir: (id) =>
+    requisicao(`/api/receitas/${id}`, { metodo: "DELETE", autenticado: true }),
+
+  listarRecorrentes: () =>
+    requisicao("/api/receitas/recorrentes", { autenticado: true }),
+
+  atualizarRecorrente: (id, corpo) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  // Pula um mês da recorrência ("remover só neste mês"). `mes` = "AAAA-MM".
+  pularRecorrente: (id, mes) =>
+    requisicao(`/api/receitas/recorrentes/${id}/pular`, {
+      metodo: "POST",
+      corpo: { mes },
+      autenticado: true,
+    }),
+
+  excluirRecorrente: (id) =>
+    requisicao(`/api/receitas/recorrentes/${id}`, {
+      metodo: "DELETE",
+      autenticado: true,
+    }),
+};
+
+/* ========================================
+   CARTEIRAS
+   ======================================== */
+
+export async function obterCarteiras() {
+  return requisicao("/api/carteiras", { autenticado: true });
+}
+
+export async function salvarCarteiras(dados) {
+  return requisicao("/api/carteiras", {
+    metodo: "PUT",
+    corpo: dados,
+    autenticado: true,
+  });
+}
+
+// Histórico unificado das carteiras (gastos, receitas, metas e transferências),
+// do mais recente para o mais antigo. Cada item:
+// { id, origem, descricao, categoria, data: "AAAA-MM-DD", valor (com sinal), entrada, carteiraId }
+export async function obterMovimentacoes() {
+  return requisicao("/api/movimentacoes", { autenticado: true });
+}
+
+/* ========================================
+   RESUMO SEMANAL POR E-MAIL
+   ======================================== */
+
+export const resumoSemanalApi = {
+  // Estado atual: { ativo, email, ultimoEnvio }
+  obterPreferencia: () =>
+    requisicao("/api/resumo-semanal/preferencia", { autenticado: true }),
+
+  // Liga ou desliga o envio semanal.
+  definirPreferencia: (ativo) =>
+    requisicao("/api/resumo-semanal/preferencia", {
+      metodo: "PUT",
+      corpo: { ativo },
+      autenticado: true,
+    }),
+
+  // Resumo dos últimos 7 dias, sem enviar nada.
+  previa: () => requisicao("/api/resumo-semanal/previa", { autenticado: true }),
+
+  // Envia o resumo agora. Devolve { mensagem }.
+  enviarAgora: () =>
+    requisicao("/api/resumo-semanal/enviar-agora", {
+      metodo: "POST",
+      autenticado: true,
+    }),
+
+  // Rota pública: usada pela tela aberta pelo link do e-mail.
+  cancelar: (token) =>
+    requisicao("/api/resumo-semanal/cancelar", {
+      metodo: "POST",
+      corpo: { token },
     }),
 };

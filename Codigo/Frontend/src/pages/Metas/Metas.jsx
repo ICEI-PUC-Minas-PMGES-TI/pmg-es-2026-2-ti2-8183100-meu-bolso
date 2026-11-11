@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Plus,
   Target,
@@ -6,17 +6,19 @@ import {
   TrendingUp,
   Pencil,
   ArrowLeftRight,
+  CheckCircle2,
 } from "lucide-react";
 
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
 import ModalMovimentarMeta from "../../components/ModalMovimentarMeta/ModalMovimentarMeta";
 import PainelDetalhesMeta from "../../components/PainelDetalhesMeta/PainelDetalhesMeta";
-import { ajustarSaldoCarteira } from "../../service/carteirasStorage";
 import {
   listarMetas,
   criarMeta,
   atualizarMeta,
   excluirMeta as excluirMetaApi,
+  movimentarMeta,
+  listarMovimentacoesMeta,
 } from "../../service/Api";
 
 import styles from "./Metas.module.css";
@@ -30,9 +32,10 @@ import styles from "./Metas.module.css";
 // nome, valorAlvo, valorAtual, prazo e prioridade. O progresso é
 // valorAtual / valorAlvo.
 //
-// A movimentação (depósito/retirada) ainda é local: no back-end
-// virará uma transação com metaId. Por isso o histórico de
-// movimentações por meta segue em estado local por enquanto.
+// A movimentação (depósito/retirada) é persistida no back-end: cada
+// aporte/retirada vira uma transação (coleção "transacoes") que ajusta
+// a carteira, atualiza o valorAtual da meta e alimenta o histórico de
+// "Movimentações recentes". Tudo vinculado ao usuário autenticado.
 // ============================================================
 
 // O back-end usa "id"; o restante da página usa "_id". Normaliza para _id
@@ -41,11 +44,26 @@ function normalizarMeta(meta) {
   return { ...meta, _id: meta.id ?? meta._id };
 }
 
-// Data curta no padrão "05 out" para novas movimentações.
+// Data curta no padrão "05 out" a partir de um Date ou string ISO.
 function dataCurta(d = new Date()) {
-  return d
+  const data = d instanceof Date ? d : new Date(d);
+  return data
     .toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
     .replace(".", "");
+}
+
+// Converte uma movimentação vinda do back-end para o formato que o
+// PainelDetalhesMeta espera (descricao, categoria, data curta, entrada).
+function movParaPainel(mov) {
+  const ehDeposito = mov.tipo === "deposito";
+  return {
+    id: mov.id,
+    descricao: mov.titulo || (ehDeposito ? "Depósito" : "Retirada"),
+    categoria: ehDeposito ? "Depósito" : "Retirada",
+    data: dataCurta(mov.data),
+    valor: Number(mov.valor ?? 0),
+    entrada: ehDeposito,
+  };
 }
 
 // Formata um número como moeda brasileira (R$).
@@ -75,6 +93,40 @@ function Metas() {
 
   // Meta aberta no painel lateral de detalhes (null = painel fechado).
   const [metaSelecionada, setMetaSelecionada] = useState(null);
+
+  // Ids de metas recém-concluídas (passaram de <100% para 100% agora),
+  // para disparar a animação só na transição — não ao abrir a página com
+  // metas já concluídas. Preenchido pela ação de movimentação.
+  const [recemConcluidas, setRecemConcluidas] = useState(() => new Set());
+  const timersConclusao = useRef(new Map());
+
+  // Marca uma meta como recém-concluída e a remove após a animação (~1.2s).
+  function celebrarConclusao(metaId) {
+    setRecemConcluidas((atual) => new Set(atual).add(metaId));
+
+    const timers = timersConclusao.current;
+    if (timers.has(metaId)) clearTimeout(timers.get(metaId));
+    timers.set(
+      metaId,
+      setTimeout(() => {
+        setRecemConcluidas((atual) => {
+          const prox = new Set(atual);
+          prox.delete(metaId);
+          return prox;
+        });
+        timers.delete(metaId);
+      }, 1200)
+    );
+  }
+
+  // Limpa timers pendentes ao desmontar.
+  useEffect(() => {
+    const timers = timersConclusao.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
+    };
+  }, []);
 
   // Carrega as metas do usuário ao abrir a página.
   useEffect(() => {
@@ -128,14 +180,44 @@ function Metas() {
     setMetaEmMovimentacao(null);
   }
 
-  // Aplica a movimentação: atualiza o valorAtual da meta e o saldo da
-  // carteira vinculada. (No back-end isto virará uma transação com metaId
-  // e carteiraId, recalculando os dois saldos numa só operação.)
-  //  - Depósito: sai da carteira (delta negativo), entra na meta.
-  //  - Retirada: entra na carteira (delta positivo), sai da meta.
-  function confirmarMovimentacao(meta, { tipo, valor, titulo, novoValorAtual, carteiraId }) {
-    const deltaCarteira = tipo === "deposito" ? -valor : valor;
-    ajustarSaldoCarteira(carteiraId, deltaCarteira);
+  // Abre o painel de detalhes e carrega o histórico de movimentações da meta
+  // a partir do back-end (persistido e isolado por usuário).
+  async function abrirPainel(meta) {
+    setMetaSelecionada(meta);
+    try {
+      const historico = await listarMovimentacoesMeta(meta._id);
+      setMovimentacoesPorMeta((mapa) => ({
+        ...mapa,
+        [meta._id]: historico.map(movParaPainel),
+      }));
+    } catch {
+      // Falha ao buscar histórico não impede ver o resumo da meta.
+    }
+  }
+
+  // Aplica a movimentação chamando o back-end, que numa só operação ajusta a
+  // carteira, atualiza o valorAtual da meta e grava o histórico (tudo
+  // vinculado ao usuário). O estado local é atualizado a partir da resposta.
+  //  - Depósito: sai da carteira e entra na meta.
+  //  - Retirada: entra na carteira e sai da meta.
+  async function confirmarMovimentacao(meta, { tipo, valor, titulo, carteiraId }) {
+    let resposta;
+    try {
+      resposta = await movimentarMeta(meta._id, { tipo, valor, titulo, carteiraId });
+    } catch (e) {
+      alert(e.message || "Não foi possível registrar a movimentação.");
+      return;
+    }
+
+    const novoValorAtual = Number(resposta.meta.valorAtual ?? 0);
+
+    // Detecta a transição para "concluída" (cruzou de <100% para 100%)
+    // para disparar a animação de celebração.
+    const progressoAntes = calcularProgresso(meta.valorAtual, meta.valorAlvo);
+    const progressoDepois = calcularProgresso(novoValorAtual, meta.valorAlvo);
+    if (progressoAntes < 100 && progressoDepois >= 100) {
+      celebrarConclusao(meta._id);
+    }
 
     setMetas((lista) =>
       lista.map((m) =>
@@ -143,18 +225,8 @@ function Metas() {
       )
     );
 
-    // Registra a movimentação no histórico da meta (mais recente primeiro).
-    // O título informado pelo usuário vira a descrição; sem título, usa um
-    // rótulo padrão conforme o tipo.
-    const ehDeposito = tipo === "deposito";
-    const novaMov = {
-      id: Date.now(),
-      descricao: titulo || (ehDeposito ? "Depósito" : "Retirada"),
-      categoria: ehDeposito ? "Depósito" : "Retirada",
-      data: dataCurta(),
-      valor,
-      entrada: ehDeposito,
-    };
+    // Adiciona a movimentação recém-criada ao histórico (mais recente primeiro).
+    const novaMov = movParaPainel(resposta.movimentacao);
     setMovimentacoesPorMeta((mapa) => ({
       ...mapa,
       [meta._id]: [novaMov, ...(mapa[meta._id] ?? [])],
@@ -304,37 +376,52 @@ function Metas() {
                 meta.valorAtual,
                 meta.valorAlvo
               );
+              const concluida = progresso >= 100;
+              const animar = recemConcluidas.has(meta._id);
 
               return (
                 <article
                   key={meta._id}
-                  className={`card card-interativo ${styles.cardMeta}`}
+                  className={`card card-interativo ${styles.cardMeta} ${
+                    concluida ? styles.cardConcluida : ""
+                  } ${animar ? styles.cardCelebrar : ""}`}
                   role="button"
                   tabIndex={0}
-                  onClick={() => setMetaSelecionada(meta)}
+                  onClick={() => abrirPainel(meta)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setMetaSelecionada(meta);
+                      abrirPainel(meta);
                     }
                   }}
-                  aria-label={`Abrir detalhes da meta ${meta.nome}`}
+                  aria-label={`Abrir detalhes da meta ${meta.nome}${
+                    concluida ? " (concluída)" : ""
+                  }`}
                 >
                   <header className={styles.metaTopo}>
                     <h3>{meta.nome}</h3>
-                    <span
-                      className={`${styles.tag} ${
-                        styles[`tag-${meta.prioridade}`]
-                      }`}
-                    >
-                      {meta.prioridade}
-                    </span>
+                    {concluida ? (
+                      <span className={styles.badgeConcluida}>
+                        <CheckCircle2 size={14} aria-hidden="true" />
+                        Concluída
+                      </span>
+                    ) : (
+                      <span
+                        className={`${styles.tag} ${
+                          styles[`tag-${meta.prioridade}`]
+                        }`}
+                      >
+                        {meta.prioridade}
+                      </span>
+                    )}
                   </header>
 
                   {/* Barra de progresso */}
                   <div className={styles.progresso}>
                     <div
-                      className={styles.progressoBarra}
+                      className={`${styles.progressoBarra} ${
+                        concluida ? styles.progressoBarraConcluida : ""
+                      }`}
                       style={{ width: `${progresso}%` }}
                     />
                   </div>

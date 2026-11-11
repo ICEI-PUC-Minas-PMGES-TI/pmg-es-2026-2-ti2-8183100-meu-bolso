@@ -44,13 +44,20 @@ export function retanguloArredondado(x, y, largura, altura, { topo = 0, base = 0
     .join(" ");
 }
 
-// Calcula o teto do eixo Y e as marcas de grade de "degrau" em "degrau".
-// Ex.: maior=2680, degrau=1000 -> { teto: 3000, marcas: [0,1000,2000,3000] }
-export function calcularEscala(maiorValor, degrau) {
+// Calcula o piso e o teto do eixo Y e as marcas de grade, de
+// "degrau" em "degrau". O teto é arredondado para cima; o piso,
+// para baixo (fica negativo quando há valores abaixo de zero).
+// Quando não há negativos, o piso é 0 (comportamento usual).
+//
+// Ex.: maior=2680, menor=0,   degrau=1000 -> piso 0,     teto 3000
+//      maior=1200, menor=-800, degrau=1000 -> piso -1000, teto 2000
+export function calcularEscala(maiorValor, menorValor, degrau) {
   const teto = Math.ceil(Math.max(maiorValor, 1) / degrau) * degrau;
+  const piso = Math.min(Math.floor(Math.min(menorValor, 0) / degrau) * degrau, 0);
+
   const marcas = [];
-  for (let v = 0; v <= teto; v += degrau) {
+  for (let v = piso; v <= teto; v += degrau) {
     marcas.push(v);
   }
-  return { teto, marcas };
+  return { piso, teto, marcas };
 }

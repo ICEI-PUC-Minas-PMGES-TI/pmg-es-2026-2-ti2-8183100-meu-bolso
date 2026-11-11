@@ -1,0 +1,1183 @@
+/* ========================================
+   PÁGINA DE RECEITAS
+   Todas as classes usam o prefixo "receitas-".
+   Espelho da página de Gastos, em tom de entrada (verde/sucesso).
+   Reaproveita variáveis, .btn, .form-* e .mensagem-* do global.css.
+   ======================================== */
+
+.receitas-pagina {
+  /* Curva de saída forte, usada em todas as animações da página */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-6);
+  width: 100%;
+}
+
+/* ---------- Topo ---------- */
+
+.receitas-topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.receitas-titulo {
+  font-size: var(--titulo-lg);
+}
+
+.receitas-subtitulo {
+  margin-top: var(--espaco-1);
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.receitas-topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+.receitas-contagem {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+}
+
+.receitas-erro-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+/* ---------- Seletor de mês ---------- */
+
+.receitas-seletor-mes {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  min-height: 44px;
+  padding: 0 var(--espaco-1);
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+}
+
+.receitas-seletor-botao {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--preto);
+  transition: background-color var(--transicao-rapida);
+}
+
+.receitas-seletor-texto {
+  min-width: 150px;
+  text-align: center;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto-suave);
+}
+
+/* ---------- Card base (tabela, categorias) ---------- */
+
+.receitas-card {
+  background-color: var(--branco);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-leve);
+  overflow: hidden;
+}
+
+/* ========================================
+   CARDS DE RESUMO
+   Uma única entrada escalonada ao carregar a página.
+   ======================================== */
+
+.receitas-resumo {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.receitas-resumo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--espaco-5);
+  background-color: var(--branco);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-leve);
+  animation: receitas-entra 260ms var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+/* O total recebido é o número principal da página: card verde */
+.receitas-resumo-destaque {
+  background-color: var(--verde-escuro);
+  border-color: var(--verde-escuro);
+}
+
+.receitas-resumo-icone {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--espaco-3);
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.receitas-resumo-destaque .receitas-resumo-icone {
+  background-color: var(--verde-principal);
+  color: var(--preto);
+}
+
+.receitas-resumo-rotulo {
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--cinza-700);
+}
+
+.receitas-resumo-valor {
+  font-size: var(--titulo-md);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--preto);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.receitas-resumo-detalhe {
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.receitas-resumo-destaque .receitas-resumo-rotulo {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.receitas-resumo-destaque .receitas-resumo-valor {
+  color: var(--branco);
+}
+
+.receitas-resumo-destaque .receitas-resumo-detalhe {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ========================================
+   PAINEL: CATEGORIAS (largura total)
+   ======================================== */
+
+.receitas-distribuicao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+}
+
+.receitas-painel-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.receitas-painel-titulo {
+  font-size: var(--texto-lg);
+}
+
+.receitas-painel-legenda {
+  margin-top: 2px;
+  font-size: var(--texto-sm);
+  color: var(--cinza-700);
+}
+
+.receitas-painel-vazio {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4) 0;
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--cinza-700);
+}
+
+.receitas-painel-vazio svg {
+  color: var(--verde-principal);
+}
+
+/* ---------- Barra (usada nas categorias) ---------- */
+
+.receitas-barra-trilho {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cinza-100);
+  overflow: hidden;
+}
+
+/* O preenchimento tem sempre 100% de largura e é "recortado" até --p (0 a 1). */
+.receitas-barra-preenchimento {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cor, var(--verde-principal));
+  clip-path: inset(0 calc((1 - var(--p, 0)) * 100%) 0 0 round 999px);
+  transition: clip-path 400ms var(--ease-out);
+  animation: receitas-barra-cresce 450ms var(--ease-out) backwards;
+}
+
+/* ---------- Distribuição por categoria ---------- */
+
+.receitas-distribuicao-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.receitas-distribuicao-item {
+  --cor: var(--verde-principal);
+
+  width: 100%;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pequeno);
+  text-align: left;
+  color: inherit;
+  transition:
+    background-color var(--transicao-rapida),
+    border-color var(--transicao-rapida);
+}
+
+/* A categoria que mais pesa ganha o verde mais escuro */
+.receitas-distribuicao-lider {
+  --cor: var(--verde-escuro);
+}
+
+.receitas-distribuicao-item[aria-pressed="true"] {
+  background-color: var(--verde-claro);
+  border-color: var(--verde-principal);
+}
+
+.receitas-distribuicao-icone {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.receitas-distribuicao-item[aria-pressed="true"] .receitas-distribuicao-icone {
+  background-color: var(--branco);
+}
+
+.receitas-distribuicao-meio {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.receitas-distribuicao-nome {
+  display: flex;
+  align-items: baseline;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+}
+
+.receitas-distribuicao-qtd {
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  color: var(--cinza-700);
+}
+
+.receitas-distribuicao-numeros {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.receitas-distribuicao-numeros strong {
+  font-size: var(--texto-base);
+  color: var(--preto);
+}
+
+/* ========================================
+   FILTROS E ORDENAÇÃO
+   ======================================== */
+
+.receitas-filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  align-items: end;
+  gap: var(--espaco-4);
+  padding: var(--espaco-5) var(--espaco-6);
+  border-bottom: var(--borda-padrao);
+}
+
+.receitas-filtro-busca {
+  grid-column: 1 / -1;
+}
+
+.receitas-busca-campo {
+  position: relative;
+}
+
+.receitas-busca-campo svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--cinza-500);
+  pointer-events: none;
+}
+
+.receitas-busca-campo input {
+  padding-left: 36px;
+}
+
+/* ========================================
+   TABELA
+   ======================================== */
+
+.receitas-tabela-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.receitas-tabela {
+  min-width: 720px;
+}
+
+.receitas-tabela th {
+  padding: var(--espaco-4) var(--espaco-6);
+  text-align: left;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cinza-500);
+  background-color: var(--cinza-50);
+  border-bottom: var(--borda-padrao);
+  white-space: nowrap;
+}
+
+.receitas-tabela td {
+  padding: var(--espaco-4) var(--espaco-6);
+  font-size: var(--texto-sm);
+  color: var(--preto-suave);
+  border-bottom: 1px solid var(--cinza-100);
+  vertical-align: middle;
+}
+
+.receitas-tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.receitas-tabela tbody tr {
+  transition: background-color var(--transicao-rapida);
+}
+
+.receitas-celula-descricao {
+  font-weight: 500;
+  color: var(--preto);
+}
+
+.receitas-col-valor {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+/* ---------- Cabeçalho ordenável ---------- */
+
+.receitas-th-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.receitas-th-botao svg {
+  opacity: 0.5;
+  transition: opacity var(--transicao-rapida);
+}
+
+.receitas-th-ativo {
+  color: var(--preto);
+}
+
+.receitas-th-ativo svg {
+  opacity: 1;
+}
+
+/* ---------- Linhas: entrada, saída e hover ---------- */
+
+.receitas-linha {
+  animation: receitas-linha-entra 220ms var(--ease-out) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * 30ms);
+}
+
+.receitas-linha-saindo {
+  animation: receitas-linha-sai 180ms var(--ease-out) forwards;
+  animation-delay: 0s;
+  pointer-events: none;
+}
+
+/* ---------- Descrição, selo e comentário ---------- */
+
+.receitas-descricao {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.receitas-selo-recorrente {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cinza-100);
+  color: var(--cinza-700);
+}
+
+.receitas-selo-previsto {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-redondo);
+  border: 1px dashed var(--cinza-300, #cbd5e1);
+  background-color: transparent;
+  color: var(--cinza-500, #6b7280);
+}
+
+.receitas-botao-comentario {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  transition: background-color var(--transicao-rapida);
+}
+
+/* ---------- Etiqueta de categoria ---------- */
+
+.receitas-etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: 4px 10px;
+  font-size: var(--texto-xs);
+  font-weight: 500;
+  color: var(--verde-escuro);
+  background-color: var(--verde-claro);
+  border-radius: var(--radius-redondo);
+  white-space: nowrap;
+}
+
+/* ---------- Valores (entrada = verde/sucesso) ---------- */
+
+.receitas-valor {
+  font-weight: 600;
+  color: var(--sucesso);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Ações da linha ---------- */
+
+.receitas-col-acoes {
+  width: 112px;
+  text-align: right;
+}
+
+.receitas-acoes {
+  display: inline-flex;
+  gap: var(--espaco-1);
+}
+
+.receitas-botao-icone {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-500);
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.receitas-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ---------- Rodapé ---------- */
+
+.receitas-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4) var(--espaco-6);
+  border-top: var(--borda-padrao);
+  background-color: var(--cinza-50);
+}
+
+.receitas-total {
+  font-size: var(--texto-sm);
+  color: var(--cinza-700);
+}
+
+/* ---------- Estado vazio ---------- */
+
+.receitas-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-12) var(--espaco-6);
+  text-align: center;
+}
+
+.receitas-vazio-icone {
+  font-size: 2.5rem;
+  margin-bottom: var(--espaco-2);
+}
+
+.receitas-vazio-svg {
+  margin-bottom: var(--espaco-2);
+  color: var(--cinza-500);
+}
+
+.receitas-vazio p {
+  max-width: 360px;
+  margin-bottom: var(--espaco-2);
+  font-size: var(--texto-sm);
+}
+
+/* ---------- Carregamento (esqueleto) ---------- */
+
+.receitas-esqueleto {
+  background-color: var(--cinza-100);
+  border-color: transparent;
+  box-shadow: none;
+  animation: receitas-pulso 1.2s ease-in-out infinite;
+}
+
+.receitas-esqueleto-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-6);
+}
+
+.receitas-esqueleto-lista .receitas-esqueleto {
+  height: 44px;
+  border-radius: var(--radius-pequeno);
+}
+
+/* ========================================
+   MODAIS E FORMULÁRIOS
+   ======================================== */
+
+.receitas-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-4);
+  background-color: rgba(16, 24, 23, 0.5);
+  overflow-y: auto;
+  animation: receitas-overlay-entra 160ms ease-out backwards;
+}
+
+.receitas-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: var(--espaco-6);
+  background-color: var(--branco);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  animation: receitas-modal-entra 200ms var(--ease-out) backwards;
+}
+
+.receitas-modal-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--espaco-6);
+}
+
+.receitas-modal-fechar {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-500);
+  transition: background-color var(--transicao-rapida);
+}
+
+.receitas-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.receitas-form-coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.receitas-form-campo-largo {
+  grid-column: 1 / -1;
+}
+
+.receitas-erro-campo {
+  font-size: var(--texto-xs);
+  color: var(--erro);
+}
+
+.receitas-form-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--espaco-3);
+  margin-top: var(--espaco-2);
+}
+
+.receitas-acao-esquerda {
+  margin-right: auto;
+}
+
+.receitas-textarea {
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.receitas-contador {
+  align-self: flex-end;
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+}
+
+.receitas-nota {
+  font-size: var(--texto-sm);
+}
+
+.receitas-comentario-contexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--espaco-4);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--cinza-50);
+  font-size: var(--texto-sm);
+}
+
+/* ---------- Caixa de marcar "Repetir todo mês" ---------- */
+
+.receitas-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-pequeno);
+  cursor: pointer;
+  transition:
+    background-color var(--transicao-rapida),
+    border-color var(--transicao-rapida);
+}
+
+.receitas-check input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--verde-escuro);
+}
+
+.receitas-check > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--texto-sm);
+}
+
+.receitas-check small {
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+}
+
+.receitas-check:has(input:checked) {
+  background-color: var(--verde-fundo);
+  border-color: var(--verde-principal);
+}
+
+/* ---------- Lista de recorrências ---------- */
+
+.receitas-recorrencias-intro {
+  margin-bottom: var(--espaco-4);
+}
+
+.receitas-recorrencias-lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+}
+
+.receitas-recorrencia {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+}
+
+.receitas-recorrencia-pausada {
+  background-color: var(--cinza-50);
+}
+
+.receitas-recorrencia-pausada .receitas-recorrencia-info strong {
+  color: var(--cinza-700);
+}
+
+.receitas-recorrencia-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.receitas-recorrencia-info strong {
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+.receitas-recorrencia-info span {
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+}
+
+.receitas-recorrencia-proximo {
+  font-weight: 500;
+}
+
+.receitas-recorrencia-acoes {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.receitas-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-right: var(--espaco-2);
+  border: none;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cinza-300);
+  transition: background-color var(--transicao-padrao);
+}
+
+.receitas-switch[aria-checked="true"] {
+  background-color: var(--verde-escuro);
+}
+
+.receitas-switch-bolinha {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--branco);
+  transition: transform 150ms var(--ease-out);
+}
+
+.receitas-switch[aria-checked="true"] .receitas-switch-bolinha {
+  transform: translateX(18px);
+}
+
+/* ========================================
+   HOVER (só em dispositivos com mouse)
+   ======================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .receitas-seletor-botao:hover {
+    background-color: var(--verde-claro);
+  }
+
+  .receitas-tabela tbody tr:hover {
+    background-color: var(--verde-fundo);
+  }
+
+  .receitas-th-botao:hover {
+    color: var(--preto);
+  }
+
+  .receitas-botao-comentario:hover {
+    background-color: var(--verde-principal);
+    color: var(--preto);
+  }
+
+  .receitas-botao-icone:hover {
+    background-color: var(--cinza-100);
+    color: var(--preto);
+  }
+
+  /* Vem depois do hover genérico para vencer */
+  .receitas-botao-excluir:hover {
+    background-color: var(--erro-fundo);
+    color: var(--erro);
+  }
+
+  .receitas-modal-fechar:hover {
+    background-color: var(--cinza-100);
+    color: var(--preto);
+  }
+
+  .receitas-distribuicao-item:hover {
+    background-color: var(--verde-fundo);
+  }
+
+  .receitas-distribuicao-item[aria-pressed="true"]:hover {
+    background-color: var(--verde-claro);
+  }
+
+  .receitas-check:hover {
+    border-color: var(--verde-principal);
+  }
+}
+
+/* ========================================
+   ANIMAÇÕES
+   Só transform, opacity e clip-path (não recalculam layout).
+   ======================================== */
+
+@keyframes receitas-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes receitas-linha-entra {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes receitas-linha-sai {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes receitas-barra-cresce {
+  from {
+    clip-path: inset(0 100% 0 0 round 999px);
+  }
+}
+
+@keyframes receitas-overlay-entra {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes receitas-modal-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes receitas-pulso {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .receitas-resumo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .receitas-tabela th,
+  .receitas-tabela td {
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  .receitas-filtros {
+    padding: var(--espaco-4);
+  }
+}
+
+@media (max-width: 768px) {
+  .receitas-topo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .receitas-topo-acoes {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .receitas-seletor-mes {
+    justify-content: space-between;
+  }
+
+  .receitas-botao-adicionar {
+    width: 100%;
+  }
+
+  .receitas-distribuicao {
+    padding: var(--espaco-4);
+  }
+
+  /* Tabela vira lista de cartões */
+  .receitas-tabela {
+    min-width: 0;
+  }
+
+  .receitas-tabela thead {
+    display: none;
+  }
+
+  .receitas-tabela,
+  .receitas-tabela tbody,
+  .receitas-tabela tr,
+  .receitas-tabela td {
+    display: block;
+    width: 100%;
+  }
+
+  .receitas-tabela tr {
+    padding: var(--espaco-3) var(--espaco-4);
+    border-bottom: var(--borda-padrao);
+  }
+
+  .receitas-tabela tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .receitas-tabela td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    padding: var(--espaco-2) 0;
+    border-bottom: none;
+    text-align: right;
+  }
+
+  .receitas-tabela td::before {
+    content: attr(data-label);
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--cinza-500);
+    text-align: left;
+  }
+
+  .receitas-descricao {
+    justify-content: flex-end;
+  }
+
+  .receitas-col-valor {
+    text-align: right !important;
+  }
+
+  .receitas-col-acoes {
+    width: 100%;
+  }
+
+  .receitas-rodape {
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  .receitas-recorrencia {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .receitas-recorrencia-acoes {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .receitas-resumo {
+    gap: var(--espaco-3);
+  }
+
+  .receitas-resumo-card {
+    padding: var(--espaco-4);
+  }
+
+  .receitas-resumo-valor {
+    font-size: var(--titulo-sm);
+  }
+
+  .receitas-resumo-destaque {
+    grid-column: 1 / -1;
+  }
+
+  .receitas-modal {
+    padding: var(--espaco-4);
+  }
+
+  .receitas-form {
+    grid-template-columns: 1fr;
+  }
+
+  .receitas-form-acoes {
+    flex-direction: column-reverse;
+  }
+
+  .receitas-form-acoes :global(.btn) {
+    width: 100%;
+  }
+
+  .receitas-acao-esquerda {
+    margin-right: 0;
+  }
+}
+
+/* ========================================
+   MOVIMENTO REDUZIDO
+   ======================================== */
+
+@keyframes receitas-aparece {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes receitas-some {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .receitas-resumo-card,
+  .receitas-linha,
+  .receitas-modal,
+  .receitas-modal-overlay {
+    animation-name: receitas-aparece;
+    animation-duration: 150ms;
+    animation-delay: 0s;
+  }
+
+  .receitas-linha-saindo {
+    animation-name: receitas-some;
+  }
+
+  .receitas-barra-preenchimento {
+    animation: none;
+    transition: none;
+  }
+
+  .receitas-esqueleto {
+    animation: none;
+  }
+
+  .receitas-switch-bolinha,
+  .receitas-switch,
+  .receitas-tabela tbody tr,
+  .receitas-seletor-botao,
+  .receitas-modal-fechar {
+    transition: none;
+  }
+}

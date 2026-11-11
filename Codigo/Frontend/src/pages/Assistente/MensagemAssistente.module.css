@@ -1,0 +1,102 @@
+/* Mensagens da conversa do assistente. */
+
+.linha {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  max-width: 85%;
+}
+
+.linhaUsuario {
+  margin-left: auto;
+  justify-content: flex-end;
+  max-width: 85%;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+}
+
+/* Mini-avatar do assistente */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-escuro);
+  color: var(--verde-claro);
+  font-size: var(--texto-xs);
+  font-weight: 800;
+}
+
+.balao {
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: 16px;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.balaoUsuario {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  border-bottom-right-radius: 4px;
+}
+
+.balaoAssistente {
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  color: var(--preto);
+  box-shadow: var(--sombra-leve);
+  border-bottom-left-radius: 4px;
+}
+
+.balaoErro {
+  background-color: var(--erro-fundo);
+  border: 1px solid var(--erro);
+  /* Texto escuro para contraste >= 4.5:1; a borda/fundo vermelhos é que
+     sinalizam o erro. */
+  color: var(--cinza-700);
+  border-bottom-left-radius: 4px;
+}
+
+.horario {
+  font-size: var(--texto-xs);
+  color: var(--cinza-700);
+}
+
+/* Texto exclusivo para leitores de tela. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 768px) {
+  .linha,
+  .linhaUsuario {
+    max-width: 100%;
+  }
+}
+
+/* No mobile, o balão do usuário não pode empurrar o avatar para fora:
+   deixa o balão encolher e manter a quebra de linha. */
+@media (max-width: 480px) {
+  .linhaUsuario .balao {
+    max-width: 100%;
+    min-width: 0;
+  }
+}

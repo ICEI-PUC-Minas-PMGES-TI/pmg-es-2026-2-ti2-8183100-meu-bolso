@@ -68,4 +68,8 @@ npm run dev
 
 A aplicação abre em `http://localhost:5173`.
 
+### 3. Chatbot do WhatsApp (opcional)
+
+O chatbot precisa do back-end e do [WAHA](https://waha.devlike.pro/) (em container Docker) rodando no mesmo ambiente. Passo a passo em [`Documentacao/ChatbotWhatsApp.md`](Documentacao/ChatbotWhatsApp.md).
+
 > Detalhes de variáveis de ambiente e endpoints estão nos READMEs de [`Codigo/Backend`](Codigo/Backend/Readme.md) e [`Codigo/Frontend`](Codigo/Frontend/README.md).

@@ -1,90 +1,70 @@
 /**
- * Acesso compartilhado às carteiras persistidas no localStorage.
+ * Acesso compartilhado às carteiras persistidas no back-end (por usuário).
  *
- * A página Carteiras guarda três listas (cartoes, contas, dinheiroEReservas)
- * sob a chave "meubolso:carteira". Enquanto não há back-end, a página de
- * Metas lê e atualiza esses mesmos dados para refletir o saldo das carteiras
+ * A página Metas usa estas funções para refletir o saldo das carteiras
  * quando há uma movimentação (depósito/retirada) vinculada a uma meta.
- *
- * Quando o back-end existir, estas funções serão substituídas por chamadas
- * à API (src/service/Api.js).
+ * Os dados vêm da API em { cartoes, contas, dinheiroEReservas, movsDinheiro }.
  */
 
-const CHAVE_STORAGE = "meubolso:carteira";
-
-/** Lê o objeto bruto salvo { cartoes, contas, dinheiroEReservas } ou null. */
-function lerBruto() {
-  try {
-    const bruto = localStorage.getItem(CHAVE_STORAGE);
-    if (!bruto) return null;
-    const dados = JSON.parse(bruto);
-    if (
-      Array.isArray(dados?.cartoes) &&
-      Array.isArray(dados?.contas) &&
-      Array.isArray(dados?.dinheiroEReservas)
-    ) {
-      return dados;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
+import { obterCarteiras } from "./Api";
 
 /**
- * Retorna as carteiras que possuem saldo movimentável (contas e dinheiro
- * físico), no formato { id, nome, saldo, origem }. São as únicas que podem
- * ceder ou receber dinheiro numa movimentação de meta — cartões (fatura/
- * limite) e reservas ficam de fora.
+ * Retorna as contas bancárias que possuem saldo, no formato
+ * { id, nome, saldo, origem }. São as únicas que podem ceder ou receber
+ * dinheiro numa movimentação de meta — cartões, dinheiro físico e reservas
+ * ficam de fora.
  *
  * `origem` indica a lista de origem para saber onde gravar de volta.
  */
-export function listarCarteirasComSaldo() {
-  const dados = lerBruto();
+export async function listarCarteirasComSaldo() {
+  let dados;
+  try {
+    dados = await obterCarteiras();
+  } catch {
+    return [];
+  }
   if (!dados) return [];
 
-  const contas = dados.contas
+  const contas = (dados.contas ?? [])
     .filter((c) => typeof c.saldo === "number")
     .map((c) => ({ id: c.id, nome: c.apelido, saldo: c.saldo, origem: "contas" }));
 
-  const dinheiro = dados.dinheiroEReservas
-    .filter((d) => d.tipo === "dinheiro" && typeof d.saldo === "number")
-    .map((d) => ({
-      id: d.id,
-      nome: d.apelido,
-      saldo: d.saldo,
-      origem: "dinheiroEReservas",
-    }));
-
-  return [...contas, ...dinheiro];
+  return contas;
 }
 
 /**
- * Aplica uma variação de saldo a uma carteira e persiste no localStorage.
- * `delta` positivo entra na carteira; negativo sai.
- * Retorna true se conseguiu gravar.
+ * Lista apenas as contas cadastradas na carteira, no formato { id, nome, tipo },
+ * para seleção ao registrar um gasto ou uma receita.
+ *
+ * Gastos e receitas só podem ser lançados em uma conta: sem conta cadastrada,
+ * a lista vem vazia e a tela mostra o aviso para cadastrar uma na Carteira.
  */
-export function ajustarSaldoCarteira(carteiraId, delta) {
-  const dados = lerBruto();
-  if (!dados) return false;
+export async function listarContas() {
+  let dados;
+  try { dados = await obterCarteiras(); } catch { return []; }
+  if (!dados) return [];
 
-  const aplicar = (lista) =>
-    lista.map((item) =>
-      item.id === carteiraId && typeof item.saldo === "number"
-        ? { ...item, saldo: item.saldo + delta }
-        : item
-    );
+  return (dados.contas ?? []).map((c) => ({ id: c.id, nome: c.apelido, tipo: "conta" }));
+}
 
-  const atualizado = {
-    ...dados,
-    contas: aplicar(dados.contas),
-    dinheiroEReservas: aplicar(dados.dinheiroEReservas),
-  };
+/**
+ * Lista as formas de pagamento disponíveis (contas, cartões e dinheiro) no
+ * formato { id, nome, tipo }, para seleção ao registrar um gasto.
+ */
+export async function listarFormasDePagamento() {
+  let dados;
+  try { dados = await obterCarteiras(); } catch { return []; }
+  if (!dados) return [];
 
-  try {
-    localStorage.setItem(CHAVE_STORAGE, JSON.stringify(atualizado));
-    return true;
-  } catch {
-    return false;
-  }
+  const contas = (dados.contas ?? []).map((c) => ({ id: c.id, nome: c.apelido, tipo: "conta" }));
+  const cartoes = (dados.cartoes ?? []).map((c) => ({
+    id: c.id,
+    nome: `${c.apelido} (${c.subtipo === "credito" ? "Crédito" : "Débito"})`,
+    tipo: "cartao",
+  }));
+  const dinheiro = (dados.dinheiroEReservas ?? [])
+    .filter((d) => d.tipo === "dinheiro")
+    .map((d) => ({ id: d.id, nome: d.apelido, tipo: "dinheiro" }));
+
+  return [...contas, ...cartoes, ...dinheiro];
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   CreditCard,
@@ -13,40 +13,26 @@ import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
 import PainelContas from "../../components/PainelContas/PainelContas";
 import ModalAdicionar from "../../components/ModalAdicionar/ModalAdicionar";
+import ModalCedulas from "../../components/ModalCedulas/ModalCedulas";
 
-import {
-  contas as contasMock,
-  cartoes as cartoesMock,
-  dinheiroEReservas as dinheiroEReservasMock,
-  movimentacoesPorItem,
-  formatarBRL,
-} from "./carteirasMock";
+import { formatarBRL } from "./carteirasMock";
 
 import { BANCOS, bancoDe, chaveDoBanco, FUNDO_LOGO } from "../../data/bancos";
 import { posicaoEfetiva, ORDEM_POSICAO } from "../../data/posicaoContas";
+import {
+  normalizarDinheiro,
+  saldoDaContagem,
+  totalCentavos,
+} from "../../data/denominacoes";
+import { obterCarteiras, salvarCarteiras, obterMovimentacoes } from "../../service/Api";
 
 import styles from "./Carteiras.module.css";
 
-// Persistência simples em localStorage (sem backend nesta etapa).
-const CHAVE_STORAGE = "meubolso:carteira";
-
-function carregarPersistido() {
-  try {
-    const bruto = localStorage.getItem(CHAVE_STORAGE);
-    if (!bruto) return null;
-    const dados = JSON.parse(bruto);
-    // só aceita se tiver as três listas no formato esperado
-    if (
-      Array.isArray(dados?.cartoes) &&
-      Array.isArray(dados?.contas) &&
-      Array.isArray(dados?.dinheiroEReservas)
-    ) {
-      return dados;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+// Normaliza a lista de dinheiro/reservas (itens de dinheiro ganham contagem/saldo).
+function normalizarListaDinheiro(lista) {
+  return (lista ?? []).map((item) =>
+    item.tipo === "dinheiro" ? normalizarDinheiro(item) : item
+  );
 }
 
 function Carteiras() {
@@ -57,33 +43,74 @@ function Carteiras() {
   // (ex.: botão "Adicionar" exclusivo de cartões na seção da carteira).
   const [tipoAdicionar, setTipoAdicionar] = useState(null);
 
-  // Listas em estado. Na primeira carga, usa o que estiver salvo no
-  // localStorage; caso contrário, parte dos dados fictícios.
-  const persistido = carregarPersistido();
-  const [cartoes, setCartoes] = useState(persistido?.cartoes ?? cartoesMock);
-  const [contas, setContas] = useState(persistido?.contas ?? contasMock);
-  const [dinheiroEReservas, setDinheiroEReservas] = useState(
-    persistido?.dinheiroEReservas ?? dinheiroEReservasMock
-  );
+  // Estado inicial vazio; preenchido pela carteira do usuário via API.
+  const [cartoes, setCartoes] = useState([]);
+  const [contas, setContas] = useState([]);
+  const [dinheiroEReservas, setDinheiroEReservas] = useState([]);
 
-  // Salva as listas sempre que mudarem (edição, exclusão, inclusão).
+  // Movimentações do dinheiro em espécie (crescem a cada adicionar/retirar).
+  const [movsDinheiro, setMovsDinheiro] = useState([]);
+
+  // Histórico unificado (gastos, receitas, metas e transferências), usado para
+  // derivar os extratos e a "última movimentação" de contas/cartões.
+  const [historico, setHistorico] = useState([]);
+
+  // Controle de carga/salvamento com a API.
+  const [carregado, setCarregado] = useState(false);
+  const [erroSalvar, setErroSalvar] = useState(false);
+  const [erroCarga, setErroCarga] = useState(false);
+  const versaoRef = useRef(0);
+  const filaRef = useRef(Promise.resolve());
+  const [conflito, setConflito] = useState(false);
+
+  // Carrega o histórico primeiro (para os extratos) e depois a carteira do usuário.
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        CHAVE_STORAGE,
-        JSON.stringify({ cartoes, contas, dinheiroEReservas })
+    let ativo = true;
+    (async () => {
+      let lista = [];
+      try { lista = await obterMovimentacoes(); } catch (e) { console.error("movimentações:", e); }
+      try {
+        const dados = await obterCarteiras();
+        if (!ativo) return;
+        setHistorico(lista ?? []);
+        setCartoes(dados?.cartoes ?? []);
+        setContas(dados?.contas ?? []);
+        setDinheiroEReservas(normalizarListaDinheiro(dados?.dinheiroEReservas));
+        setMovsDinheiro(dados?.movsDinheiro ?? []);
+        versaoRef.current = dados?.versao ?? 0;
+        setCarregado(true);
+      } catch {
+        if (ativo) setErroCarga(true);
+      }
+    })();
+    return () => { ativo = false; };
+  }, []);
+
+  // Salva as listas na API quando mudarem, com debounce de 800ms.
+  // Só roda depois que a carga inicial terminou (carregado=true).
+  useEffect(() => {
+    if (!carregado || conflito) return;
+    const id = setTimeout(() => {
+      filaRef.current = filaRef.current.then(() =>
+        salvarCarteiras({
+          cartoes, contas, dinheiroEReservas, movsDinheiro,
+          versao: versaoRef.current,
+        })
+          .then((resp) => {
+            versaoRef.current = resp?.versao ?? versaoRef.current;
+            setErroSalvar(false);
+          })
+          .catch((e) => {
+            if (e?.status === 409) setConflito(true);
+            else setErroSalvar(true);
+          })
       );
-    } catch {
-      // armazenamento indisponível: segue apenas em memória
-    }
-  }, [cartoes, contas, dinheiroEReservas]);
+    }, 800);
+    return () => clearTimeout(id);
+  }, [carregado, conflito, cartoes, contas, dinheiroEReservas, movsDinheiro]);
 
   // Resumo recalculado a partir do estado atual.
-  const saldoContas =
-    contas.reduce((acc, c) => acc + (c.saldo || 0), 0) +
-    dinheiroEReservas
-      .filter((i) => i.tipo === "dinheiro")
-      .reduce((acc, d) => acc + (d.saldo || 0), 0);
+  const saldoContas = contas.reduce((acc, c) => acc + (c.saldo || 0), 0); 
 
   const faturasCartoes = cartoes
     .filter((c) => c.subtipo === "credito")
@@ -98,6 +125,42 @@ function Carteiras() {
 
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
+
+  // Modal de cédulas/moedas: { modo, item } ou null.
+  const [modalCedulas, setModalCedulas] = useState(null);
+
+  // Aplica uma contagem escolhida no modal ao item de dinheiro, somando
+  // (adicionar) ou subtraindo (retirar) por denominação, e registra a
+  // movimentação no extrato. Tudo em centavos inteiros.
+  function confirmarCedulas(item, modo, escolhida) {
+    const entrada = modo === "adicionar";
+    const valor = saldoDaContagem(escolhida);
+    if (totalCentavos(escolhida) === 0) return;
+
+    setDinheiroEReservas((lista) =>
+      lista.map((i) => {
+        if (i.id !== item.id) return i;
+        const atual = i.contagem || {};
+        const nova = { ...atual };
+        for (const chave of Object.keys(escolhida)) {
+          const base = Number(nova[chave]) || 0;
+          const delta = Number(escolhida[chave]) || 0;
+          nova[chave] = entrada ? base + delta : Math.max(0, base - delta);
+        }
+        return { ...i, contagem: nova, saldo: saldoDaContagem(nova) };
+      })
+    );
+
+    const mov = {
+      id: Date.now(),
+      descricao: entrada ? "Entrada em dinheiro" : "Retirada em dinheiro",
+      categoria: "Dinheiro",
+      data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+      valor: entrada ? valor : -valor,
+      entrada,
+    };
+    setMovsDinheiro((lista) => [mov, ...lista]);
+  }
 
   function setListaPorTipo(tipo, atualizador) {
     if (tipo === "cartao") setCartoes(atualizador);
@@ -128,7 +191,6 @@ function Carteiras() {
 
   function salvarItem(dados) {
     if (dados.id) {
-      // edição: substitui o item existente
       setListaPorTipo(dados.tipo, (lista) => {
         let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
         if (dados.tipo === "conta") {
@@ -136,12 +198,10 @@ function Carteiras() {
         }
         return nova;
       });
-      // mantém o painel refletindo o item editado
       setItemSelecionado((atual) =>
         atual && atual.id === dados.id ? { ...atual, ...dados } : atual
       );
     } else {
-      // novo item
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
       setListaPorTipo(dados.tipo, (lista) => {
         const base = [...lista, item];
@@ -187,13 +247,49 @@ function Carteiras() {
       ? contas.find((c) => c.id === itemSelecionado.contaId) || null
       : null;
 
-  const movimentacoes = itemSelecionado
-    ? movimentacoesPorItem[itemSelecionado.id] || []
-    : [];
+  // Item de dinheiro sempre na versão mais recente do estado (saldo/contagem).
+  const dinheiroAtual =
+    itemSelecionado?.tipo === "dinheiro"
+      ? dinheiroEReservas.find((i) => i.id === itemSelecionado.id) || itemSelecionado
+      : null;
+
+  const itemPainel = dinheiroAtual ?? itemSelecionado;
+
+  const movimentacoes =
+    itemSelecionado?.tipo === "dinheiro"
+      ? movsDinheiro
+      : movimentacoesDoItem(itemSelecionado, historico, cartoes).slice(0, 50);
+
+  if (erroCarga) {
+    return (
+      <div className={styles.carteiras}>
+        <p className="texto-secundario" role="alert">
+          Não foi possível carregar sua carteira. Recarregue a página.
+        </p>
+      </div>
+    );
+  }
+
+  if (!carregado) {
+    return (
+      <div className={styles.carteiras}>
+        <p className="texto-secundario">Carregando carteira...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.carteiras}>
-      {/* Cabeçalho */}
+      {conflito && (
+        <p className="texto-secundario" role="alert">
+          Sua carteira foi alterada em outra tela. Recarregue a página para continuar.
+        </p>
+      )}
+      {erroSalvar && (
+        <p className="texto-secundario" role="alert">
+          Não foi possível salvar. Tentando novamente na próxima alteração.
+        </p>
+      )}
       <div className={styles.topo}>
         <div>
           <span className={styles.rotulo}>CARTEIRA</span>
@@ -209,7 +305,6 @@ function Carteiras() {
       {/* Área principal em duas colunas:
           esquerda = carteira física | direita = resumos + contas */}
       <div className={styles.areaPrincipal}>
-      {/* Coluna esquerda: a carteira física */}
       {/* Seção: Cartões — porta-cartões físico (SVG) com cartões HTML */}
       <section className={`${styles.secao} ${styles.secaoCarteira}`}>
         <div className={styles.secaoTopo}>
@@ -263,9 +358,7 @@ function Carteiras() {
         )}
       </section>
 
-      {/* Coluna direita: resumos financeiros + seção Contas */}
       <div className={styles.colunaDireita}>
-        {/* Resumo financeiro */}
         <div className={styles.resumo}>
           <div className={`card ${styles.cardResumo}`}>
             <span className={styles.resumoIcone}>
@@ -276,7 +369,6 @@ function Carteiras() {
               <strong className={styles.resumoValor}>
                 {formatarBRL(saldoContas)}
               </strong>
-              <span className="texto-secundario">Contas e dinheiro físico</span>
             </div>
             <ChevronRight size={18} className={styles.resumoSeta} />
           </div>
@@ -290,15 +382,11 @@ function Carteiras() {
               <strong className={styles.resumoValor}>
                 {formatarBRL(faturasCartoes)}
               </strong>
-              <span className="texto-secundario">
-                Cartões de crédito em aberto
-              </span>
             </div>
             <ChevronRight size={18} className={styles.resumoSeta} />
           </div>
         </div>
 
-        {/* Seção: Contas */}
         <Secao
           titulo="Contas"
           icone={Landmark}
@@ -327,6 +415,7 @@ function Carteiras() {
               item={item}
               selecionado={itemSelecionado?.id === item.id}
               onSelecionar={() => setItemSelecionado(item)}
+              ultimaMov={movimentacoesDoItem(item, historico, cartoes)[0] ?? null}
             />
           ))}
           <CardAdicionarConta
@@ -338,38 +427,29 @@ function Carteiras() {
           />
         </Secao>
 
-        {/* Seção: Dinheiro e reservas (abaixo de Contas, na coluna direita) */}
+        {/* Seção: Dinheiro (em espécie) */}
         <Secao
-          titulo="Dinheiro e reservas"
+          titulo="Dinheiro"
           icone={Coins}
-          vazio="Nenhum dinheiro ou reserva cadastrado."
+          vazio="Nenhum dinheiro cadastrado."
           className={styles.secaoDinheiro}
         >
-          {dinheiroEReservas.map((item) =>
-            item.tipo === "reserva" ? (
-              <CardConta
+          {dinheiroEReservas
+            .filter((item) => item.tipo === "dinheiro")
+            .map((item) => (
+              <CardDinheiro
                 key={item.id}
                 item={item}
-                selecionado={itemSelecionado?.id === item.id}
-                onSelecionar={() => setItemSelecionado(item)}
+                onAdicionar={() => setModalCedulas({ modo: "adicionar", item })}
+                onRetirar={() => setModalCedulas({ modo: "retirar", item })}
               />
-            ) : (
-              <ItemCarteira
-                key={item.id}
-                item={item}
-                selecionado={itemSelecionado?.id === item.id}
-                onSelecionar={() => setItemSelecionado(item)}
-                semRodape
-              />
-            )
-          )}
+            ))}
         </Secao>
       </div>
       </div>
 
-      {/* Painel lateral de detalhes */}
       <PainelDetalhes
-        item={itemSelecionado}
+        item={itemPainel}
         movimentacoes={movimentacoes}
         contaAssociada={contaAssociada}
         onFechar={() => setItemSelecionado(null)}
@@ -380,7 +460,6 @@ function Carteiras() {
         onExcluir={() => excluirItem(itemSelecionado)}
       />
 
-      {/* Painel lateral com todas as contas */}
       <PainelContas
         aberto={painelContasAberto}
         contas={contas}
@@ -416,6 +495,21 @@ function Carteiras() {
         contas={contas}
         itemEditando={itemEditando}
         tipoInicial={tipoAdicionar}
+      />
+
+      <ModalCedulas
+        key={modalCedulas ? `${modalCedulas.modo}-${modalCedulas.item.id}` : "cedulas"}
+        aberto={Boolean(modalCedulas)}
+        modo={modalCedulas?.modo}
+        disponivel={
+          modalCedulas
+            ? dinheiroEReservas.find((i) => i.id === modalCedulas.item.id)?.contagem || {}
+            : {}
+        }
+        onFechar={() => setModalCedulas(null)}
+        onConfirmar={(escolhida) =>
+          confirmarCedulas(modalCedulas.item, modalCedulas.modo, escolhida)
+        }
       />
     </div>
   );
@@ -510,10 +604,32 @@ function chaveBanco(item) {
   return chaveDoBanco(item.instituicao || item.apelido);
 }
 
-/** Última movimentação (a lista do mock já vem com a mais recente primeiro). */
-function ultimaMovimentacao(id) {
-  const lista = movimentacoesPorItem[id];
-  return Array.isArray(lista) && lista.length ? lista[0] : null;
+// Converte uma movimentação da API (/api/movimentacoes) numa linha do extrato.
+// O valor já vem com sinal (negativo = saída) e `entrada` indica a direção.
+function paraLinhaDoExtrato(m) {
+  return {
+    id: m.id,
+    descricao: m.descricao,
+    categoria: m.categoria,
+    data: new Date(`${m.data}T00:00:00`).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+    valor: Number(m.valor),
+    entrada: Boolean(m.entrada),
+  };
+}
+
+// Movimentações que afetam o item: ele próprio e, para conta, seus cartões de
+// débito. A lista da API já vem do mais recente para o mais antigo.
+function movimentacoesDoItem(item, historico, cartoes) {
+  if (!item) return [];
+  let ids = [item.id];
+  if (item.tipo === "conta") {
+    ids = ids.concat(
+      cartoes.filter((c) => c.subtipo === "debito" && c.contaId === item.id).map((c) => c.id)
+    );
+  } else if (item.tipo !== "cartao") {
+    return [];
+  }
+  return historico.filter((m) => ids.includes(m.carteiraId)).map(paraLinhaDoExtrato);
 }
 
 /**
@@ -521,7 +637,7 @@ function ultimaMovimentacao(id) {
  * logo/ícone circular, nome, subtítulo, valor dentro, seta e rodapé
  * com a última movimentação. Apenas apresentação; não altera dados.
  */
-function CardConta({ item, selecionado, onSelecionar }) {
+function CardConta({ item, selecionado, onSelecionar, ultimaMov = null }) {
   const ehReserva = item.tipo === "reserva";
   const chave = ehReserva ? null : chaveBanco(item);
   const banco = ehReserva ? null : bancoDe(chave);
@@ -551,7 +667,7 @@ function CardConta({ item, selecionado, onSelecionar }) {
     ? formatarBRL(item.valorReservado)
     : formatarBRL(item.saldo);
 
-  const mov = ultimaMovimentacao(item.id);
+  const mov = ultimaMov;
 
   return (
     <div
@@ -617,6 +733,40 @@ function CardConta({ item, selecionado, onSelecionar }) {
           <ChevronRight size={16} className={styles.contaSeta} />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Card "Dinheiro na carteira" (visual escuro, largura total da seção).
+ * Os botões Adicionar/Retirar abrem o modal de contagem de cédulas/moedas.
+ */
+function CardDinheiro({ item, onAdicionar, onRetirar }) {
+  return (
+    <div className={styles.cardDinheiro}>
+      <CarteiraVisual
+        tipo="dinheiro"
+        apelido={item.apelido}
+        valor={formatarBRL(item.saldo)}
+        contagem={item.contagem}
+      />
+
+      <div className={styles.dinheiroAcoes}>
+        <button
+          type="button"
+          className={`${styles.dinheiroBtn} ${styles.dinheiroBtnPreenchido}`}
+          onClick={onAdicionar}
+        >
+          Adicionar
+        </button>
+        <button
+          type="button"
+          className={`${styles.dinheiroBtn} ${styles.dinheiroBtnContorno}`}
+          onClick={onRetirar}
+        >
+          Retirar
+        </button>
+      </div>
     </div>
   );
 }

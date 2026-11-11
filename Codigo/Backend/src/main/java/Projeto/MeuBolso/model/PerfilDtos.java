@@ -18,6 +18,12 @@ public final class PerfilDtos {
         @NotBlank @Size(max = 30) String telefone
     ) {}
 
+    /** Atualização da foto de perfil (data URL base64, ou null/vazio para remover). */
+    public record AtualizarFotoRequest(String foto) {}
+
+    /** Resposta do endpoint de foto. */
+    public record FotoResponse(String foto) {}
+
     /** Troca de senha: exige a senha atual e a nova. */
     public record TrocarSenhaRequest(
         @NotBlank String senhaAtual,
@@ -34,6 +40,7 @@ public final class PerfilDtos {
         String nome,
         String email,
         String telefone,
+        String foto,
         String token
     ) {}
 }

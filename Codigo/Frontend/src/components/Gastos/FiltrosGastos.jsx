@@ -1,7 +1,7 @@
     import { Search, X } from "lucide-react";
 
     import { OPCOES_ORDENACAO, temFiltroAtivo } from "../../utils/Gastosutils";
-    import { CATEGORIAS, CARTEIRAS } from "../../pages/Gastos/Constantes";
+    import { CATEGORIAS } from "../../pages/Gastos/Constantes";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
     export default function FiltrosGastos({
@@ -12,6 +12,7 @@
     onOrdenar,
     mesSelecionado,
     diasDoMes,
+    carteiras = [],
     }) {
     const primeiroDia = `${mesSelecionado}-01`;
     const ultimoDia = `${mesSelecionado}-${String(diasDoMes).padStart(2, "0")}`;
@@ -73,9 +74,9 @@
             onChange={alterar}
             >
             <option value="">Todas</option>
-            {CARTEIRAS.map((carteira) => (
-                <option key={carteira} value={carteira}>
-                {carteira}
+            {carteiras.map((carteira) => (
+                <option key={carteira.id} value={carteira.id}>
+                {carteira.nome}
                 </option>
             ))}
             </select>

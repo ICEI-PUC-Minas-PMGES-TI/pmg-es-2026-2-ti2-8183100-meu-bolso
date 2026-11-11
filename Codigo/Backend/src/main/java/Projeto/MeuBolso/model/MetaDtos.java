@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 
 /**
@@ -34,5 +35,36 @@ public final class MetaDtos {
         BigDecimal valorAtual,
         LocalDate prazo,
         String prioridade
+    ) {}
+
+    /**
+     * Movimentação (aporte/retirada) de uma meta enviada pelo cliente.
+     * `tipo`: "deposito" soma ao valor guardado; "retirada" subtrai.
+     * `carteiraId`: conta ou dinheiro de onde o valor sai/entra.
+     */
+    public record MovimentacaoRequest(
+        @NotBlank @Pattern(regexp = "deposito|retirada", message = "Tipo deve ser deposito ou retirada.") String tipo,
+        @NotNull @DecimalMin(value = "0.01", message = "O valor deve ser maior que zero.") BigDecimal valor,
+        @NotBlank String carteiraId,
+        @Size(max = 120) String titulo
+    ) {}
+
+    /** Movimentação devolvida no histórico da meta. */
+    public record MovimentacaoResponse(
+        String id,
+        String tipo,
+        BigDecimal valor,
+        String titulo,
+        String carteiraId,
+        Instant data
+    ) {}
+
+    /**
+     * Resposta de uma movimentação aplicada: devolve a meta já atualizada
+     * (com o novo valorAtual) e a movimentação registrada.
+     */
+    public record MovimentacaoAplicadaResponse(
+        MetaResponse meta,
+        MovimentacaoResponse movimentacao
     ) {}
 }

@@ -1,0 +1,331 @@
+/* ========================================
+   COMO USAR O WHATSAPP
+======================================== */
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+}
+
+/* Cabeçalho */
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  flex-wrap: wrap;
+}
+
+.cabecalho > div {
+  flex: 1;
+  min-width: 260px;
+}
+
+.cabecalho h1 {
+  font-size: var(--titulo-xl);
+  font-weight: 800;
+}
+
+.cabecalho p {
+  margin-top: var(--espaco-1);
+  max-width: 640px;
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  flex-shrink: 0;
+}
+
+.botaoAbrir {
+  gap: var(--espaco-2);
+  text-decoration: none;
+}
+
+/* Número do bot (destaque à direita do título) */
+.numeroBot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-width: 280px;
+  text-align: center;
+  border: 2px solid var(--verde-principal);
+}
+
+.numeroRotulo {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--verde-escuro);
+}
+
+.numeroValor {
+  font-size: var(--titulo-lg);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--preto);
+  line-height: 1.1;
+}
+
+/* Seções */
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.secao h2 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.secao h3 {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+
+.grade2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-6);
+  align-items: start;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-8);
+}
+
+/* Antes de começar */
+.requisito {
+  display: flex;
+  gap: var(--espaco-4);
+  align-items: flex-start;
+}
+
+.requisito p {
+  margin-top: var(--espaco-1);
+}
+
+.iconeRequisito {
+  color: var(--verde-escuro);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Passo a passo */
+.passos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.passos li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  color: var(--verde-escuro);
+}
+
+.passos li h3 {
+  color: var(--preto);
+}
+
+.numeroPasso {
+  position: absolute;
+  top: var(--espaco-4);
+  right: var(--espaco-4);
+  font-size: var(--titulo-md);
+  font-weight: 800;
+  color: var(--cinza-200);
+}
+
+/* Opções do menu */
+.opcoes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.opcao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.opcaoTopo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.opcaoNumero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--preto);
+  color: var(--branco);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.opcaoIcone {
+  color: var(--verde-escuro);
+  flex-shrink: 0;
+}
+
+.opcaoPassos {
+  line-height: 1.5;
+}
+
+/* Conversa de exemplo (bolhas no estilo do WhatsApp) */
+.chat {
+  list-style: none;
+  margin: 0;
+  padding: var(--espaco-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  background-color: #efeae2;
+  border-radius: var(--radius-grande);
+  border: var(--borda-padrao);
+}
+
+.balao {
+  max-width: 85%;
+  padding: var(--espaco-2) var(--espaco-3);
+  border-radius: var(--radius-medio);
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+  white-space: pre-line;
+  box-shadow: var(--sombra-leve);
+  color: var(--preto);
+}
+
+.balaoVoce {
+  align-self: flex-end;
+  background-color: #d9fdd3;
+  border-top-right-radius: 4px;
+}
+
+.balaoBot {
+  align-self: flex-start;
+  background-color: var(--branco);
+  border-top-left-radius: 4px;
+}
+
+/* Comandos */
+.comandos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  margin: 0;
+}
+
+.comando {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: var(--espaco-3);
+  align-items: baseline;
+}
+
+.comando dd {
+  margin: 0;
+}
+
+.codigo {
+  display: inline-block;
+  padding: 2px var(--espaco-2);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.valores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+}
+
+/* Bom saber */
+.avisos {
+  list-style: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.avisos li {
+  display: flex;
+  gap: var(--espaco-2);
+  align-items: flex-start;
+  color: var(--cinza-700);
+  font-size: var(--texto-sm);
+}
+
+.avisos li svg {
+  color: var(--informacao);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Acessível só para leitores de tela */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  .passos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .opcoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .numeroBot {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .grade2,
+  .passos,
+  .opcoes {
+    grid-template-columns: 1fr;
+  }
+}

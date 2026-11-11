@@ -19,6 +19,6 @@ public final class AuthDtos {
         @NotBlank String senha
     ) {}
 
-    public record AuthResponse(String token, String tipo, String nome, String email) {}
+    public record AuthResponse(String token, String tipo, String nome, String email, String foto) {}
     public record MensagemResponse(String mensagem) {}
 }

@@ -13,7 +13,6 @@
   margin-inline: calc(-1 * var(--espaco-8));
 }
 
-/* ---------- Cabeçalho ---------- */
 .topo {
   display: flex;
   align-items: flex-start;
@@ -78,7 +77,6 @@
   gap: var(--espaco-4);
 }
 
-/* ícone em círculo verde-claro à esquerda do texto */
 .resumoIcone {
   display: inline-flex;
   align-items: center;
@@ -257,9 +255,52 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-/* Dinheiro e reservas: dois cards lado a lado (largura total) */
+/* Dinheiro: card único ocupando a largura inteira da seção */
 .secaoDinheiro .grade {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
+}
+
+/* ---------- Card "Dinheiro na carteira" ---------- */
+.cardDinheiro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.dinheiroAcoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-3);
+}
+
+.dinheiroBtn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transicao-padrao), color var(--transicao-padrao);
+}
+
+.dinheiroBtnPreenchido {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  border: 1px solid var(--verde-claro);
+}
+
+.dinheiroBtnPreenchido:hover {
+  background-color: var(--verde-principal);
+}
+
+.dinheiroBtnContorno {
+  background-color: var(--branco);
+  color: var(--preto);
+  border: 1px solid var(--cinza-200);
+}
+
+.dinheiroBtnContorno:hover {
+  background-color: var(--cinza-50);
 }
 
 /* ---------- Item clicável ---------- */
@@ -328,6 +369,39 @@
     grid-template-columns: 1fr;
     gap: var(--espaco-8);
   }
+
+  /* Reduz a sangria lateral para não gerar scroll horizontal nessas larguras */
+  .carteiras {
+    margin-inline: calc(-1 * var(--espaco-5));
+  }
+
+  /* O card da carteira não precisa de 600px de altura quando empilha */
+  .secaoCarteira {
+    min-height: 0;
+    padding: var(--espaco-5);
+  }
+}
+
+@media (max-width: 768px) {
+  .carteiras {
+    gap: var(--espaco-6);
+    margin-inline: calc(-1 * var(--espaco-4));
+  }
+
+  /* Títulos proporcionais à largura, sem alterar o layout do desktop */
+  .topo h1 {
+    font-size: var(--titulo-lg);
+  }
+
+  .resumoValor {
+    font-size: var(--titulo-md);
+  }
+
+  /* A carteira física nunca estoura a largura disponível */
+  .secaoCarteira > :not(.secaoTopo):not(.carteiraLegenda) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -345,8 +419,47 @@
   }
 
   .grade,
-  .secaoDinheiro .grade {
+  .secaoDinheiro .grade,
+  .secaoContas .grade {
     grid-template-columns: 1fr;
+  }
+
+  /* Resumo fica mais compacto na vertical em telas estreitas */
+  .cardResumo {
+    padding: var(--espaco-4);
+  }
+
+  .resumoIcone {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .carteiras {
+    margin-inline: calc(-1 * var(--espaco-3));
+    gap: var(--espaco-5);
+  }
+
+  .topo h1 {
+    font-size: var(--titulo-md);
+  }
+
+  .secaoTopo h2 {
+    font-size: var(--titulo-sm);
+  }
+
+  .secaoCarteira {
+    padding: var(--espaco-4);
+  }
+
+  /* Botões de dinheiro empilham para alvos de toque maiores */
+  .dinheiroAcoes {
+    grid-template-columns: 1fr;
+  }
+
+  .resumoValor {
+    font-size: var(--titulo-sm);
   }
 }
 

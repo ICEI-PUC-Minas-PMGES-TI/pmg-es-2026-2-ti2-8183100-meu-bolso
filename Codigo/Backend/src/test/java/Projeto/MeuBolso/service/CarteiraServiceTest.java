@@ -1,0 +1,254 @@
+package Projeto.MeuBolso.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+import Projeto.MeuBolso.model.CarteiraUsuario;
+import Projeto.MeuBolso.model.Transferencia;
+import Projeto.MeuBolso.repository.CarteiraUsuarioRepository;
+import Projeto.MeuBolso.repository.TransferenciaRepository;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
+
+@ExtendWith(MockitoExtension.class)
+class CarteiraServiceTest {
+
+    private static final String USUARIO = "u1";
+
+    @Mock
+    CarteiraUsuarioRepository repo;
+
+    @Mock
+    TransferenciaRepository transferenciaRepo;
+
+    CarteiraService service;
+
+    CarteiraUsuario carteira;
+
+    @BeforeEach
+    void preparar() {
+        service = new CarteiraService(repo, transferenciaRepo);
+        carteira = new CarteiraUsuario(USUARIO);
+        carteira.setContas(lista(item("id", "conta-1", "tipo", "conta", "saldo", 1000.0)));
+        carteira.setCartoes(lista(
+            item("id", "cred-1", "tipo", "cartao", "subtipo", "credito", "faturaAtual", 200.0),
+            item("id", "deb-1", "tipo", "cartao", "subtipo", "debito", "contaId", "conta-1")));
+        carteira.setDinheiroEReservas(lista(
+            item("id", "din-1", "tipo", "dinheiro", "saldo", 180.0)));
+    }
+
+    // ---------- aplicarGasto ----------
+
+    @Test
+    void gastoEmContaDiminuiSaldoESobeVersao() {
+        carregar();
+        service.aplicarGasto(USUARIO, "conta-1", new BigDecimal("100.50"));
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(899.5);
+        assertThat(carteira.getVersao()).isEqualTo(1);
+        verify(repo).save(carteira);
+    }
+
+    @Test
+    void estornoDevolveSaldoDaConta() {
+        carregar();
+        service.aplicarGasto(USUARIO, "conta-1", new BigDecimal("-100"));
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(1100.0);
+    }
+
+    @Test
+    void gastoNoCreditoAumentaFatura() {
+        carregar();
+        service.aplicarGasto(USUARIO, "cred-1", new BigDecimal("80"));
+        assertThat(numero(carteira.getCartoes(), "cred-1", "faturaAtual")).isEqualTo(280.0);
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(1000.0);
+        verify(repo).save(carteira);
+    }
+
+    @Test
+    void gastoNoDebitoDiminuiSaldoDaContaLigada() {
+        carregar();
+        service.aplicarGasto(USUARIO, "deb-1", new BigDecimal("40"));
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(960.0);
+    }
+
+    @Test
+    void gastoEmDinheiroNaoAlteraNada() {
+        carregar();
+        service.aplicarGasto(USUARIO, "din-1", new BigDecimal("50"));
+        assertThat(numero(carteira.getDinheiroEReservas(), "din-1", "saldo")).isEqualTo(180.0);
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void itemInexistenteNaoGrava() {
+        carregar();
+        service.aplicarGasto(USUARIO, "nao-existe", new BigDecimal("10"));
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void usuarioSemCarteiraNaoGrava() {
+        when(repo.findByUsuarioId(USUARIO)).thenReturn(Optional.empty());
+        service.aplicarGasto(USUARIO, "conta-1", new BigDecimal("10"));
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void entradasInvalidasNemConsultamORepositorio() {
+        service.aplicarGasto(USUARIO, null, new BigDecimal("10"));
+        service.aplicarGasto(USUARIO, " ", new BigDecimal("10"));
+        service.aplicarGasto(USUARIO, "conta-1", BigDecimal.ZERO);
+        service.aplicarGasto(USUARIO, "conta-1", null);
+        verifyNoInteractions(repo);
+    }
+
+    // ---------- saldoDe ----------
+
+    @Test
+    void saldoDeContaRetornaOSaldo() {
+        carregar();
+        assertThat(service.saldoDe(USUARIO, "conta-1")).isEqualByComparingTo("1000");
+    }
+
+    @Test
+    void saldoDeDinheiroFisicoNaoEhMovimentavel() {
+        carregar();
+        assertThat(service.saldoDe(USUARIO, "din-1")).isNull();
+    }
+
+    @Test
+    void saldoDeCartaoRetornaNull() {
+        carregar();
+        assertThat(service.saldoDe(USUARIO, "cred-1")).isNull();
+    }
+
+    // ---------- ajustarSaldo ----------
+
+    @Test
+    void ajustarSaldoDaContaSomaEGrava() {
+        carregar();
+        boolean ok = service.ajustarSaldo(USUARIO, "conta-1", new BigDecimal("-250"));
+        assertThat(ok).isTrue();
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(750.0);
+        assertThat(carteira.getVersao()).isEqualTo(1);
+        verify(repo).save(carteira);
+    }
+
+    @Test
+    void ajustarSaldoNaoMexeEmDinheiroFisico() {
+        carregar();
+        assertThat(service.ajustarSaldo(USUARIO, "din-1", new BigDecimal("10"))).isFalse();
+        assertThat(numero(carteira.getDinheiroEReservas(), "din-1", "saldo")).isEqualTo(180.0);
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void ajustarSaldoComDeltaZeroNaoFazNada() {
+        assertThat(service.ajustarSaldo(USUARIO, "conta-1", BigDecimal.ZERO)).isFalse();
+        verifyNoInteractions(repo);
+    }
+
+    // ---------- transferir ----------
+
+    @Test
+    void transferirDebitaOrigemCreditaDestinoNumUnicoSave() {
+        adicionarSegundaConta();
+        carregar();
+        service.transferir(USUARIO, "conta-1", "conta-2", new BigDecimal("300"));
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(700.0);
+        assertThat(numero(carteira.getContas(), "conta-2", "saldo")).isEqualTo(350.0);
+        assertThat(carteira.getVersao()).isEqualTo(1);
+        verify(repo).save(carteira);
+
+        // Registra o histórico com os nomes das contas no momento da transferência.
+        ArgumentCaptor<Transferencia> captor = ArgumentCaptor.forClass(Transferencia.class);
+        verify(transferenciaRepo).save(captor.capture());
+        Transferencia t = captor.getValue();
+        assertThat(t.getUsuarioId()).isEqualTo(USUARIO);
+        assertThat(t.getOrigemId()).isEqualTo("conta-1");
+        assertThat(t.getOrigemNome()).isEqualTo("Inter");
+        assertThat(t.getDestinoId()).isEqualTo("conta-2");
+        assertThat(t.getDestinoNome()).isEqualTo("Nubank");
+        assertThat(t.getValor()).isEqualByComparingTo("300");
+        assertThat(t.getData()).isNotNull();
+    }
+
+    @Test
+    void transferirMaisQueOSaldoFalhaSemGravar() {
+        adicionarSegundaConta();
+        carregar();
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-2", new BigDecimal("1000.01")))
+            .isInstanceOf(ResponseStatusException.class)
+            .hasMessageContaining("Saldo insuficiente");
+        assertThat(numero(carteira.getContas(), "conta-1", "saldo")).isEqualTo(1000.0);
+        verify(repo, never()).save(any());
+        verifyNoInteractions(transferenciaRepo);
+    }
+
+    @Test
+    void transferirParaDinheiroOuCartaoFalha() {
+        carregar();
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "din-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "cred-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void transferirParaAMesmaContaOuValorInvalidoNemConsulta() {
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-1", new BigDecimal("10")))
+            .isInstanceOf(ResponseStatusException.class);
+        assertThatThrownBy(() -> service.transferir(USUARIO, "conta-1", "conta-2", BigDecimal.ZERO))
+            .isInstanceOf(ResponseStatusException.class);
+        verifyNoInteractions(repo);
+    }
+
+    // ---------- auxiliares ----------
+
+    private void adicionarSegundaConta() {
+        carteira.getContas().get(0).put("apelido", "Inter");
+        carteira.getContas().add(item("id", "conta-2", "tipo", "conta", "saldo", 50.0, "apelido", "Nubank"));
+    }
+
+    private void carregar() {
+        when(repo.findByUsuarioId(USUARIO)).thenReturn(Optional.of(carteira));
+    }
+
+    private static Map<String, Object> item(Object... pares) {
+        Map<String, Object> m = new HashMap<>();
+        for (int i = 0; i < pares.length; i += 2) {
+            m.put((String) pares[i], pares[i + 1]);
+        }
+        return m;
+    }
+
+    @SafeVarargs
+    private static List<Map<String, Object>> lista(Map<String, Object>... itens) {
+        return new ArrayList<>(List.of(itens));
+    }
+
+    private static double numero(List<Map<String, Object>> itens, String id, String campo) {
+        return itens.stream()
+            .filter(i -> id.equals(i.get("id")))
+            .findFirst()
+            .map(i -> ((Number) i.get(campo)).doubleValue())
+            .orElseThrow();
+    }
+}

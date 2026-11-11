@@ -63,6 +63,66 @@
     }
 
     /* ========================================
+    PROJEÇÃO DE RECORRENTES PARA O FUTURO
+    Mostra, nos próximos meses, os lançamentos que ainda vão cair por conta de
+    uma recorrência ativa — sem gravar nada e sem tocar na carteira. Só viram
+    lançamentos reais quando o mês chega (o back/local materializa até hoje).
+    ======================================== */
+
+    // Quantos meses à frente projetamos a partir do mês atual.
+    export const MESES_PROJETADOS = 12;
+
+    /**
+     * Gera as ocorrências VIRTUAIS (futuras) das recorrências ativas.
+     * Regras:
+     *  - começa sempre no mês seguinte ao "ultimoMes" (que é o último já lançado):
+     *    assim nunca aparece em mês passado nem duplica um lançamento real;
+     *  - vai até "mesLimite" (inclusive), por padrão mesAtual + MESES_PROJETADOS;
+     *  - pula meses listados em rec.mesesPulados;
+     *  - o id é sintético ("proj:<recId>:<mes>") para o React e para as ações.
+     */
+    export function projetarRecorrencias(recorrencias = [], mesLimite) {
+    const limite = mesLimite ?? mudarMes(mesAtualChave(), MESES_PROJETADOS);
+    const projetados = [];
+
+    for (const rec of recorrencias) {
+        if (!rec.ativa || !rec.ultimoMes) continue;
+
+        const pulados = new Set(rec.mesesPulados ?? []);
+        let mes = mudarMes(rec.ultimoMes, 1);
+
+        while (mes <= limite) {
+        if (!pulados.has(mes)) {
+            projetados.push({
+            id: `proj:${rec.id}:${mes}`,
+            descricao: rec.descricao,
+            categoria: rec.categoria,
+            carteira: rec.carteira,
+            carteiraId: rec.carteiraId ?? null,
+            data: dataDaOcorrencia(mes, rec.diaDoMes),
+            valor: rec.valor,
+            comentario: rec.comentario ?? "",
+            recorrenciaId: rec.id,
+            projetado: true,
+            mes,
+            });
+        }
+        mes = mudarMes(mes, 1);
+        }
+    }
+
+    return projetados;
+    }
+
+    /**
+     * Junta os lançamentos reais com as projeções futuras, pronta para a tela
+     * filtrar por mês. Projeções nunca ultrapassam "mesLimite".
+     */
+    export function comProjecoes(gastos = [], recorrencias = [], mesLimite) {
+    return [...gastos, ...projetarRecorrencias(recorrencias, mesLimite)];
+    }
+
+    /* ========================================
     MOEDA
     ======================================== */
 
@@ -203,7 +263,7 @@
     return gastos.filter((gasto) => {
         if (busca && !normalizar(gasto.descricao).includes(busca)) return false;
         if (filtros.categoria && gasto.categoria !== filtros.categoria) return false;
-        if (filtros.carteira && gasto.carteira !== filtros.carteira) return false;
+        if (filtros.carteira && gasto.carteiraId !== filtros.carteira) return false;
         if (filtros.de && gasto.data < filtros.de) return false;
         if (filtros.ate && gasto.data > filtros.ate) return false;
         return true;

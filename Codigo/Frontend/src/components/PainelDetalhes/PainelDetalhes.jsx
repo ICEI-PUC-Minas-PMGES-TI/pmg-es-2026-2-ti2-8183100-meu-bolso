@@ -73,42 +73,44 @@ function PainelDetalhes({
                 ) : null}
               </div>
 
-              <div className={styles.acoes}>
-                <button
-                  className={styles.botaoMenu}
-                  type="button"
-                  onClick={() => setMenuAberto((v) => !v)}
-                  aria-label="Ações"
-                >
-                  <MoreVertical size={20} />
-                </button>
+              {item.tipo !== "dinheiro" && (
+                <div className={styles.acoes}>
+                  <button
+                    className={styles.botaoMenu}
+                    type="button"
+                    onClick={() => setMenuAberto((v) => !v)}
+                    aria-label="Ações"
+                  >
+                    <MoreVertical size={20} />
+                  </button>
 
-                {menuAberto && (
-                  <div className={styles.menu}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuAberto(false);
-                        onEditar?.();
-                      }}
-                    >
-                      <Pencil size={16} />
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.menuPerigo}
-                      onClick={() => {
-                        setMenuAberto(false);
-                        setConfirmarExclusao(true);
-                      }}
-                    >
-                      <Trash2 size={16} />
-                      Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
+                  {menuAberto && (
+                    <div className={styles.menu}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuAberto(false);
+                          onEditar?.();
+                        }}
+                      >
+                        <Pencil size={16} />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.menuPerigo}
+                        onClick={() => {
+                          setMenuAberto(false);
+                          setConfirmarExclusao(true);
+                        }}
+                      >
+                        <Trash2 size={16} />
+                        Excluir
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </header>
 
             {/* Área visual compacta do item */}
@@ -124,6 +126,7 @@ function PainelDetalhes({
                 subtipo={item.subtipo}
                 ultimosDigitos={item.ultimosDigitos}
                 validade={item.validade}
+                contagem={item.contagem}
                 valor={formatarBRL(item.saldo)}
               />
             </div>

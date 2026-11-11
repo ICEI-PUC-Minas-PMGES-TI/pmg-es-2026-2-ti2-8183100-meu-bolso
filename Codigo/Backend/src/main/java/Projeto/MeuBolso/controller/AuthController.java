@@ -50,6 +50,11 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Este e-mail já está cadastrado.");
         }
 
+        // O telefone identifica o usuário no chatbot do WhatsApp: não pode repetir.
+        if (repository.telefoneEmUsoPorOutraConta(request.telefone(), null)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Este telefone já está cadastrado em outra conta.");
+        }
+
         Usuario usuario = new Usuario(
             request.nome().trim(),
             email,
@@ -81,6 +86,6 @@ public class AuthController {
 
         String token = tokenService.gerar(usuario.getEmail());
 
-        return new AuthResponse(token, "Bearer", usuario.getNome(), usuario.getEmail());
+        return new AuthResponse(token, "Bearer", usuario.getNome(), usuario.getEmail(), usuario.getFoto());
     }
 }

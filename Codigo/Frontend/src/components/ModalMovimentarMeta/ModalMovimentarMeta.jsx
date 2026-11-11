@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 
 import { listarCarteirasComSaldo } from "../../service/carteirasStorage";
@@ -6,7 +6,7 @@ import styles from "./ModalMovimentarMeta.module.css";
 
 /**
  * Modal para movimentar o valor guardado de uma meta, sempre vinculado a
- * uma carteira (conta ou dinheiro físico).
+ * uma carteira (conta).
  *
  *  - Depósito: o dinheiro SAI da carteira e ENTRA na meta
  *    (carteira.saldo -= valor; meta.valorAtual += valor).
@@ -52,9 +52,25 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   const [carteiraId, setCarteiraId] = useState("");
   const [erro, setErro] = useState("");
 
-  // Carteiras com saldo (contas e dinheiro físico) disponíveis como
-  // origem/destino da movimentação. Lidas ao montar o modal.
-  const [carteiras] = useState(() => listarCarteirasComSaldo());
+  // Carteiras com saldo (contas) disponíveis como
+  // origem/destino da movimentação. Carregadas da API ao montar o modal.
+  const [carteiras, setCarteiras] = useState([]);
+  const [carregandoCarteiras, setCarregandoCarteiras] = useState(true);
+
+  useEffect(() => {
+    let ativo = true;
+    setCarregandoCarteiras(true);
+    listarCarteirasComSaldo()
+      .then((lista) => {
+        if (ativo) setCarteiras(lista);
+      })
+      .finally(() => {
+        if (ativo) setCarregandoCarteiras(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   if (!aberto || !meta) return null;
 
@@ -74,7 +90,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
     e.preventDefault();
 
     if (!carteiraId) {
-      setErro("Selecione a carteira da movimentação.");
+      setErro("Selecione a conta da movimentação.");
       return;
     }
 
@@ -88,7 +104,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
     if (tipo === "deposito") {
       // Sai da carteira, entra na meta: carteira precisa ter saldo.
       if (carteiraSelecionada && valorNum > carteiraSelecionada.saldo) {
-        setErro("Saldo insuficiente na carteira para este depósito.");
+        setErro("Saldo insuficiente na conta para este depósito.");
         return;
       }
     } else {
@@ -176,12 +192,14 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
           {/* Carteira vinculada */}
           <div className={styles.campo}>
             <label htmlFor="carteira">
-              {tipo === "deposito" ? "De qual carteira sai" : "Para qual carteira vai"}
+              {tipo === "deposito" ? "De qual conta sai" : "Para qual conta vai"}
             </label>
-            {carteiras.length === 0 ? (
+            {carregandoCarteiras ? (
+              <p className={styles.aviso}>Carregando carteiras...</p>
+            ) : carteiras.length === 0 ? (
               <p className={styles.aviso}>
-                Nenhuma carteira com saldo encontrada. Cadastre uma conta ou
-                dinheiro na página Carteiras.
+                Nenhuma conta com saldo encontrada. Cadastre uma conta na
+                página Carteiras.
               </p>
             ) : (
               <select
@@ -189,7 +207,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
                 value={carteiraId}
                 onChange={(e) => setCarteiraId(e.target.value)}
               >
-                <option value="">Selecione uma carteira</option>
+                <option value="">Selecione uma conta</option>
                 {carteiras.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.nome} · {formatarMoeda(c.saldo)}
@@ -237,7 +255,7 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
             <button
               type="submit"
               className={styles.btnSalvar}
-              disabled={carteiras.length === 0}
+              disabled={carregandoCarteiras || carteiras.length === 0}
             >
               {tipo === "deposito" ? "Depositar" : "Retirar"}
             </button>

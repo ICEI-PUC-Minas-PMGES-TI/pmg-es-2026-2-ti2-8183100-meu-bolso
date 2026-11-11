@@ -1,31 +1,36 @@
-cff-version: 1.0.1
-message: Please cite this software using these metadata.
-title: Meu bolso
+cff-version: 1.2.0
+message: "Please cite this software using these metadata."
+title: "MeuBolso"
 authors:
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names: 
-  - family-names: 
-    given-names:
+  - family-names: "Araujo"
+    given-names: "Arthur Moraes Braga"
+  - family-names: "Tsuruga"
+    given-names: "Daniel Eiji Serra"
+  - family-names: "Pedrosa"
+    given-names: "David Aurelio"
+  - family-names: "Hermont"
+    given-names: "Gabriel de Souza Junqueira"
+  - family-names: "Silva"
+    given-names: "Vinicius Eduardo de Souza Matos"
   - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
+    affiliation: "PUC Minas"
+  - family-names: "Carneiro"
+    given-names: "Rommel Vieira"
   - name-suffix: Professor
-    affiliation: PUC Minas
-    family-names: 
-    given-names: 
+    affiliation: "PUC Minas"
+  - family-names: "Tavares"
+    given-names: "Cleiton Silva"
+  - name-suffix: Professor
+    affiliation: "PUC Minas"
+  - family-names: "Diniz"
+    given-names: "Rafael Henrique Nogueira"
 keywords:
-  - 
-  - 
-repository-code: 
+  - "Educação financeira"
+  - "Finanças pessoais"
+  - "Jovens"
+  - "Planejamento financeiro"
+  - "Aplicação web"
+repository-code: "https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti2-8183100-meu-bolso"
 license: CC-BY-4.0
 version: 1.0.0
-date-released: 2022-07-14
+date-released: "2026-12-15"

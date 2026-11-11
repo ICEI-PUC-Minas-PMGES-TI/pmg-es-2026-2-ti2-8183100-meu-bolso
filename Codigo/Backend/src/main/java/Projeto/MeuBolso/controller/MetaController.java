@@ -3,9 +3,15 @@ package Projeto.MeuBolso.controller;
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.model.MetaDtos.MetaRequest;
 import Projeto.MeuBolso.model.MetaDtos.MetaResponse;
+import Projeto.MeuBolso.model.MetaDtos.MovimentacaoAplicadaResponse;
+import Projeto.MeuBolso.model.MetaDtos.MovimentacaoRequest;
+import Projeto.MeuBolso.model.MetaDtos.MovimentacaoResponse;
+import Projeto.MeuBolso.model.MovimentacaoMeta;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.MetaRepository;
+import Projeto.MeuBolso.repository.MovimentacaoMetaRepository;
 import Projeto.MeuBolso.repository.UsuarioRepository;
+import Projeto.MeuBolso.service.MetaService;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -28,10 +34,17 @@ public class MetaController {
 
     private final MetaRepository metaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MovimentacaoMetaRepository movimentacaoRepository;
+    private final MetaService metaService;
 
-    public MetaController(MetaRepository metaRepository, UsuarioRepository usuarioRepository) {
+    public MetaController(MetaRepository metaRepository,
+                          UsuarioRepository usuarioRepository,
+                          MovimentacaoMetaRepository movimentacaoRepository,
+                          MetaService metaService) {
         this.metaRepository = metaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.movimentacaoRepository = movimentacaoRepository;
+        this.metaService = metaService;
     }
 
     // Lista todas as metas do usuário autenticado.
@@ -79,7 +92,7 @@ public class MetaController {
         return paraResponse(metaRepository.save(meta));
     }
 
-    // Exclui uma meta do usuário.
+    // Exclui uma meta do usuário (e o histórico de movimentações dela).
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable String id, Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
@@ -88,7 +101,46 @@ public class MetaController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
 
         metaRepository.delete(meta);
+        movimentacaoRepository.deleteByMetaIdAndUsuarioId(id, usuarioId);
         return ResponseEntity.noContent().build();
+    }
+
+    // Lista o histórico de movimentações de uma meta (mais recente primeiro).
+    @GetMapping("/{id}/movimentacoes")
+    public List<MovimentacaoResponse> listarMovimentacoes(@PathVariable String id,
+                                                          Authentication authentication) {
+        String usuarioId = usuarioAutenticado(authentication).getId();
+
+        // Garante que a meta pertence ao usuário antes de devolver o histórico.
+        metaRepository.findByIdAndUsuarioId(id, usuarioId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
+
+        return movimentacaoRepository.findByMetaIdAndUsuarioIdOrderByDataDesc(id, usuarioId).stream()
+            .map(MetaController::paraResponse)
+            .toList();
+    }
+
+    /**
+     * Registra uma movimentação (aporte/retirada) numa meta, numa única
+     * operação: valida, ajusta o saldo da carteira, atualiza o valorAtual da
+     * meta e grava o registro do histórico. Tudo vinculado ao usuário.
+     *
+     *  - deposito: sai da carteira (delta negativo) e entra na meta.
+     *  - retirada: entra na carteira (delta positivo) e sai da meta.
+     */
+    @PostMapping("/{id}/movimentacoes")
+    public ResponseEntity<MovimentacaoAplicadaResponse> movimentar(@PathVariable String id,
+                                                                   @Valid @RequestBody MovimentacaoRequest request,
+                                                                   Authentication authentication) {
+        String usuarioId = usuarioAutenticado(authentication).getId();
+
+        MetaService.MovimentacaoAplicada aplicada = metaService.movimentar(
+            usuarioId, id, request.tipo(), request.valor(), request.carteiraId(), request.titulo());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            new MovimentacaoAplicadaResponse(
+                paraResponse(aplicada.meta()),
+                paraResponse(aplicada.movimentacao())));
     }
 
     // Resolve o usuário logado a partir do token (Authentication.getName() = e-mail).
@@ -108,6 +160,17 @@ public class MetaController {
             m.getValorAtual(),
             m.getPrazo(),
             m.getPrioridade()
+        );
+    }
+
+    private static MovimentacaoResponse paraResponse(MovimentacaoMeta m) {
+        return new MovimentacaoResponse(
+            m.getId(),
+            m.getTipo(),
+            m.getValor(),
+            m.getTitulo(),
+            m.getCarteiraId(),
+            m.getData()
         );
     }
 }

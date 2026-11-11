@@ -1,0 +1,20 @@
+/* Avatar do usuário: foto redonda ou círculo com iniciais. */
+.avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--verde-principal);
+}
+
+/* Fallback sem foto: círculo verde com as iniciais. */
+.iniciais {
+  align-items: center;
+  justify-content: center;
+  background-color: var(--verde-principal);
+  color: var(--verde-claro);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  user-select: none;
+}
