@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.45);
+  background: var(--cor-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +19,7 @@
   max-height: 90vh;
   overflow-y: auto;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-card);
   padding: var(--espaco-6);
@@ -51,11 +51,11 @@
   border: none;
   background: transparent;
   border-radius: var(--radius-pequeno);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .botaoFechar:hover {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
 }
 
 /* ---------- Formulário ---------- */
@@ -74,7 +74,7 @@
 .campo label {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
 }
 
 .campo input,
@@ -82,9 +82,9 @@
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: var(--radius-pequeno);
   outline: none;
 }
@@ -92,7 +92,7 @@
 .campo input:focus,
 .campo select:focus {
   border-color: var(--verde-principal);
-  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.15);
+  box-shadow: var(--sombra-foco);
 }
 
 .erro {
@@ -133,7 +133,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--espaco-2);
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   color: var(--erro);
   border: 1px solid var(--erro);
 }
@@ -143,18 +143,18 @@
 }
 
 .btnVoltar {
-  background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-forte);
 }
 
 .btnVoltar:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .btnSalvar {
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   border: 1px solid transparent;
 }
 

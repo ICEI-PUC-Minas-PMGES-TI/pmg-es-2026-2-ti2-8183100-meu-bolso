@@ -64,7 +64,7 @@
 
 .subtitulo {
   font-size: var(--texto-lg);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   line-height: 1.5;
 }
 
@@ -105,10 +105,10 @@
   text-align: left;
   min-height: 72px;
   padding: var(--espaco-4);
-  border: 1px solid var(--cinza-200);
+  border: 1px solid var(--cor-borda);
   border-radius: 16px;
-  background-color: var(--branco);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
   box-shadow: var(--sombra-leve);
   transition:
     border-color var(--transicao-rapida),
@@ -160,7 +160,7 @@
 
 .cartaoSeta {
   flex-shrink: 0;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -179,7 +179,7 @@
 .rotuloParametro {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .linhaParametro {
@@ -194,10 +194,10 @@
   max-width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  border: 1px solid var(--cinza-300);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: var(--radius-pequeno);
-  background-color: var(--branco);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
   font-size: var(--texto-sm);
 }
 
@@ -240,7 +240,7 @@
   top: 50%;
   width: 72px;
   height: 1px;
-  background-color: var(--cinza-200);
+  background-color: var(--cor-superficie-forte);
 }
 
 .vazioIcone::before {
@@ -254,7 +254,7 @@
 .vazioTexto {
   max-width: 420px;
   text-align: center;
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .baloes {
@@ -291,10 +291,10 @@
   padding: var(--espaco-3) var(--espaco-4);
   border-radius: 16px;
   border-bottom-left-radius: 4px;
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   box-shadow: var(--sombra-leve);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   font-size: var(--texto-sm);
 }
 
@@ -344,7 +344,7 @@
   align-items: center;
   gap: var(--espaco-2);
   font-size: var(--texto-xs);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 /* ---------- Rodapé ---------- */

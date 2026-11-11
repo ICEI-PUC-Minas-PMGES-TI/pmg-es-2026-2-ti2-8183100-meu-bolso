@@ -6,7 +6,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.5);
+  background: var(--cor-overlay-forte);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   display: flex;
@@ -31,7 +31,7 @@
   max-width: 600px;
   max-height: 92vh;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   border-radius: var(--radius-grande);
   box-shadow:
     0 24px 70px rgba(16, 24, 23, 0.22),
@@ -67,9 +67,9 @@
     150deg,
     var(--verde-claro) 0%,
     var(--verde-fundo) 55%,
-    var(--branco) 100%
+    var(--cor-superficie) 100%
   );
-  border-bottom: 1px solid var(--cinza-100);
+  border-bottom: 1px solid var(--cor-borda-suave);
 }
 
 .cabecalhoIdentidade {
@@ -96,7 +96,7 @@
 .cabecalhoNome {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -131,7 +131,7 @@
   background: transparent;
   font-size: var(--texto-xs);
   font-weight: 600;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .fotoLinkRemover:hover {
@@ -148,15 +148,15 @@
   border: none;
   background: rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-pequeno);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   transition:
     background-color var(--transicao-rapida),
     color var(--transicao-rapida);
 }
 
 .botaoFechar:hover {
-  background-color: var(--branco);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
 }
 
 /* ---------- Avatar ---------- */
@@ -173,11 +173,11 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  border: 3px solid var(--branco);
+  border: 3px solid var(--cor-superficie);
   box-shadow: 0 4px 14px rgba(71, 107, 67, 0.25);
   padding: 0;
   overflow: hidden;
-  background: var(--cinza-100);
+  background: var(--cor-superficie-realce);
   cursor: pointer;
 }
 
@@ -195,8 +195,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--branco);
-  background: rgba(16, 24, 23, 0.45);
+  color: var(--cor-texto-inverso);
+  background: var(--cor-overlay);
   opacity: 0;
   transition: opacity var(--transicao-rapida);
 }
@@ -230,8 +230,8 @@
   gap: var(--espaco-4);
 
   padding: var(--espaco-5);
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
   transition:
     border-color var(--transicao-padrao),
@@ -264,12 +264,12 @@
 .cartaoTitulo {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .cartaoDescricao {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .cartaoCorpo {
@@ -294,7 +294,7 @@
 .campo label {
   font-size: var(--texto-xs);
   font-weight: 700;
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -309,7 +309,7 @@
 .inputIcone svg {
   position: absolute;
   left: 12px;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   pointer-events: none;
   transition: color var(--transicao-rapida);
 }
@@ -318,9 +318,9 @@
   width: 100%;
   min-height: 46px;
   padding: 10px 12px 10px 38px;
-  background-color: var(--cinza-50);
-  color: var(--preto);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie-suave);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-pequeno);
   outline: none;
   transition:
@@ -330,17 +330,17 @@
 }
 
 .inputIcone input::placeholder {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .inputIcone input:hover:not(:disabled) {
-  border-color: var(--cinza-300);
+  border-color: var(--cor-borda-forte);
 }
 
 .inputIcone input:focus {
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   border-color: var(--verde-principal);
-  box-shadow: 0 0 0 3px rgba(127, 168, 120, 0.18);
+  box-shadow: var(--sombra-foco);
 }
 
 .inputIcone input:focus + svg,
@@ -349,13 +349,13 @@
 }
 
 .inputIcone input:disabled {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
   cursor: not-allowed;
 }
 
 .dica {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   line-height: 1.5;
 }
 
@@ -369,7 +369,7 @@
   min-height: 44px;
   padding: 10px 18px;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   color: var(--verde-escuro);
   border: 1px solid var(--verde-principal);
   border-radius: var(--radius-pequeno);
@@ -413,7 +413,7 @@
   background: transparent;
   font-size: var(--texto-xs);
   font-weight: 600;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .btnCancelarSenha:hover {
@@ -444,8 +444,8 @@
   gap: var(--espaco-3);
 
   padding: var(--espaco-4) var(--espaco-6);
-  background-color: var(--branco);
-  border-top: 1px solid var(--cinza-100);
+  background-color: var(--cor-superficie);
+  border-top: 1px solid var(--cor-borda-suave);
   box-shadow: 0 -6px 20px rgba(16, 24, 23, 0.04);
   flex-shrink: 0;
 }
@@ -468,18 +468,18 @@
 }
 
 .btnVoltar {
-  background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-300);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-forte);
 }
 
 .btnVoltar:hover:not(:disabled) {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .btnSalvar {
   background-color: var(--verde-principal);
-  color: var(--branco);
+  color: var(--cor-texto-inverso);
   border: 1px solid transparent;
   box-shadow: 0 4px 12px rgba(71, 107, 67, 0.25);
 }

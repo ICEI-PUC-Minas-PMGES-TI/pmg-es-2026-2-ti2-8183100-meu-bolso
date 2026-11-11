@@ -1,6 +1,6 @@
 .app-layout {
   min-height: 100vh;
-  background-color: var(--verde-fundo);
+  background-color: var(--cor-fundo-pagina);
   display: flex;
   flex-direction: column;
 }

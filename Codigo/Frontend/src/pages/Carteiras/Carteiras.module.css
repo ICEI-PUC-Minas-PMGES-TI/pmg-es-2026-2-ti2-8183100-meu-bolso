@@ -27,7 +27,7 @@
   font-size: var(--texto-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .topo h1 {
@@ -48,8 +48,8 @@
   min-height: 44px;
   padding: 12px 20px;
 
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   border: none;
   border-radius: var(--radius-redondo);
 
@@ -98,13 +98,13 @@
 }
 
 .resumoSeta {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   flex-shrink: 0;
 }
 
 .resumoRotulo {
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .resumoValor {
@@ -126,7 +126,7 @@
   justify-content: space-between;
   gap: var(--espaco-3);
   flex-wrap: wrap;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .secaoTitulo {
@@ -181,7 +181,7 @@
   min-height: 36px;
   padding: 8px 14px;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   color: var(--verde-escuro);
   border: 1px solid var(--verde-principal);
   border-radius: var(--radius-redondo);
@@ -220,7 +220,7 @@
   align-items: stretch;
 
   padding: var(--espaco-6);
-  background-color: #e6f0e8;
+  background-color: var(--verde-fundo-realce);
   border: 1px solid var(--verde-claro);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-leve);
@@ -241,7 +241,7 @@
 .carteiraLegenda {
   text-align: center;
   font-size: var(--texto-sm);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .grade {
@@ -294,13 +294,13 @@
 }
 
 .dinheiroBtnContorno {
-  background-color: var(--branco);
-  color: var(--preto);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda);
 }
 
 .dinheiroBtnContorno:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 /* ---------- Item clicável ---------- */
@@ -319,7 +319,7 @@
 }
 
 .item:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .item:focus-visible {
@@ -329,7 +329,7 @@
 
 .itemSelecionado {
   border-color: var(--verde-principal);
-  background-color: var(--verde-fundo);
+  background-color: var(--cor-fundo-pagina);
 }
 
 .itemRodape {
@@ -345,13 +345,13 @@
 .itemNome {
   font-size: var(--texto-sm);
   font-weight: 600;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .itemValor {
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   white-space: nowrap;
 }
 
@@ -476,8 +476,8 @@
   padding: var(--espaco-5);
   text-align: left;
 
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-leve);
   overflow: hidden;
@@ -506,7 +506,7 @@
 
 .contaCardSel {
   border-color: var(--verde-principal);
-  background-color: var(--verde-fundo);
+  background-color: var(--cor-fundo-pagina);
 }
 
 .contaTopo {
@@ -546,7 +546,7 @@
 }
 
 .contaSeta {
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   flex-shrink: 0;
 }
 
@@ -559,25 +559,25 @@
 .contaNome {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .contaSub {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .contaValor {
   margin-top: var(--espaco-2);
   font-size: var(--titulo-sm);
   font-weight: 800;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .contaRodape {
   margin-top: auto;
   padding-top: var(--espaco-3);
-  border-top: 1px solid var(--cinza-100);
+  border-top: 1px solid var(--cor-borda-suave);
 
   display: flex;
   align-items: center;
@@ -588,7 +588,7 @@
 .contaRodapeTexto {
   font-size: var(--texto-xs);
   line-height: 1.35;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* "Adicionar conta": tracejado e centrado verticalmente */

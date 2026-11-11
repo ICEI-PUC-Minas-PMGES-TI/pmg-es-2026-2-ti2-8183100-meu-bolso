@@ -9,8 +9,8 @@
   gap: var(--espaco-4);
 
   padding: var(--espaco-5);
-  background-color: var(--branco);
-  border: 1px solid var(--cinza-200);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
 }
 
@@ -35,12 +35,12 @@
 .cartaoTitulo {
   font-size: var(--texto-base);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .cartaoDescricao {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
   line-height: 1.5;
 }
 
@@ -58,8 +58,8 @@
   gap: var(--espaco-4);
 
   padding: var(--espaco-3) var(--espaco-4);
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-100);
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-pequeno);
 }
 
@@ -85,13 +85,13 @@
 }
 
 .badgeInativo {
-  background-color: var(--cinza-100);
-  color: var(--cinza-500);
+  background-color: var(--cor-superficie-realce);
+  color: var(--cor-texto-secundario);
 }
 
 .switchTexto {
   font-size: var(--texto-xs);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   line-height: 1.4;
 }
 
@@ -104,7 +104,7 @@
   padding: 0;
   border: none;
   border-radius: var(--radius-redondo);
-  background-color: var(--cinza-300);
+  background-color: var(--cor-superficie-contraste);
   transition: background-color var(--transicao-padrao);
 }
 
@@ -124,7 +124,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   box-shadow: 0 1px 4px rgba(16, 24, 23, 0.25);
   transition: transform var(--transicao-padrao);
 }
@@ -135,7 +135,7 @@
 
 .ultimoEnvio {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 /* ---------- Aviso de sincronização ---------- */
@@ -168,9 +168,9 @@
   align-items: center;
   gap: 6px;
   padding: 9px 16px;
-  background: var(--branco);
-  color: var(--preto-suave);
-  border: 1px solid var(--cinza-300);
+  background: var(--cor-superficie);
+  color: var(--cor-texto-forte);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: var(--radius-redondo);
   font-size: var(--texto-xs);
   font-weight: 700;
@@ -223,9 +223,9 @@
   gap: var(--espaco-2);
   padding: var(--espaco-4);
   background-color: var(--verde-fundo);
-  border: 1px solid var(--cinza-100);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-pequeno);
-  color: var(--preto-suave);
+  color: var(--cor-texto-forte);
   font-size: var(--texto-sm);
   line-height: 1.5;
 }
@@ -246,9 +246,9 @@
   border-radius: var(--radius-pequeno);
   background: linear-gradient(
     90deg,
-    var(--cinza-50) 25%,
-    var(--cinza-100) 37%,
-    var(--cinza-50) 63%
+    var(--cor-superficie-suave) 25%,
+    var(--cor-superficie-realce) 37%,
+    var(--cor-superficie-suave) 63%
   );
   background-size: 400% 100%;
   animation: brilho 1.4s ease infinite;

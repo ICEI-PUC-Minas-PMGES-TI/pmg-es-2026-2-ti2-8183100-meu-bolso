@@ -48,10 +48,10 @@
 .toggleBotao {
   min-height: 44px;
   padding: 10px 16px;
-  border: 1px solid var(--cinza-300);
+  border: 1px solid var(--cor-borda-forte);
   border-radius: var(--radius-pequeno);
-  background-color: var(--branco);
-  color: var(--preto);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
   font-size: var(--texto-sm);
   font-weight: 600;
   transition:
@@ -61,14 +61,14 @@
 }
 
 .toggleBotao:hover {
-  background-color: var(--cinza-50);
+  background-color: var(--cor-superficie-suave);
 }
 
 .toggleAtivo,
 .toggleAtivo:hover {
-  background-color: var(--preto);
-  border-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  border-color: var(--cor-borda-enfase);
+  color: var(--cor-texto-inverso);
 }
 
 /* ---------- Resultado ---------- */
@@ -96,8 +96,8 @@
   flex-direction: column;
   gap: var(--espaco-1);
   padding: var(--espaco-4);
-  background-color: var(--cinza-50);
-  border: 1px solid var(--cinza-100);
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-medio);
 }
 
@@ -106,13 +106,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .cenarioValor {
   font-size: var(--titulo-md);
   font-weight: 800;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .valorNegativo {
@@ -120,7 +120,7 @@
 }
 
 .cenarioSeta {
-  color: var(--cinza-300);
+  color: var(--cor-texto-desabilitado);
 }
 
 /* Resumo do parcelamento com juros */
@@ -130,7 +130,7 @@
   flex-direction: column;
   gap: var(--espaco-2);
   padding-top: var(--espaco-4);
-  border-top: 1px solid var(--cinza-100);
+  border-top: 1px solid var(--cor-borda-suave);
 }
 
 .resumoLinha {
@@ -161,7 +161,7 @@
   align-items: center;
   gap: var(--espaco-3);
   padding: var(--espaco-3);
-  border: 1px solid var(--cinza-100);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: var(--radius-medio);
 }
 
@@ -215,7 +215,7 @@
 
 .estadoTitulo {
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .iconeErro {

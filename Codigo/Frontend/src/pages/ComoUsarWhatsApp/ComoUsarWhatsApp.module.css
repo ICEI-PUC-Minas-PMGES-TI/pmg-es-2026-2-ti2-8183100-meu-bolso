@@ -71,7 +71,7 @@
   font-size: var(--titulo-lg);
   font-weight: 800;
   letter-spacing: 0.02em;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
   line-height: 1.1;
 }
 
@@ -141,7 +141,7 @@
 }
 
 .passos li h3 {
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .numeroPasso {
@@ -150,7 +150,7 @@
   right: var(--espaco-4);
   font-size: var(--titulo-md);
   font-weight: 800;
-  color: var(--cinza-200);
+  color: var(--cor-texto-sutil);
 }
 
 /* Opções do menu */
@@ -182,8 +182,8 @@
   width: 32px;
   height: 32px;
   border-radius: var(--radius-redondo);
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -218,7 +218,7 @@
   line-height: 1.45;
   white-space: pre-line;
   box-shadow: var(--sombra-leve);
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .balaoVoce {
@@ -229,7 +229,7 @@
 
 .balaoBot {
   align-self: flex-start;
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   border-top-left-radius: 4px;
 }
 
@@ -283,7 +283,7 @@
   display: flex;
   gap: var(--espaco-2);
   align-items: flex-start;
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
   font-size: var(--texto-sm);
 }
 

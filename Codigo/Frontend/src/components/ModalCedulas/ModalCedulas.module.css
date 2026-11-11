@@ -5,7 +5,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(16, 24, 23, 0.45);
+  background: var(--cor-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,7 +19,7 @@
   max-height: 90vh;
   overflow-y: auto;
 
-  background-color: var(--branco);
+  background-color: var(--cor-superficie);
   border-radius: var(--radius-grande);
   box-shadow: var(--sombra-card);
   padding: var(--espaco-6);
@@ -51,11 +51,11 @@
   border: none;
   background: transparent;
   border-radius: var(--radius-pequeno);
-  color: var(--cinza-700);
+  color: var(--cor-texto-medio);
 }
 
 .botaoFechar:hover {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
 }
 
 .lista {
@@ -69,7 +69,7 @@
   align-items: center;
   gap: var(--espaco-3);
   padding: var(--espaco-2) var(--espaco-3);
-  border: 1px solid var(--cinza-200);
+  border: 1px solid var(--cor-borda);
   border-radius: var(--radius-medio);
 }
 
@@ -78,19 +78,19 @@
   flex-direction: column;
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .tipo {
   font-size: var(--texto-xs);
   font-weight: 500;
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .disponivel {
   margin-left: auto;
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .contador {
@@ -111,14 +111,14 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: var(--cinza-50);
-  color: var(--preto);
+  background-color: var(--cor-superficie-suave);
+  color: var(--cor-texto-principal);
   cursor: pointer;
   transition: background-color var(--transicao-padrao);
 }
 
 .botaoContador:hover:not(:disabled) {
-  background-color: var(--cinza-100);
+  background-color: var(--cor-superficie-realce);
 }
 
 .botaoContador:disabled {
@@ -132,14 +132,14 @@
   text-align: center;
   font-size: var(--texto-sm);
   font-weight: 700;
-  color: var(--preto);
-  background-color: var(--branco, #fff);
-  border: 1px solid var(--cinza-100);
+  color: var(--cor-texto-principal);
+  background-color: var(--cor-superficie, #fff);
+  border: 1px solid var(--cor-borda-suave);
   border-radius: 8px;
 }
 
 .inputQtd:focus {
-  outline: 2px solid var(--cinza-100);
+  outline: 2px solid var(--cor-borda-suave);
   outline-offset: 1px;
 }
 
@@ -148,7 +148,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--espaco-4);
-  border-top: 1px solid var(--cinza-100);
+  border-top: 1px solid var(--cor-borda-suave);
   padding-top: var(--espaco-4);
 }
 
@@ -159,21 +159,21 @@
 
 .totalRotulo {
   font-size: var(--texto-xs);
-  color: var(--cinza-500);
+  color: var(--cor-texto-secundario);
 }
 
 .totalValor {
   font-size: var(--titulo-sm);
   font-weight: 800;
-  color: var(--preto);
+  color: var(--cor-texto-principal);
 }
 
 .botaoConfirmar {
   min-height: 44px;
   padding: 10px 24px;
   border-radius: var(--radius-redondo);
-  background-color: var(--preto);
-  color: var(--branco);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
   font-size: var(--texto-sm);
   font-weight: 600;
   cursor: pointer;
