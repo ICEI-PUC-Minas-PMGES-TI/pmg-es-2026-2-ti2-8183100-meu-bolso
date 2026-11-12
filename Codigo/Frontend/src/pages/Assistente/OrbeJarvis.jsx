@@ -21,12 +21,8 @@ const RAIO_ANEL = 0.375;
 const ONDAS = 1.0;
 const GORDURA_BORDA = 1.2;
 const POEIRA = 0.3;
-const BRILHO_ANEL = 0.9;
 const PONTOS = 1.3;
-const BRILHO_PONTOS = 0.9;
 const MARGEM_ESCURA = 2;
-const LINHA_BORDA = 2.0;
-const BRILHO_VOLTA = 1.3;
 
 function clamp(v, min, max) {
   return v < min ? min : v > max ? max : v;
@@ -210,27 +206,46 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
     const reduzido = menosMovimento();
     const estreito = window.innerWidth < 480;
 
-    // Cores resolvidas uma vez por montagem. cor(nome, alfa) monta rgba.
-    const paleta = {
-      "--orbe-disco": resolverCor(recipiente, "--orbe-disco"),
-      "--orbe-anel": resolverCor(recipiente, "--orbe-anel"),
-      "--orbe-borda": resolverCor(recipiente, "--orbe-borda"),
-      "--orbe-ponto": resolverCor(recipiente, "--orbe-ponto"),
-      "--orbe-poeira": resolverCor(recipiente, "--orbe-poeira"),
-      "--orbe-texto": resolverCor(recipiente, "--orbe-texto"),
-    };
+    // Estado dependente do tema. Recalculado em aplicarTema() a cada
+    // troca de :root[data-tema], sem recarregar a página.
+    let escuro = false;
+    let LINHA_BORDA = 2.0;
+    let BRILHO_VOLTA = 1.3;
+    let BRILHO_ANEL = 0.9;
+    let BRILHO_PONTOS = 0.9;
+    let ALFA_BRILHO_1 = 0.22;
+    let ALFA_BRILHO_2 = 0.4;
+    let paleta = {};
+    let corInterior = "";
+
+    function aplicarTema() {
+      escuro = document.documentElement.dataset.tema === "escuro";
+      LINHA_BORDA = escuro ? 1.2 : 2.0;
+      BRILHO_VOLTA = escuro ? 1.0 : 1.3;
+      BRILHO_ANEL = escuro ? 0.8 : 0.9;
+      BRILHO_PONTOS = escuro ? 0.7 : 0.9;
+      ALFA_BRILHO_1 = escuro ? 0.1 : 0.22;
+      ALFA_BRILHO_2 = escuro ? 0.2 : 0.4;
+      paleta = {
+        "--orbe-disco": resolverCor(recipiente, "--orbe-disco"),
+        "--orbe-anel": resolverCor(recipiente, "--orbe-anel"),
+        "--orbe-borda": resolverCor(recipiente, "--orbe-borda"),
+        "--orbe-ponto": resolverCor(recipiente, "--orbe-ponto"),
+        "--orbe-poeira": resolverCor(recipiente, "--orbe-poeira"),
+        "--orbe-texto": resolverCor(recipiente, "--orbe-texto"),
+      };
+      // Cor do interior: disco + (anel − disco)·0.16.
+      const d = paleta["--orbe-disco"];
+      const a = paleta["--orbe-anel"];
+      const mix = d.map((v, i) => Math.round(v + (a[i] - v) * 0.16));
+      corInterior = `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
+    }
+
+    // cor(nome, alfa) monta rgba a partir da paleta atual.
     function cor(nome, alfa = 1) {
       const [r, g, b] = paleta[nome];
       return `rgba(${r}, ${g}, ${b}, ${clamp(alfa, 0, 1)})`;
     }
-
-    // Cor do interior: disco + (anel − disco)·0.16, calculada uma vez.
-    const corInterior = (() => {
-      const d = paleta["--orbe-disco"];
-      const a = paleta["--orbe-anel"];
-      const mix = d.map((v, i) => Math.round(v + (a[i] - v) * 0.16));
-      return `rgb(${mix[0]}, ${mix[1]}, ${mix[2]})`;
-    })();
 
     // Estruturas fixas.
     const MIOLO_N = estreito ? 60 : 120;
@@ -456,7 +471,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         R,
         escala,
         7 * BRILHO_VOLTA,
-        cor("--orbe-anel", 0.22),
+        cor("--orbe-anel", ALFA_BRILHO_1),
       );
       camadaAnel(
         cx,
@@ -467,7 +482,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
         R,
         escala,
         3.5 * BRILHO_VOLTA,
-        cor("--orbe-anel", 0.4),
+        cor("--orbe-anel", ALFA_BRILHO_2),
       );
       camadaAnel(
         cx,
@@ -537,8 +552,20 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
       if (reduzido || !dados.raf) desenhar();
     }
 
+    aplicarTema();
     dimensionar();
     desenhar();
+
+    // Troca de tema em tempo real: relê cores/parâmetros e redesenha
+    // quando o loop está parado (reduced-motion ou fora de tela).
+    const mo = new MutationObserver(() => {
+      aplicarTema();
+      if (reduzido || dados.raf === 0) desenhar();
+    });
+    mo.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-tema"],
+    });
 
     const ro = new ResizeObserver(aoRedimensionar);
     ro.observe(recipiente);
@@ -564,6 +591,7 @@ function OrbeJarvis({ estado = "parado", observarRef = null }) {
 
     return () => {
       parar();
+      mo.disconnect();
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", aoVisibilidade);
