@@ -1181,3 +1181,21 @@
     transition: none;
   }
 }
+
+/* ========================================
+   TEMA ESCURO
+   No dark, o botão "Adicionar receita" ganha o mesmo verde do card de total
+   recebido (--verde-escuro = verde clarinho no escuro), em vez do fundo escuro
+   padrão do .btn-primario.
+   ======================================== */
+
+:global(:root[data-tema="escuro"]) .receitas-botao-adicionar {
+  background-color: var(--verde-escuro);
+  color: var(--cor-texto-sobre-verde);
+  border-color: var(--verde-escuro);
+}
+
+:global(:root[data-tema="escuro"]) .receitas-botao-adicionar:hover:not(:disabled) {
+  background-color: var(--verde-hover);
+  border-color: var(--verde-hover);
+}

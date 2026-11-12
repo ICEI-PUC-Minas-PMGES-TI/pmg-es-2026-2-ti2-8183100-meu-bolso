@@ -1287,3 +1287,31 @@
         transition: none;
     }
     }
+
+/* ========================================
+   TEMA ESCURO
+   No dark, o card de "Total gasto no mês" e o botão "Adicionar gasto" ganham o
+   verde clarinho (--verde-escuro no escuro), igual ao total de receitas, em vez
+   do fundo escuro padrão.
+   ======================================== */
+
+:global(:root[data-tema="escuro"]) .gastos-resumo-destaque {
+  background-color: var(--verde-escuro);
+  border-color: var(--verde-escuro);
+}
+
+:global(:root[data-tema="escuro"]) .gastos-resumo-destaque .gastos-resumo-icone {
+  background-color: var(--verde-principal);
+  color: var(--cor-texto-sobre-verde);
+}
+
+:global(:root[data-tema="escuro"]) .gastos-botao-adicionar {
+  background-color: var(--verde-escuro);
+  color: var(--cor-texto-sobre-verde);
+  border-color: var(--verde-escuro);
+}
+
+:global(:root[data-tema="escuro"]) .gastos-botao-adicionar:hover:not(:disabled) {
+  background-color: var(--verde-hover);
+  border-color: var(--verde-hover);
+}
