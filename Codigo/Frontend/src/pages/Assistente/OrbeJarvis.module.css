@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600&display=swap');
 
 /* Orbe do Jarvis. Decorativo (aria-hidden). Fundo transparente: anel
    branco com brilho, interior verde translúcido, poeira preta ao redor.
@@ -17,6 +17,19 @@
   width: var(--orbe-tamanho);
   height: var(--orbe-tamanho);
   flex-shrink: 0;
+}
+
+:global(:root[data-tema="escuro"]) .orbe {
+  --orbe-borda: #dcebd9;
+  --orbe-ponto: #cfe3cb;
+  --orbe-poeira: #9fbf9a;
+  --orbe-texto: #f5faf3;
+}
+
+:global(:root[data-tema="escuro"]) .rotulo {
+  text-shadow: none;
+  opacity: 1;
+  font-weight: 600;
 }
 
 .canvas {

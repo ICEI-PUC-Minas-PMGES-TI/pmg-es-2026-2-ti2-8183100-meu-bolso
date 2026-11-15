@@ -11,31 +11,6 @@
   gap: var(--espaco-6);
 }
 
-/* Fundo: dois blobs suaves em cantos opostos, atrás do conteúdo. */
-.assistente::before,
-.assistente::after {
-  content: "";
-  position: absolute;
-  width: 420px;
-  height: 420px;
-  border-radius: var(--radius-redondo);
-  background-color: var(--verde-claro);
-  opacity: 0.4;
-  filter: blur(10px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-.assistente::before {
-  top: -160px;
-  right: -140px;
-}
-
-.assistente::after {
-  bottom: -180px;
-  left: -160px;
-}
-
 /* ---------- Hero ---------- */
 .hero {
   display: flex;

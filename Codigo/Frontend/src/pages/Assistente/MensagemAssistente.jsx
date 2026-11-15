@@ -9,6 +9,30 @@ import styles from "./MensagemAssistente.module.css";
 
 const INTERVALO_MS = 22;
 
+// Foto de perfil do assistente (Jarvis). Fica em public/images.
+const FOTO_JARVIS = "/images/jarvis.jpg";
+
+// Avatar do assistente: foto de perfil; cai no "J" se a imagem falhar.
+function AvatarJarvis() {
+  const [erroFoto, setErroFoto] = useState(false);
+  if (erroFoto) {
+    return (
+      <span className={styles.avatar} aria-hidden="true">
+        J
+      </span>
+    );
+  }
+  return (
+    <img
+      src={FOTO_JARVIS}
+      alt=""
+      aria-hidden="true"
+      className={`${styles.avatar} ${styles.avatarFoto}`}
+      onError={() => setErroFoto(true)}
+    />
+  );
+}
+
 function prefereMenosMovimento() {
   return (
     typeof window !== "undefined" &&
@@ -82,7 +106,7 @@ function MensagemAssistente({ mensagem, finalizarDigitacao }) {
   if (erro) {
     return (
       <div className={styles.linha}>
-        <span className={styles.avatar} aria-hidden="true">J</span>
+        <AvatarJarvis />
         <div className={styles.coluna}>
           <div className={`${styles.balao} ${styles.balaoErro}`} role="alert">
             {texto}
@@ -97,7 +121,7 @@ function MensagemAssistente({ mensagem, finalizarDigitacao }) {
   const textoParcial = texto.slice(0, visiveis);
   return (
     <div className={styles.linha}>
-      <span className={styles.avatar} aria-hidden="true">J</span>
+      <AvatarJarvis />
       <div className={styles.coluna}>
         <div className={`${styles.balao} ${styles.balaoAssistente}`}>
           {/* Texto completo só para leitor de tela (não lê letra por letra). */}

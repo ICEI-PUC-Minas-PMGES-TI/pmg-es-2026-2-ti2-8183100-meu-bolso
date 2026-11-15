@@ -35,6 +35,12 @@
   font-weight: 800;
 }
 
+/* Avatar com foto de perfil (Jarvis): a imagem cobre o círculo. */
+.avatarFoto {
+  object-fit: cover;
+  padding: 0;
+}
+
 .balao {
   padding: var(--espaco-3) var(--espaco-4);
   border-radius: 16px;

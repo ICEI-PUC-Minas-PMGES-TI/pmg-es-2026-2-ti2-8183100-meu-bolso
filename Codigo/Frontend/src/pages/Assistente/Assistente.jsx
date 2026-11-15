@@ -8,8 +8,9 @@ import {
   ChartColumn,
   ChartPie,
   CalendarDays,
-  TrendingUp,
+  Scale,
   ArrowLeftRight,
+  Repeat,
   Target,
   PiggyBank,
 } from "lucide-react";
@@ -34,11 +35,12 @@ import styles from "./Assistente.module.css";
 
 // Ordem fixa de exibição; ids desconhecidos vão para o fim.
 const ORDEM = [
+  "saldo_mes",
   "orcamento_status",
   "gasto_por_dia",
   "gastos_por_categoria",
-  "maior_gasto",
   "comparativo_mes",
+  "recorrencias",
   "meta_faltante",
   "metas_total_guardado",
 ];
@@ -46,11 +48,12 @@ const ORDEM = [
 // Interface de cada pergunta (ícone + rótulo curto do cartão). O texto
 // completo da API vai no title/aria-label e no balão do usuário.
 const PERGUNTAS_UI = {
+  saldo_mes: { Icone: Scale, rotulo: "Qual é o meu saldo deste mês?" },
   orcamento_status: { Icone: ChartColumn, rotulo: "Estou dentro do orçamento?" },
   gasto_por_dia: { Icone: CalendarDays, rotulo: "Quanto posso gastar por dia?" },
   gastos_por_categoria: { Icone: ChartPie, rotulo: "Onde gastei mais este mês?" },
-  maior_gasto: { Icone: TrendingUp, rotulo: "Qual foi meu maior gasto do mês?" },
   comparativo_mes: { Icone: ArrowLeftRight, rotulo: "Como foi este mês comparado ao anterior?" },
+  recorrencias: { Icone: Repeat, rotulo: "Quais gastos fixos saem todo mês?" },
   meta_faltante: { Icone: Target, rotulo: "Quanto falta para minha meta?" },
   metas_total_guardado: { Icone: PiggyBank, rotulo: "Quanto já guardei nas metas?" },
 };
@@ -284,8 +287,8 @@ function Assistente() {
       ) : perguntas.length === 0 ? (
         <div className={`card ${styles.estado}`}>
           <p className="texto-secundario">
-            Ainda não há perguntas disponíveis. Registre gastos, defina um
-            orçamento ou crie uma meta para liberar perguntas.
+            Ainda não há perguntas disponíveis. Registre receitas e gastos,
+            defina um orçamento ou crie uma meta para liberar perguntas.
           </p>
         </div>
       ) : (
