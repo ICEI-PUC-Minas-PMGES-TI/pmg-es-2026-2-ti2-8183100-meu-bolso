@@ -228,21 +228,22 @@ As demais coleções (`receitas`, `gastos`, `metas`, `transacoes`, `carteiras`) 
 
 ---
 
-## 7. Proteções para número pessoal
+## 7. Proteções e comportamento do número do bot
 
-Enquanto o bot roda num número pessoal (o que fazemos nos testes), ele **não pode responder as conversas normais do dono**. Por isso existem duas proteções, **ligadas por padrão**:
+O bot tem um **número dedicado**: **+55 (31) 97342-1628**. A configuração atual
+(no `.env` do backend) é:
 
-| Proteção | Variável | Padrão | Efeito |
+| Proteção | Variável | Valor atual | Efeito |
 |---|---|---|---|
 | Palavra de ativação | `WHATSAPP_PALAVRA_ATIVACAO` | `meu bolso` | Sem conversa em andamento, o bot só reage se a mensagem **contiver** a palavra (ignora maiúsculas, acentos e espaços: "Meu Bolso", "MEUBOLSO" e "oi meu bolso" funcionam). Mensagens comuns nem consultam o banco. |
-| Silêncio para não cadastrados | `WHATSAPP_RESPONDER_NAO_CADASTRADOS` | `false` | Números sem conta no Meu Bolso não recebem resposta. Com `true`, recebem "Não encontrei uma conta com este número...". |
+| Resposta a não cadastrados | `WHATSAPP_RESPONDER_NAO_CADASTRADOS` | `true` | Números sem conta no Meu Bolso recebem "Não encontrei uma conta com este número...". Com `false`, ficariam em silêncio. |
 
-**Com um número dedicado ao bot**, desligue as duas no `.env` do backend:
+Mantemos a **palavra de ativação** mesmo com número dedicado, para o bot não
+responder qualquer mensagem solta. Se quiser que **qualquer** mensagem inicie a
+conversa, deixe `WHATSAPP_PALAVRA_ATIVACAO=` (vazio).
 
-```env
-WHATSAPP_PALAVRA_ATIVACAO=
-WHATSAPP_RESPONDER_NAO_CADASTRADOS=true
-```
+> Histórico: quando o bot rodava num número **pessoal** (nos primeiros testes),
+> as duas proteções evitavam responder as conversas normais do dono.
 
 Assim, qualquer mensagem inicia a conversa, e quem não tem cadastro recebe uma explicação.
 
@@ -326,10 +327,11 @@ Suba o backend como de costume (em `Codigo/Backend`):
 
 ### 8.6 Frontend (opcional)
 
-A página `/whatsapp` mostra o número do bot se a variável estiver no `Codigo/Frontend/.env`:
+A página `/whatsapp` mostra o número do bot a partir da variável no `Codigo/Frontend/.env`.
+O número oficial do bot é **+55 (31) 97342-1628**:
 
 ```env
-VITE_WHATSAPP_NUMERO=5531999990000   # só dígitos, com DDI; vazio = mostra "xxxxxxx"
+VITE_WHATSAPP_NUMERO=5531973421628   # só dígitos, com DDI; vazio = mostra "xxxxxxx"
 ```
 
 Depois de mudar, reinicie o `npm run dev`.

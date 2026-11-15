@@ -22,8 +22,9 @@ import styles from "./ComoUsarWhatsApp.module.css";
  * Os textos seguem o comportamento real do bot (backend: whatsapp/FluxoChatbot
  * e WhatsAppService). Se o fluxo do bot mudar, atualize esta página junto.
  *
- * Número do bot: VITE_WHATSAPP_NUMERO (só dígitos, com DDI, ex.: 5531999990000).
- * Sem ele, a página não mostra o botão "Abrir no WhatsApp".
+ * Número do bot: VITE_WHATSAPP_NUMERO (só dígitos, com DDI).
+ * Número oficial: 5531973421628 (+55 (31) 97342-1628).
+ * Sem a variável, a página não mostra o botão "Abrir no WhatsApp".
  */
 
 // Palavra que inicia a conversa (mesmo padrão do backend: app.whatsapp.palavra-ativacao).
