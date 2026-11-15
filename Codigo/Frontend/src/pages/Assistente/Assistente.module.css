@@ -43,6 +43,47 @@
   line-height: 1.5;
 }
 
+/* ---------- Abas ---------- */
+.abas {
+  display: flex;
+  gap: var(--espaco-1);
+  padding: 6px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius-redondo);
+  background-color: var(--cor-superficie);
+  width: fit-content;
+}
+
+.aba {
+  padding: 8px 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+  white-space: nowrap;
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.aba:hover:not(.abaAtiva) {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.aba:focus-visible {
+  outline: 2px solid var(--verde-escuro);
+  outline-offset: 2px;
+}
+
+/* Aba ativa: mesmo padrão do botão ativo do menu do Header. */
+.abaAtiva,
+.abaAtiva:hover {
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
+}
+
 /* ---------- Perguntas ---------- */
 .perguntas {
   display: flex;
@@ -357,6 +398,18 @@
   .hero {
     flex-direction: column;
     align-items: center;
+    text-align: center;
+  }
+}
+
+/* Abas lado a lado em largura total no mobile. */
+@media (max-width: 640px) {
+  .abas {
+    width: 100%;
+  }
+
+  .aba {
+    flex: 1;
     text-align: center;
   }
 }

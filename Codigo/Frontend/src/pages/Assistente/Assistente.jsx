@@ -19,7 +19,14 @@ import { assistenteApi } from "../../service/Api";
 import { useAssistente } from "./AssistenteContext";
 import OrbeJarvis from "./OrbeJarvis";
 import MensagemAssistente from "./MensagemAssistente";
+import ChatIA from "./ChatIA";
 import styles from "./Assistente.module.css";
+
+// Abas da página: perguntas prontas (padrão) e chat livre (protótipo).
+const ABAS = [
+  { id: "rapidas", rotulo: "Perguntas rápidas" },
+  { id: "chat", rotulo: "Conversar com o Jarvis" },
+];
 
 // ============================================================
 // ASSISTENTE (perguntas prontas, sem IA)
@@ -103,6 +110,11 @@ function Assistente() {
   const [perguntasBrutas, setPerguntasBrutas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  // Aba ativa: "rapidas" (perguntas prontas) ou "chat" (protótipo).
+  const [abaAtiva, setAbaAtiva] = useState("rapidas");
+  // Estado do orbe vindo do ChatIA (só vale quando a aba do chat está ativa).
+  const [estadoChat, setEstadoChat] = useState("parado");
 
   // Lista ordenada derivada: só recalcula quando a lista muda, não a cada
   // tick da digitação.
@@ -250,15 +262,18 @@ function Assistente() {
     [...mensagens].reverse().find((m) => m.de === "assistente" && m.aviso)
       ?.aviso ?? AVISO_PADRAO;
 
+  // Na aba do chat o orbe segue o estado do ChatIA; nas demais, o do provider.
+  const estadoOrbe = abaAtiva === "chat" ? estadoChat : estado;
+
   return (
     <div
       ref={paginaRef}
       className={styles.assistente}
-      data-jarvis-estado={estado}
+      data-jarvis-estado={estadoOrbe}
     >
       {/* Hero: avatar + apresentação do Jarvis */}
       <header className={styles.hero}>
-        <OrbeJarvis estado={estado} observarRef={paginaRef} />
+        <OrbeJarvis estado={estadoOrbe} observarRef={paginaRef} />
         <div className={styles.heroTexto}>
           <h1 className={styles.somenteLeitor}>Jarvis</h1>
           <p className={styles.subtitulo}>
@@ -269,7 +284,36 @@ function Assistente() {
         </div>
       </header>
 
-      {carregando ? (
+      {/* Abas: perguntas rápidas (padrão) e chat livre (protótipo). */}
+      <div className={styles.abas} role="tablist" aria-label="Modo do assistente">
+        {ABAS.map((aba) => (
+          <button
+            key={aba.id}
+            type="button"
+            role="tab"
+            id={`aba-${aba.id}`}
+            aria-selected={abaAtiva === aba.id}
+            aria-controls={`painel-${aba.id}`}
+            className={`${styles.aba} ${
+              abaAtiva === aba.id ? styles.abaAtiva : ""
+            }`}
+            onClick={() => setAbaAtiva(aba.id)}
+          >
+            {aba.rotulo}
+          </button>
+        ))}
+      </div>
+
+      {abaAtiva === "chat" ? (
+        <div
+          id="painel-chat"
+          role="tabpanel"
+          aria-labelledby="aba-chat"
+          className={styles.perguntas}
+        >
+          <ChatIA onEstadoChange={setEstadoChat} />
+        </div>
+      ) : carregando ? (
         <div className={`card ${styles.estado}`}>
           <p className="texto-secundario">Carregando as perguntas...</p>
         </div>
@@ -435,11 +479,6 @@ function Assistente() {
             )}
           </section>
 
-          <p className={styles.aviso}>
-            <Info size={14} aria-hidden="true" />
-            {aviso}
-          </p>
-
           {mensagens.length > 0 && (
             <div className={styles.rodape}>
               <button
@@ -455,6 +494,12 @@ function Assistente() {
           )}
         </>
       )}
+
+      {/* Aviso fixo: aparece nas duas abas. */}
+      <p className={styles.aviso}>
+        <Info size={14} aria-hidden="true" />
+        {aviso}
+      </p>
     </div>
   );
 }

@@ -338,6 +338,14 @@ export const assistenteApi = {
       corpo: { params },
       autenticado: true,
     }),
+
+  // Chat livre com o Jarvis. `mensagens` = [{ papel, texto }].
+  conversar: (mensagens) =>
+    requisicao("/api/assistente/chat", {
+      metodo: "POST",
+      corpo: { mensagens },
+      autenticado: true,
+    }),
 };
 
 /* ========================================

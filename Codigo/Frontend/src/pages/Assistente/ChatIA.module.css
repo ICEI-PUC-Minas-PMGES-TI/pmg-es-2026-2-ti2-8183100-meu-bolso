@@ -1,0 +1,270 @@
+/* ========================================
+   CHAT IA (protótipo visual)
+   Reaproveita o visual dos balões do assistente.
+======================================== */
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  width: 100%;
+  max-width: var(--largura-maxima);
+}
+
+/* Janela do chat: área de mensagens + barra de entrada embaixo. */
+.janela {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cor-borda);
+  border-radius: 16px;
+  background-color: var(--cor-superficie);
+  overflow: hidden;
+}
+
+/* Área rolável das mensagens. */
+.mensagens {
+  flex: 1;
+  min-height: 360px;
+  max-height: calc(100vh - 360px);
+  overflow-y: auto;
+  padding: var(--espaco-4);
+}
+
+/* ---------- Estado vazio ---------- */
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-4);
+  min-height: 320px;
+  text-align: center;
+}
+
+.vazioTexto {
+  max-width: 420px;
+  color: var(--cor-texto-medio);
+}
+
+/* ---------- Chips ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  justify-content: center;
+}
+
+.chip {
+  padding: 8px 14px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius-redondo);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  transition:
+    border-color var(--transicao-rapida),
+    background-color var(--transicao-rapida);
+}
+
+.chip:hover:not(:disabled) {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--verde-escuro);
+  outline-offset: 2px;
+}
+
+.chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Balões ---------- */
+.baloes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Indicador "calculando" ---------- */
+.calculando {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+}
+
+.calculandoAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-escuro);
+  color: var(--verde-claro);
+  font-size: var(--texto-xs);
+  font-weight: 800;
+}
+
+.calculandoBalao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  box-shadow: var(--sombra-leve);
+  color: var(--cor-texto-medio);
+  font-size: var(--texto-sm);
+}
+
+.pontos {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.pontos span {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-principal);
+  animation: pontoPulo 1s ease-in-out infinite;
+}
+
+.pontos span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.pontos span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes pontoPulo {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pontos span {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/* ---------- Barra de entrada ---------- */
+.barraEntrada {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda);
+  background-color: var(--cor-superficie);
+}
+
+/* Dica de privacidade + mensagens restantes, abaixo da barra de entrada. */
+.dica {
+  padding: 0 var(--espaco-3) var(--espaco-3);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  max-height: 116px;
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  font-family: inherit;
+  font-size: var(--texto-sm);
+  line-height: 1.5;
+}
+
+.textarea:focus-visible {
+  outline: 2px solid var(--verde-escuro);
+  outline-offset: 1px;
+}
+
+.textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão de enviar circular de 44px. */
+.enviar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-principal);
+  color: var(--cor-texto-inverso);
+  transition:
+    background-color var(--transicao-rapida),
+    opacity var(--transicao-rapida);
+}
+
+.enviar:hover:not(:disabled) {
+  background-color: var(--verde-escuro);
+}
+
+.enviar:focus-visible {
+  outline: 2px solid var(--verde-escuro);
+  outline-offset: 2px;
+}
+
+.enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modo claro: botão desabilitado mais visível (cinza sólido com borda e
+   ícone escuro), mantendo a aparência de inativo. */
+:global(:root:not([data-tema="escuro"])) .enviar:disabled {
+  opacity: 1;
+  border: 1px solid var(--cor-borda);
+  background-color: var(--cor-superficie-realce);
+  color: var(--cor-texto-principal);
+  cursor: not-allowed;
+}
+
+/* ---------- Rodapé ---------- */
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 640px) {
+  .barraEntrada {
+    width: 100%;
+  }
+
+  .chips {
+    flex-wrap: wrap;
+  }
+}
