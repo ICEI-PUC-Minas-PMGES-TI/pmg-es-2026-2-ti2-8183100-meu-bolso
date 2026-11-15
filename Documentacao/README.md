@@ -167,7 +167,7 @@ Em vez de apenas informar, o Meu Bolso permite **testar decisões sem consequên
 | **RF-06** | Exibir resumo e evolução financeira | Mostrar quanto foi recebido, gasto e guardado e a evolução ao longo do tempo. | Lucas, Matheus, Gabriel |
 | **RF-07** | Orientar sobre investimentos | Apresentar informações básicas e claras sobre como e onde investir. | Lucas, Gabriel |
 | **RF-08** | Simular cenários e compras | Testar uma decisão (compra ou objetivo) e ver o impacto no orçamento futuro sem risco real. | Proposta de valor das três personas |
-| **RF-09** | Receber orientações do assistente de IA | Analisar gastos e metas do usuário e devolver retornos e recomendações educativas em linguagem acessível. | Objetivo do projeto |
+| **RF-09** | Receber orientações do assistente de IA | Analisar gastos e metas do usuário e devolver retornos e recomendações educativas em linguagem acessível. No MVP: perguntas prontas e chat com IA que consultam os dados do próprio usuário (gastos, receitas, orçamento, metas e gastos fixos). | Objetivo do projeto |
 | **RF-10** | Gerenciar a conta do usuário | Cadastro e acesso com login, garantindo que cada usuário veja apenas os próprios dados. | Decorrente do RNF-04 |
 
 ## 3.3 Requisitos não funcionais (RNF)
@@ -180,7 +180,7 @@ Em vez de apenas informar, o Meu Bolso permite **testar decisões sem consequên
 | **RNF-04** | Segurança e privacidade | Dados pessoais e financeiros armazenados de forma segura e em conformidade com a LGPD. |
 | **RNF-05** | Bom desempenho | O sistema deve responder rapidamente às ações do usuário. |
 | **RNF-06** | Disponibilidade | O sistema deve estar disponível pela internet sempre que necessário. |
-| **RNF-07** | Transparência da IA | Deixar claro que as orientações do assistente têm caráter educativo e não substituem consultoria financeira profissional. |
+| **RNF-07** | Transparência da IA | Deixar claro que as orientações do assistente têm caráter educativo e não substituem consultoria financeira profissional. A tela do assistente exibe o aviso 'Orientação educativa; não substitui um profissional.'. |
 
 ## 3.4 Rastreabilidade entre personas e requisitos funcionais
 
@@ -277,8 +277,10 @@ estão no [README principal](../README.md).
 | Front-end | React 19, Vite, React Router, lucide-react | ✅ Em uso |
 | Back-end | Java 21, Spring Boot 3.3, Spring Security, JWT (jjwt) | ✅ Em uso |
 | Banco de dados | MongoDB 7 (Spring Data MongoDB) | ✅ Em uso |
-| Assistente de IA | `<a definir>` | ⏳ A definir |
+| Assistente de IA | Perguntas prontas calculadas pelo back-end + chat com IA (Gemini, API do Google AI Studio) | ✅ Em uso (nível gratuito, cota limitada) |
 | Infraestrutura / Deploy | Docker e Docker Compose | ✅ Em uso (ambiente local) |
+
+**Assistente de IA.** O assistente oferece duas formas de uso: perguntas prontas (cards respondidos pelo próprio back-end, sem IA) e um chat livre ("Conversar com o Jarvis"). A IA (Gemini) é usada apenas para escolher qual consulta executar; o texto da resposta e todos os números saem do sistema, nunca são inventados pelo modelo. Por usar a cota gratuita do Gemini, o chat aplica limites de uso por usuário/dia e globais. Em termos de privacidade, ao Gemini vão só o texto digitado e o histórico recente da conversa, nunca valores financeiros, e-mail ou identificador do usuário; no nível gratuito o Google pode usar prompts e respostas para melhorar seus produtos, por isso a LGPD (RNF-04) pede cuidado e, para produção, recomenda-se o nível pago. Detalhes em [Assistente com IA (Jarvis)](../Codigo/Backend/Readme.md#assistente-com-ia-jarvis).
 
 ---
 

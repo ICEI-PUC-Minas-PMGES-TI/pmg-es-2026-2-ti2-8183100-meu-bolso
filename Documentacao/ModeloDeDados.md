@@ -19,8 +19,16 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `orcamentos` | `Orcamento` | Teto mensal de gastos; um por usuário. |
 | `recorrencias` | `Recorrencia` | Regras de gasto recorrente (repetir todo mês). |
 | `tokens_recuperacao` | `TokenRecuperacao` | Token (hash) de recuperação de senha, com expiração via TTL. |
+| `receitas` | `Receita` | Receitas (entradas), espelho simétrico dos gastos, classificadas por categoria e carteira. |
+| `receitaRecorrencias` | `ReceitaRecorrencia` | Regras de receita recorrente (repetir todo mês), espelho das recorrências de gasto. |
+| `transacoes` | `MovimentacaoMeta` | Movimentações (aporte/retirada) das metas; fonte do histórico "Movimentações recentes" do painel de metas. |
+| `transferencias` | `Transferencia` | Transferências entre contas do usuário, guardadas para o histórico (saída na origem, entrada no destino). |
+| `conversas_whatsapp` | `ConversaWhatsApp` | Estado da conversa do chatbot do WhatsApp (etapa do fluxo e dados já informados), um documento por chat. |
+| `preferencias_resumo` | `PreferenciaResumo` | Preferência do resumo semanal por e-mail (ativo, último envio e hash do token de cancelamento), um por usuário. |
 
 > **Não é coleção:** o **Resumo Financeiro** (calculado a partir de gastos, orçamento e metas) e o **extrato** de conta e cartão (derivado dos gastos por `carteiraId`).
+
+> **Nota:** o detalhamento de atributos, relacionamentos, diagrama e exemplos das seções 3 a 6 ainda não inclui: `receitas`, `receitaRecorrencias`, `transacoes`, `transferencias`, `conversas_whatsapp` e `preferencias_resumo`.
 
 ---
 
@@ -277,9 +285,8 @@ As coleções abaixo fazem parte do modelo conceitual do projeto, mas **ainda n�
 | Coleção | Finalidade |
 |---|---|
 | `categorias` | Categorias do usuário como documentos próprios (hoje a categoria é um texto livre em `gastos`/`recorrencias`). |
-| `transacoes` | Modelo unificado de entradas/saídas e aportes a metas (hoje há `gastos`; aportes a meta ainda não geram transação). |
+| `transacoes` | Modelo unificado de entradas/saídas e aportes a metas (hoje há `gastos`; aportes a meta ainda não geram transação). (já existe uma coleção `transacoes` com outra finalidade: ver seção 2) |
 | `planejamentosMensais` | Planejamento do mês com itens por categoria. |
 | `simulacoes` | Histórico de simulações de decisões/compras. |
-| `orientacoesIA` | Perguntas e respostas do assistente de IA. |
+| `orientacoesIA` | Perguntas e respostas do assistente de IA. O chat com IA atual não persiste conversas: o histórico fica só na sessão da tela e os contadores de limite de uso ficam em memória no back-end; esta coleção seria criada se o histórico passar a ser salvo. |
 | `conteudosInvestimento` | Conteúdo educativo geral sobre investimentos. |
-| `conversasWhatsApp` | Estado das conversas no chatbot do WhatsApp. |

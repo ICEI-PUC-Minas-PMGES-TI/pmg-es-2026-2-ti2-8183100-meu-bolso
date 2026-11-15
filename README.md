@@ -72,4 +72,22 @@ A aplicação abre em `http://localhost:5173`.
 
 O chatbot precisa do back-end e do [WAHA](https://waha.devlike.pro/) (em container Docker) rodando no mesmo ambiente. Passo a passo em [`Documentacao/ChatbotWhatsApp.md`](Documentacao/ChatbotWhatsApp.md).
 
-> Detalhes de variáveis de ambiente e endpoints estão nos READMEs de [`Codigo/Backend`](Codigo/Backend/Readme.md) e [`Codigo/Frontend`](Codigo/Frontend/README.md).
+### 4. Chat com IA do assistente (opcional)
+
+O chat **"Conversar com o Jarvis"** da página do assistente usa o **Gemini** do Google. Só quem executa o back-end precisa de uma chave; os usuários do site não precisam de nada. Sem chave, o chat mostra um aviso de indisponível e o resto do app funciona normalmente.
+
+1. Crie uma chave no [Google AI Studio](https://aistudio.google.com).
+2. Coloque-a em `GEMINI_API_KEY` no `Codigo/Backend/.env` (nunca versione a chave; nunca a coloque no `.env.example`). Opcionalmente, defina `GEMINI_MODELO` com um modelo liberado na sua conta.
+
+```bash
+GEMINI_API_KEY=sua-chave-aqui
+GEMINI_MODELO=nome-do-modelo
+```
+
+3. Reinicie o back-end.
+
+> A cota gratuita é compartilhada por todos os usuários do servidor, por isso há limites de mensagens por usuário e por dia. No nível gratuito, o Google pode usar prompts e respostas para melhorar seus produtos — não digite dados pessoais no chat.
+
+Detalhes de variáveis, limites, privacidade e ferramentas em [Assistente com IA (Jarvis)](Codigo/Backend/Readme.md#assistente-com-ia-jarvis).
+
+> Detalhes de variáveis de ambiente e endpoints estão nos READMEs de [`Codigo/Backend`](Codigo/Backend/Readme.md) e [`Codigo/Frontend`](Codigo/Frontend/README.md) — incluindo o chat com IA do assistente.
