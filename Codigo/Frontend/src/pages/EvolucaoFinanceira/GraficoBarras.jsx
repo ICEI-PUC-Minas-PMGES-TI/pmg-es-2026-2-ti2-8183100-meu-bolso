@@ -8,13 +8,12 @@ import {
 } from "./formatacao";
 import { useLarguraGrafico } from "./useLarguraGrafico";
 
-// topo maior para caber o rótulo de valor acima das barras
-const MARGEM = { topo: 28, direita: 16, base: 28, esquerda: 16 };
+const MARGEM = { topo: 20, direita: 16, base: 28, esquerda: 16 };
 const LARGURA_TOOLTIP = 150;
 
-// Gráfico de barras empilhadas: gastos (topo) e guardado (base) por mês.
+// Gráfico de barras lado a lado: renda (verde) e gastos (vermelho) por mês.
 function GraficoBarras({
-  titulo = "Gastos e guardado por mês",
+  titulo = "Gastos e renda por mês",
   dados = [],
   altura = 240,
   acoes = null,
@@ -25,12 +24,11 @@ function GraficoBarras({
   const larguraUtil = Math.max(largura - MARGEM.esquerda - MARGEM.direita, 10);
   const alturaUtil = altura - MARGEM.topo - MARGEM.base;
 
-  // Teto do eixo Y arredondado para a próxima marca de R$ 500.
-  // Barras empilhadas são sempre positivas, então o piso é 0.
+  // Teto do eixo Y conforme o maior valor entre renda e gastos do período.
   const { teto, marcas } = useMemo(
     () =>
       calcularEscala(
-        Math.max(...dados.map((d) => d.gastos + d.guardado), 1),
+        Math.max(...dados.map((d) => Math.max(d.renda, d.gastos)), 1),
         0,
         500,
       ),
@@ -38,34 +36,39 @@ function GraficoBarras({
   );
 
   const passo = larguraUtil / dados.length;
-  const larguraBarra = Math.min(passo * 0.5, 44);
+  // Duas barras por mês, lado a lado, dentro do espaço do mês.
+  const larguraBarra = Math.min(passo * 0.28, 32);
+  const vao = larguraBarra * 0.25; // folga entre as duas barras
 
   const posicaoY = (valor) =>
     MARGEM.topo + alturaUtil - (valor / teto) * alturaUtil;
   const alturaValor = (valor) => (valor / teto) * alturaUtil;
 
-  // Cada barra com as posições já calculadas na tela.
-  // "acumulado" é o saldo até o mês (entradas - gastos) — o MESMO
-  // número que o gráfico de linha mostra naquele ponto.
   const barras = dados.map((d, i) => {
-    const acumulado = dados
-      .slice(0, i + 1)
-      .reduce((soma, item) => soma + item.guardado - item.gastos, 0);
-
     const centroX = MARGEM.esquerda + passo * i + passo / 2;
-    const x = centroX - larguraBarra / 2;
 
-    const hGuardado = alturaValor(d.guardado);
+    const hRenda = alturaValor(d.renda);
     const hGastos = alturaValor(d.gastos);
-    const yGuardado = MARGEM.topo + alturaUtil - hGuardado;
-    const yGastos = yGuardado - hGastos;
+    const base = MARGEM.topo + alturaUtil;
 
-    return { ...d, acumulado, centroX, x, hGuardado, hGastos, yGuardado, yGastos };
+    // Renda à esquerda do centro, gastos à direita.
+    const xRenda = centroX - larguraBarra - vao / 2;
+    const xGastos = centroX + vao / 2;
+
+    return {
+      ...d,
+      centroX,
+      xRenda,
+      xGastos,
+      hRenda,
+      hGastos,
+      yRenda: base - hRenda,
+      yGastos: base - hGastos,
+    };
   });
 
   const barra = barraAtiva !== null ? (barras[barraAtiva] ?? null) : null;
 
-  // Centraliza o tooltip na barra sem deixar sair do card
   const tooltipEsquerda = barra
     ? Math.min(
         Math.max(barra.centroX - LARGURA_TOOLTIP / 2, 0),
@@ -80,12 +83,12 @@ function GraficoBarras({
         <div className={styles.barrasTopoDireita}>
           <div className={styles.legenda}>
             <span className={styles.legendaItem}>
-              <span className={`${styles.legendaCor} ${styles.corGastos}`} />
-              Gastos
+              <span className={`${styles.legendaCor} ${styles.corRenda}`} />
+              Renda
             </span>
             <span className={styles.legendaItem}>
-              <span className={`${styles.legendaCor} ${styles.corGuardado}`} />
-              Guardado
+              <span className={`${styles.legendaCor} ${styles.corGastos}`} />
+              Gastos
             </span>
           </div>
           {acoes}
@@ -101,9 +104,9 @@ function GraficoBarras({
           aria-label={`${titulo}: ${dados
             .map(
               (d) =>
-                `${d.mes}, gastos ${formatarReal(
+                `${d.mes}, renda ${formatarReal(d.renda)}, gastos ${formatarReal(
                   d.gastos,
-                )}, guardado ${formatarReal(d.guardado)}`,
+                )}`,
             )
             .join("; ")}`}
         >
@@ -119,14 +122,14 @@ function GraficoBarras({
             />
           ))}
 
-          {/* Barras empilhadas */}
+          {/* Barras lado a lado (renda e gastos) */}
           {barras.map((b, i) => (
             <g
               key={b.mes}
               onPointerEnter={() => setBarraAtiva(i)}
               onPointerLeave={() => setBarraAtiva(null)}
             >
-              {/* Área clicável/hover invisível sobre toda a coluna */}
+              {/* Área de hover invisível sobre toda a coluna */}
               <rect
                 x={MARGEM.esquerda + passo * i}
                 y={MARGEM.topo}
@@ -135,44 +138,33 @@ function GraficoBarras({
                 fill="transparent"
               />
 
-              {/* Guardado (base) — arredonda só a base */}
+              {/* Renda (verde) */}
               <path
-                className={`${styles.barraGuardado} ${
+                className={`${styles.barraRenda} ${
                   barraAtiva === i ? styles.barraAtiva : ""
                 }`}
                 d={retanguloArredondado(
-                  b.x,
-                  b.yGuardado,
+                  b.xRenda,
+                  b.yRenda,
                   larguraBarra,
-                  b.hGuardado,
-                  { base: 6 },
+                  b.hRenda,
+                  { topo: 5 },
                 )}
               />
 
-              {/* Gastos (topo) — arredonda só o topo */}
+              {/* Gastos (vermelho) */}
               <path
                 className={`${styles.barraGastos} ${
                   barraAtiva === i ? styles.barraAtiva : ""
                 }`}
                 d={retanguloArredondado(
-                  b.x,
+                  b.xGastos,
                   b.yGastos,
                   larguraBarra,
                   b.hGastos,
-                  { topo: 6 },
+                  { topo: 5 },
                 )}
               />
-
-              {/* Rótulo do total acumulado acima da barra
-                  (mesmo número que a linha mostra neste mês) */}
-              <text
-                className={styles.rotuloValor}
-                x={b.centroX}
-                y={b.yGastos - 8}
-                textAnchor="middle"
-              >
-                {formatarReal(b.acumulado)}
-              </text>
 
               {/* Mês do eixo X */}
               <text
@@ -195,16 +187,16 @@ function GraficoBarras({
             className={styles.tooltip}
             style={{
               left: tooltipEsquerda,
-              top: Math.max(barra.yGastos - 70, 0),
+              top: Math.max(Math.min(barra.yRenda, barra.yGastos) - 70, 0),
               width: LARGURA_TOOLTIP,
             }}
           >
             <span className={styles.tooltipMes}>{barra.mes}</span>
+            <span className={`${styles.tooltipLinha} ${styles.tooltipRenda}`}>
+              Renda: {formatarReal(barra.renda)}
+            </span>
             <span className={`${styles.tooltipLinha} ${styles.tooltipGastos}`}>
               Gastos: {formatarReal(barra.gastos)}
-            </span>
-            <span className={`${styles.tooltipLinha} ${styles.tooltipGuardado}`}>
-              Guardado: {formatarReal(barra.guardado)}
             </span>
           </div>
         )}

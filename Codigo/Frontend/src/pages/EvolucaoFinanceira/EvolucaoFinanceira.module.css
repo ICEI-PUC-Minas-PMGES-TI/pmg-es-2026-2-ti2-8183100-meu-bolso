@@ -274,7 +274,7 @@
   background-color: var(--erro);
 }
 
-.tooltipGuardado::before {
+.tooltipRenda::before {
   background-color: var(--verde-principal);
 }
 
@@ -328,13 +328,13 @@
   background-color: var(--erro);
 }
 
-.corGuardado {
+.corRenda {
   background-color: var(--verde-principal);
 }
 
 /* Barras — crescem de baixo para cima na entrada */
 .barraGastos,
-.barraGuardado {
+.barraRenda {
   transform-box: fill-box;
   transform-origin: bottom;
   animation: cresceBarra 0.6s ease both;
