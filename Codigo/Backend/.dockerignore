@@ -1,0 +1,13 @@
+# Não envia para o contexto de build do Docker (mais rápido e seguro).
+target/
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+.idea/
+*.iml
+.vscode/
+Readme.md
+HELP.md
