@@ -3,36 +3,46 @@ import { TrendingUp, AlertCircle } from "lucide-react";
 
 import styles from "./EvolucaoFinanceira.module.css";
 import gastosService from "../../service/gastosService";
+import { listarMetas, obterMovimentacoes } from "../../service/Api";
 import {
   ALTURA_GRAFICO,
   agruparPorMes,
   calcularAcumulado,
+  agruparInvestimentosPorMes,
+  calcularAcumuladoInvestido,
+  extrairAportesInvestimento,
   movimentacoesDasCarteiras,
 } from "./dados";
 import GraficoEvolucao from "./GraficoEvolucao";
 import GraficoBarras from "./GraficoBarras";
+import GraficoInvestimento from "./GraficoInvestimento";
 import SeletorGrafico from "./SeletorGrafico";
 
 // ============================================================
 // EVOLUÇÃO FINANCEIRA (RF-06)
 // ------------------------------------------------------------
 // Busca as transações reais do usuário (gastosService), agrupa
-// por mês e deriva as duas séries dos gráficos. A evolução é
-// calculada em tempo de consulta — não é armazenada.
+// por mês e deriva as séries dos gráficos. A evolução é calculada
+// em tempo de consulta — não é armazenada.
 //
-// Um seletor alterna entre dois gráficos: linha com o saldo
-// acumulado e barras com gastos/guardado por mês.
+// O seletor alterna entre três gráficos: saldo acumulado (linha),
+// gastos x renda (barras lado a lado) e investimentos (linha do
+// total investido).
 // ============================================================
 
 function EvolucaoFinanceira() {
   const [transacoes, setTransacoes] = useState([]);
+  const [aportes, setAportes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
 
-  // Gráfico em exibição: "acumulado" (linha) ou "mensal" (barras).
-  const [graficoAtivo, setGraficoAtivo] = useState("acumulado");
+  // Gráfico em exibição: "mensal" (barras, padrão) ou "acumulado" (linha).
+  const [graficoAtivo, setGraficoAtivo] = useState("mensal");
 
-  // Busca as transações do usuário ao montar a página.
+  // Carrega tudo ao montar a página, com o mínimo de requisições:
+  //  - gastos (gastosService) + movimentações das carteiras: gastos/renda
+  //  - metas + histórico unificado (1 requisição cada): aportes de
+  //    investimento, filtrados pelas metas cujo nome indica investimento.
   useEffect(() => {
     let ativo = true;
 
@@ -40,12 +50,15 @@ function EvolucaoFinanceira() {
       setCarregando(true);
       setErro(null);
       try {
-        // Saídas: gastos do usuário. Entradas (e saídas): movimentações
-        // das carteiras. As duas fontes são combinadas numa só lista.
-        const { gastos } = await gastosService.carregarTudo();
-        const movimentacoes = movimentacoesDasCarteiras();
+        const [{ gastos }, metas, movimentacoes] = await Promise.all([
+          gastosService.carregarTudo(),
+          listarMetas(),
+          obterMovimentacoes(),
+        ]);
 
-        if (ativo) setTransacoes([...(gastos ?? []), ...movimentacoes]);
+        if (!ativo) return;
+        setTransacoes([...(gastos ?? []), ...movimentacoesDasCarteiras()]);
+        setAportes(extrairAportesInvestimento(metas, movimentacoes));
       } catch (e) {
         if (ativo) {
           setErro(
@@ -63,7 +76,7 @@ function EvolucaoFinanceira() {
     };
   }, []);
 
-  // Agrega as transações por mês e deriva a série acumulada.
+  // Agrega as transações por mês e deriva as séries dos gráficos.
   const dadosMensais = useMemo(
     () => agruparPorMes(transacoes),
     [transacoes],
@@ -71,6 +84,10 @@ function EvolucaoFinanceira() {
   const dadosAcumulado = useMemo(
     () => calcularAcumulado(dadosMensais),
     [dadosMensais],
+  );
+  const dadosInvestido = useMemo(
+    () => calcularAcumuladoInvestido(agruparInvestimentosPorMes(aportes)),
+    [aportes],
   );
 
   const temDados = dadosMensais.length > 0;
@@ -95,6 +112,19 @@ function EvolucaoFinanceira() {
           <p className={styles.estadoTitulo}>Não foi possível carregar</p>
           <p className="texto-secundario">{erro}</p>
         </div>
+      );
+    }
+
+    // A aba de investimentos é independente das transações (gastos/renda):
+    // tem sua própria fonte e seu próprio estado vazio no componente.
+    if (graficoAtivo === "investimento") {
+      return (
+        <GraficoInvestimento
+          key="investimento"
+          dados={dadosInvestido}
+          altura={ALTURA_GRAFICO}
+          acoes={seletor}
+        />
       );
     }
 

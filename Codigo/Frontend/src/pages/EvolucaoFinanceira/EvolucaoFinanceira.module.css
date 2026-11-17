@@ -111,6 +111,7 @@
 
 /* Estados de carregando / erro / vazio */
 .estado {
+  position: relative;
   max-width: 800px;
   min-height: 360px;
   display: flex;
@@ -135,6 +136,13 @@
 .estadoIconeErro {
   color: var(--erro);
   margin-bottom: var(--espaco-2);
+}
+
+/* Seletor no topo direito do card de estado vazio (aba investimentos) */
+.estadoTopo {
+  position: absolute;
+  top: var(--espaco-6);
+  right: var(--espaco-6);
 }
 
 /* Topo do card de linha: título/subtítulo à esquerda, seletor à direita */
@@ -345,7 +353,7 @@
   transition: opacity var(--transicao-rapida);
 }
 
-.barraGuardado {
+.barraRenda {
   fill: var(--verde-principal);
   transition: opacity var(--transicao-rapida);
 }

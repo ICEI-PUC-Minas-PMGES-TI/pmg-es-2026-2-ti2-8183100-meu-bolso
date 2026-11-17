@@ -1,20 +1,26 @@
-import { ChartLine, ChartColumnStacked } from "lucide-react";
+import { ChartLine, ChartColumnBig, PiggyBank } from "lucide-react";
 
 import styles from "./EvolucaoFinanceira.module.css";
 
 // Opções do seletor (dados → menos JSX repetido).
 const OPCOES = [
   {
-    valor: "acumulado",
-    Icone: ChartLine,
-    rotulo: "Gráfico de linha (total guardado)",
-    titulo: "Total guardado",
+    valor: "mensal",
+    Icone: ChartColumnBig,
+    rotulo: "Gráfico de barras (gastos e renda)",
+    titulo: "Gastos e renda",
   },
   {
-    valor: "mensal",
-    Icone: ChartColumnStacked,
-    rotulo: "Gráfico de barras (gastos e guardado)",
-    titulo: "Gastos e guardado",
+    valor: "acumulado",
+    Icone: ChartLine,
+    rotulo: "Gráfico de linha (saldo acumulado)",
+    titulo: "Saldo acumulado",
+  },
+  {
+    valor: "investimento",
+    Icone: PiggyBank,
+    rotulo: "Gráfico de investimentos",
+    titulo: "Investimentos",
   },
 ];
 
