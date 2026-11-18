@@ -28,6 +28,9 @@ import SeletorGrafico from "./SeletorGrafico";
 // O seletor alterna entre três gráficos: saldo acumulado (linha),
 // gastos x renda (barras lado a lado) e investimentos (linha do
 // total investido).
+//
+// É exibida como seção da Visão geral (Dashboard), por isso o
+// título é um <h2> dentro de uma <section>.
 // ============================================================
 
 function EvolucaoFinanceira() {
@@ -161,16 +164,16 @@ function EvolucaoFinanceira() {
   }
 
   return (
-    <div className={styles.evolucao}>
+    <section className={styles.evolucao} aria-labelledby="evolucao-titulo">
       <div className={styles.cabecalho}>
-        <h1>Evolução financeira</h1>
+        <h2 id="evolucao-titulo">Evolução financeira</h2>
         <p className="texto-secundario">
           Acompanhe o crescimento do seu dinheiro ao longo dos meses.
         </p>
       </div>
 
       {renderConteudo()}
-    </div>
+    </section>
   );
 }
 

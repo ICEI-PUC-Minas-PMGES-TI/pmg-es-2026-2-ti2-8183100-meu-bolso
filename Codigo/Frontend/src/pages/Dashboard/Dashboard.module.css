@@ -16,9 +16,3 @@
 .saudacao p {
   margin-top: var(--espaco-1);
 }
-
-.placeholder {
-  display: flex;
-  flex-direction: column;
-  gap: var(--espaco-2);
-}

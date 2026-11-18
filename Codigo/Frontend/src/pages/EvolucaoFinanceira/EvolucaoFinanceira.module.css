@@ -46,13 +46,13 @@
 .evolucao {
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-6);
+  gap: var(--espaco-4);
 }
 
-/* Cabeçalho da página */
-.cabecalho h1 {
-  font-size: var(--titulo-xl);
-  font-weight: 800;
+/* Cabeçalho da seção (dentro da Visão geral) */
+.cabecalho h2 {
+  font-size: var(--titulo-md);
+  font-weight: 700;
 }
 
 .cabecalho p {

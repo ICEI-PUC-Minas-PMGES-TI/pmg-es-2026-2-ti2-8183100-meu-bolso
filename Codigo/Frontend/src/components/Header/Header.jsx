@@ -13,7 +13,6 @@ import useTema from "../../hooks/useTema";
 // itens visuais ate as paginas serem criadas.
 const navItems = [
   { nome: "Visão geral", caminho: "/dashboard" },
-  { nome: "Evolução", caminho: "/evolucao-financeira" },
   { nome: "Gastos", caminho: "/gastos" },
   { nome: "Receitas", caminho: "/receitas" },
   { nome: "Carteiras", caminho: "/carteiras" },

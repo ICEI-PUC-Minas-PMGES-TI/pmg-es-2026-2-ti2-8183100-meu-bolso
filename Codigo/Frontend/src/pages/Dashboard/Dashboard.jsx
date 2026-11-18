@@ -1,5 +1,6 @@
 import styles from "./Dashboard.module.css";
 import { obterUsuario } from "../../service/Api";
+import EvolucaoFinanceira from "../EvolucaoFinanceira/EvolucaoFinanceira";
 
 function Dashboard() {
   return (
@@ -11,12 +12,8 @@ function Dashboard() {
         </p>
       </div>
 
-      <section className={`card ${styles.placeholder}`}>
-        <h2>Bem-vindo ao MeuBolso!</h2>
-        <p className="texto-secundario">
-          Seu Dashboard está em desenvolvimento.
-        </p>
-      </section>
+      {/* Evolução financeira (gráficos de gastos x renda, saldo e investimentos) */}
+      <EvolucaoFinanceira />
     </div>
   );
 }

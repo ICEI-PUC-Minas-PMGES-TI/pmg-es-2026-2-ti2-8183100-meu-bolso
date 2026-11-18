@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
 import Cadastro from "./pages/Login/Cadastro";
@@ -14,7 +14,6 @@ import Gastos from "./pages/Gastos/Gastos";
 import Receitas from "./pages/Receitas/Receitas";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
-import EvolucaoFinanceira from "./pages/EvolucaoFinanceira/EvolucaoFinanceira";
 import Simulacao from "./pages/Simulacao/Simulacao";
 import Assistente from "./pages/Assistente/Assistente";
 import AssistenteProvider from "./pages/Assistente/AssistenteProvider";
@@ -47,9 +46,10 @@ function App() {
             <Route path="/receitas" element={<Receitas />} />
             <Route path="/carteiras" element={<Carteiras />} />
             <Route path="/metas" element={<Metas />} />
+            {/* A evolução financeira agora fica na Visão geral */}
             <Route
               path="/evolucao-financeira"
-              element={<EvolucaoFinanceira />}
+              element={<Navigate to="/dashboard" replace />}
             />
             <Route path="/simulador" element={<Simulacao />} />
             <Route path="/assistente" element={<Assistente />} />
