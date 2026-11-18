@@ -33,7 +33,7 @@ const PALAVRA_ATIVACAO = "meu bolso";
 const NUMERO_BOT = (import.meta.env.VITE_WHATSAPP_NUMERO || "").replace(/\D/g, "");
 
 // Exibido enquanto o bot não tem número próprio (VITE_WHATSAPP_NUMERO vazio).
-const NUMERO_PROVISORIO = "xxxxxxx";
+const NUMERO_PROVISORIO = "+55 31 97342-1628";
 
 // "5531999990000" -> "+55 (31) 99999-0000"
 function formatarNumeroBot(digitos) {
