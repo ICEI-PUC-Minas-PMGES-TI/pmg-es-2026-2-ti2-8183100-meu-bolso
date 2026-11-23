@@ -1,4 +1,5 @@
-    import { useState } from "react";
+    import { useEffect, useState } from "react";
+    import { Settings2 } from "lucide-react";
 
     import {
     converterValor,
@@ -7,6 +8,8 @@
     valorParaTexto,
     } from "../../utils/Gastosutils";
     import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
+    import categoriasService, { TIPO_GASTO } from "../../service/categoriasService";
+    import GerenciarCategorias from "../Categorias/GerenciarCategorias";
     import Modal from "./Modal";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
@@ -52,11 +55,30 @@
     const [erroEnvio, setErroEnvio] = useState("");
     const [salvando, setSalvando] = useState(false);
 
-    // Se o gasto tiver uma categoria fora da lista, ela continua selecionável
+    // Categorias vindas da biblioteca do usuário (back-end). Cai na lista fixa
+    // se a busca falhar, para o modal nunca ficar sem opções.
+    const [categoriasBanco, setCategoriasBanco] = useState(null);
+    const [gerenciarAberto, setGerenciarAberto] = useState(false);
+
+    async function carregarCategorias() {
+        try {
+        const lista = await categoriasService.listar(TIPO_GASTO);
+        setCategoriasBanco(lista.map((c) => c.nome));
+        } catch {
+        setCategoriasBanco(CATEGORIAS);
+        }
+    }
+
+    useEffect(() => {
+        carregarCategorias();
+    }, []);
+
+    const base = categoriasBanco ?? CATEGORIAS;
+    // A categoria atual do gasto continua selecionável mesmo se não estiver na lista.
     const categorias =
-        !form.categoria || CATEGORIAS.includes(form.categoria)
-        ? CATEGORIAS
-        : [...CATEGORIAS, form.categoria];
+        !form.categoria || base.includes(form.categoria)
+        ? base
+        : [...base, form.categoria];
 
     // Formas de pagamento disponíveis. Item editado sem carteiraId mas com
     // nome legado ganha uma opção extra para não perder o valor atual.
@@ -144,9 +166,19 @@
             </div>
 
             <div className="form-group">
-            <label className="form-label" htmlFor="gasto-categoria">
+            <div className={styles["gastos-label-linha"]}>
+                <label className="form-label" htmlFor="gasto-categoria">
                 Categoria
-            </label>
+                </label>
+                <button
+                type="button"
+                className={styles["gastos-link-gerenciar"]}
+                onClick={() => setGerenciarAberto(true)}
+                >
+                <Settings2 size={14} aria-hidden="true" />
+                Gerenciar
+                </button>
+            </div>
             <select
                 id="gasto-categoria"
                 name="categoria"
@@ -306,6 +338,14 @@
             </button>
             </div>
         </form>
+
+        {gerenciarAberto && (
+            <GerenciarCategorias
+            tipo={TIPO_GASTO}
+            onFechar={() => setGerenciarAberto(false)}
+            onAlterado={carregarCategorias}
+            />
+        )}
         </Modal>
     );
     }

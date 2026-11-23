@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Settings2 } from "lucide-react";
 
 import {
   converterValor,
@@ -7,6 +8,8 @@ import {
   valorParaTexto,
 } from "../../utils/Receitasutils";
 import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Receitas/Constantes";
+import categoriasService, { TIPO_RECEITA } from "../../service/categoriasService";
+import GerenciarCategorias from "../Categorias/GerenciarCategorias";
 import Modal from "./Modal";
 import styles from "../../pages/Receitas/Receitas.module.css";
 
@@ -52,11 +55,30 @@ export default function ModalReceita({ receita, mesSelecionado, carteiras = [], 
   const [erroEnvio, setErroEnvio] = useState("");
   const [salvando, setSalvando] = useState(false);
 
-  // Se a receita tiver uma categoria fora da lista, ela continua selecionável
+  // Categorias vindas da biblioteca do usuário (back-end). Cai na lista fixa
+  // se a busca falhar, para o modal nunca ficar sem opções.
+  const [categoriasBanco, setCategoriasBanco] = useState(null);
+  const [gerenciarAberto, setGerenciarAberto] = useState(false);
+
+  async function carregarCategorias() {
+    try {
+      const lista = await categoriasService.listar(TIPO_RECEITA);
+      setCategoriasBanco(lista.map((c) => c.nome));
+    } catch {
+      setCategoriasBanco(CATEGORIAS);
+    }
+  }
+
+  useEffect(() => {
+    carregarCategorias();
+  }, []);
+
+  const base = categoriasBanco ?? CATEGORIAS;
+  // A categoria atual da receita continua selecionável mesmo se não estiver na lista.
   const categorias =
-    !form.categoria || CATEGORIAS.includes(form.categoria)
-      ? CATEGORIAS
-      : [...CATEGORIAS, form.categoria];
+    !form.categoria || base.includes(form.categoria)
+      ? base
+      : [...base, form.categoria];
 
   // Formas de recebimento disponíveis. Item editado sem carteiraId mas com
   // nome legado ganha uma opção extra para não perder o valor atual.
@@ -144,9 +166,19 @@ export default function ModalReceita({ receita, mesSelecionado, carteiras = [], 
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="receita-categoria">
-            Categoria
-          </label>
+          <div className={styles["receitas-label-linha"]}>
+            <label className="form-label" htmlFor="receita-categoria">
+              Categoria
+            </label>
+            <button
+              type="button"
+              className={styles["receitas-link-gerenciar"]}
+              onClick={() => setGerenciarAberto(true)}
+            >
+              <Settings2 size={14} aria-hidden="true" />
+              Gerenciar
+            </button>
+          </div>
           <select
             id="receita-categoria"
             name="categoria"
@@ -306,6 +338,14 @@ export default function ModalReceita({ receita, mesSelecionado, carteiras = [], 
           </button>
         </div>
       </form>
+
+      {gerenciarAberto && (
+        <GerenciarCategorias
+          tipo={TIPO_RECEITA}
+          onFechar={() => setGerenciarAberto(false)}
+          onAlterado={carregarCategorias}
+        />
+      )}
     </Modal>
   );
 }
