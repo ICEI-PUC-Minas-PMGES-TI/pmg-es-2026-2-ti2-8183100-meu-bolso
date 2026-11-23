@@ -1,36 +1,42 @@
 cff-version: 1.2.0
-message: "Please cite this software using these metadata."
-title: "MeuBolso"
+message: Please cite this software using these metadata.
+title: Meu Bolso
+abstract: >-
+  Aplicação para auxiliar jovens que estão começando a administrar
+  o próprio dinheiro, especialmente após os primeiros salários,
+  ajudando no desenvolvimento de melhores hábitos financeiros por
+  meio do planejamento da renda, do controle de gastos, da criação
+  de reservas e da definição de metas e prioridades.
 authors:
-  - family-names: "Araujo"
-    given-names: "Arthur Moraes Braga"
-  - family-names: "Tsuruga"
-    given-names: "Daniel Eiji Serra"
-  - family-names: "Pedrosa"
-    given-names: "David Aurelio"
-  - family-names: "Hermont"
-    given-names: "Gabriel de Souza Junqueira"
-  - family-names: "Silva"
-    given-names: "Vinicius Eduardo de Souza Matos"
+  - family-names: Moraes Braga Araujo
+    given-names: Arthur
+  - family-names: Serra Tsuruga
+    given-names: Daniel Eiji
+  - family-names: Pedrosa
+    given-names: David Aurelio
+  - family-names: de Souza Junqueira Hermont
+    given-names: Gabriel
+  - family-names: de Souza Matos Silva
+    given-names: Vinicius Eduardo
   - name-suffix: Professor
-    affiliation: "PUC Minas"
-  - family-names: "Carneiro"
-    given-names: "Rommel Vieira"
+    affiliation: PUC Minas
+    family-names: Vieira Carneiro
+    given-names: Rommel
   - name-suffix: Professor
-    affiliation: "PUC Minas"
-  - family-names: "Tavares"
-    given-names: "Cleiton Silva"
+    affiliation: PUC Minas
+    family-names: Silva Tavares
+    given-names: Cleiton
   - name-suffix: Professor
-    affiliation: "PUC Minas"
-  - family-names: "Diniz"
-    given-names: "Rafael Henrique Nogueira"
+    affiliation: PUC Minas
+    family-names: Nogueira Diniz
+    given-names: Rafael Henrique
 keywords:
-  - "Educação financeira"
-  - "Finanças pessoais"
-  - "Jovens"
-  - "Planejamento financeiro"
-  - "Aplicação web"
+  - educação financeira
+  - finanças pessoais
+  - controle de gastos
+  - planejamento financeiro
+  - metas financeiras
 repository-code: "https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti2-8183100-meu-bolso"
 license: CC-BY-4.0
 version: 1.0.0
-date-released: "2026-12-15"
+date-released: 2026-09-01
