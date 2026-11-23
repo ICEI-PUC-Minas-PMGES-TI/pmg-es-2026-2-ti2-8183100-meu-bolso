@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { X, Plus, Pencil, Trash2, Check, Library } from "lucide-react";
 
 import categoriasService from "../../service/categoriasService";
-import { ICONES_DISPONIVEIS, iconeDe } from "../../data/categoriaIcones";
+import { CATALOGO, ICONES_DISPONIVEIS, buscarIcones, iconeDe } from "../../data/categoriaIcones";
 import styles from "./GerenciarCategorias.module.css";
 
 /**
@@ -288,11 +288,18 @@ export default function GerenciarCategorias({ tipo, onFechar, onAlterado }) {
   );
 }
 
-/** Seletor de ícone: botão com o ícone atual que abre uma grade de opções. */
+/**
+ * Seletor de ícone: um botão com o ícone atual que abre um painel com busca e
+ * uma grade com todos os ícones disponíveis. Dá para digitar ("cafe", "carro",
+ * "saude"...) para filtrar, ou rolar a grade e escolher.
+ */
 function SeletorIcone({ valor, onEscolher, desabilitado }) {
   const [aberto, setAberto] = useState(false);
+  const [busca, setBusca] = useState("");
   const ref = useRef(null);
   const Atual = iconeDe(valor);
+
+  const resultados = buscarIcones(busca);
 
   useEffect(() => {
     if (!aberto) return;
@@ -302,6 +309,16 @@ function SeletorIcone({ valor, onEscolher, desabilitado }) {
     document.addEventListener("mousedown", aoClicarFora);
     return () => document.removeEventListener("mousedown", aoClicarFora);
   }, [aberto]);
+
+  // Ao fechar, limpa a busca para a próxima abertura começar do zero.
+  useEffect(() => {
+    if (!aberto) setBusca("");
+  }, [aberto]);
+
+  function escolher(nome) {
+    onEscolher(nome);
+    setAberto(false);
+  }
 
   return (
     <div className={styles.seletor} ref={ref}>
@@ -313,32 +330,47 @@ function SeletorIcone({ valor, onEscolher, desabilitado }) {
         aria-label="Escolher ícone"
         aria-haspopup="true"
         aria-expanded={aberto}
+        title="Escolher ícone"
       >
         <Atual size={18} aria-hidden="true" />
       </button>
 
       {aberto && (
-        <div className={styles.seletorGrade} role="menu">
-          {ICONES_DISPONIVEIS.map((nome) => {
-            const Ic = iconeDe(nome);
-            return (
-              <button
-                key={nome}
-                type="button"
-                className={`${styles.seletorOpcao} ${
-                  nome === valor ? styles.seletorOpcaoAtiva : ""
-                }`}
-                onClick={() => {
-                  onEscolher(nome);
-                  setAberto(false);
-                }}
-                aria-label={nome}
-                title={nome}
-              >
-                <Ic size={18} aria-hidden="true" />
-              </button>
-            );
-          })}
+        <div className={styles.seletorPainel} role="dialog" aria-label="Escolher ícone">
+          <input
+            type="search"
+            className={`form-input ${styles.seletorBusca}`}
+            placeholder="Buscar ícone (ex.: comida, carro...)"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            autoFocus
+          />
+
+          {resultados.length === 0 ? (
+            <p className={styles.seletorVazio}>Nenhum ícone encontrado.</p>
+          ) : (
+            <div className={styles.seletorGrade} role="listbox">
+              {resultados.map((nome) => {
+                const Ic = iconeDe(nome);
+                return (
+                  <button
+                    key={nome}
+                    type="button"
+                    role="option"
+                    aria-selected={nome === valor}
+                    className={`${styles.seletorOpcao} ${
+                      nome === valor ? styles.seletorOpcaoAtiva : ""
+                    }`}
+                    onClick={() => escolher(nome)}
+                    aria-label={CATALOGO[nome]?.rotulo || nome}
+                    title={CATALOGO[nome]?.rotulo || nome}
+                  >
+                    <Ic size={18} aria-hidden="true" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

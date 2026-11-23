@@ -183,22 +183,41 @@
   border-color: var(--verde-principal);
 }
 
-.seletorGrade {
+/* Painel suspenso do seletor: busca no topo + grade rolável de ícones */
+.seletorPainel {
   position: absolute;
   top: calc(100% + var(--espaco-1));
   left: 0;
   z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 2px;
-  width: 268px;
-  max-height: 220px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  width: 288px;
   padding: var(--espaco-2);
   background-color: var(--branco);
   border: 1px solid var(--cinza-200);
   border-radius: var(--radius-medio);
   box-shadow: var(--sombra-card);
+}
+
+.seletorBusca {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.seletorGrade {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.seletorVazio {
+  padding: var(--espaco-3);
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
 }
 
 .seletorOpcao {
@@ -262,9 +281,12 @@
     flex: 1 1 140px;
   }
 
+  .seletorPainel {
+    width: min(288px, calc(100vw - var(--espaco-8)));
+  }
+
   .seletorGrade {
     grid-template-columns: repeat(5, 1fr);
-    width: 230px;
   }
 }
 
