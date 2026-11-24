@@ -3,6 +3,7 @@ import { TrendingUp, AlertCircle } from "lucide-react";
 
 import styles from "./EvolucaoFinanceira.module.css";
 import gastosService from "../../service/gastosService";
+import receitasService from "../../service/receitasService";
 import { listarMetas, obterMovimentacoes } from "../../service/Api";
 import {
   ALTURA_GRAFICO,
@@ -11,7 +12,7 @@ import {
   agruparInvestimentosPorMes,
   calcularAcumuladoInvestido,
   extrairAportesInvestimento,
-  movimentacoesDasCarteiras,
+  paraTransacoes,
 } from "./dados";
 import GraficoEvolucao from "./GraficoEvolucao";
 import GraficoBarras from "./GraficoBarras";
@@ -21,7 +22,7 @@ import SeletorGrafico from "./SeletorGrafico";
 // ============================================================
 // EVOLUÇÃO FINANCEIRA (RF-06)
 // ------------------------------------------------------------
-// Busca as transações reais do usuário (gastosService), agrupa
+// Busca as transações reais do usuário (gastos e receitas), agrupa
 // por mês e deriva as séries dos gráficos. A evolução é calculada
 // em tempo de consulta — não é armazenada.
 //
@@ -43,7 +44,7 @@ function EvolucaoFinanceira() {
   const [graficoAtivo, setGraficoAtivo] = useState("mensal");
 
   // Carrega tudo ao montar a página, com o mínimo de requisições:
-  //  - gastos (gastosService) + movimentações das carteiras: gastos/renda
+  //  - gastos (gastosService) e receitas (receitasService): gastos/renda
   //  - metas + histórico unificado (1 requisição cada): aportes de
   //    investimento, filtrados pelas metas cujo nome indica investimento.
   useEffect(() => {
@@ -53,14 +54,16 @@ function EvolucaoFinanceira() {
       setCarregando(true);
       setErro(null);
       try {
-        const [{ gastos }, metas, movimentacoes] = await Promise.all([
-          gastosService.carregarTudo(),
-          listarMetas(),
-          obterMovimentacoes(),
-        ]);
+        const [{ gastos }, { receitas }, metas, movimentacoes] =
+          await Promise.all([
+            gastosService.carregarTudo(),
+            receitasService.carregarTudo(),
+            listarMetas(),
+            obterMovimentacoes(),
+          ]);
 
         if (!ativo) return;
-        setTransacoes([...(gastos ?? []), ...movimentacoesDasCarteiras()]);
+        setTransacoes(paraTransacoes(gastos, receitas));
         setAportes(extrairAportesInvestimento(metas, movimentacoes));
       } catch (e) {
         if (ativo) {
@@ -137,8 +140,8 @@ function EvolucaoFinanceira() {
           <TrendingUp size={32} className={styles.estadoIcone} aria-hidden="true" />
           <p className={styles.estadoTitulo}>Ainda não há transações</p>
           <p className="texto-secundario">
-            Registre seus gastos para ver a evolução do seu dinheiro ao longo
-            dos meses.
+            Registre seus gastos e receitas para ver a evolução do seu
+            dinheiro ao longo dos meses.
           </p>
         </div>
       );
