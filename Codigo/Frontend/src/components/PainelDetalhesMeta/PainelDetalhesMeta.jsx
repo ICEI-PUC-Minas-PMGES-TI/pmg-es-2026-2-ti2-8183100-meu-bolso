@@ -8,6 +8,7 @@ import {
   Target,
 } from "lucide-react";
 
+import { ROTULO_PRIORIDADE } from "../../pages/Metas/ordenacaoMetas";
 import styles from "./PainelDetalhesMeta.module.css";
 
 /**
@@ -168,7 +169,7 @@ function PainelDetalhesMeta({
                 <span
                   className={`${styles.tag} ${styles[`tag-${meta.prioridade}`]}`}
                 >
-                  {meta.prioridade}
+                  {ROTULO_PRIORIDADE[meta.prioridade] ?? meta.prioridade}
                 </span>
               </div>
             </div>

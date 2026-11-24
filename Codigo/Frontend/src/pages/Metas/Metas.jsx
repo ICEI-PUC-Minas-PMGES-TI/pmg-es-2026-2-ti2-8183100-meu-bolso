@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Plus,
   Target,
@@ -7,6 +7,7 @@ import {
   Pencil,
   ArrowLeftRight,
   CheckCircle2,
+  CalendarClock,
 } from "lucide-react";
 
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
@@ -21,7 +22,30 @@ import {
   listarMovimentacoesMeta,
 } from "../../service/Api";
 
+import {
+  OPCOES_ORDENACAO_METAS,
+  ORDENACAO_METAS_PADRAO,
+  ROTULO_PRIORIDADE,
+  descreverPrazo,
+  ordenarMetas,
+} from "./ordenacaoMetas";
+
 import styles from "./Metas.module.css";
+
+// Critério de ordenação escolhido fica salvo no navegador (só preferência
+// de tela; não é dado financeiro).
+const CHAVE_ORDENACAO = "meubolso:metas:ordenacao";
+
+function lerOrdenacaoSalva() {
+  try {
+    const salvo = localStorage.getItem(CHAVE_ORDENACAO);
+    return OPCOES_ORDENACAO_METAS.some((o) => o.valor === salvo)
+      ? salvo
+      : ORDENACAO_METAS_PADRAO;
+  } catch {
+    return ORDENACAO_METAS_PADRAO;
+  }
+}
 
 // ============================================================
 // METAS (RF-02 / RF-03 — F4: Metas e reserva)
@@ -86,6 +110,22 @@ function Metas() {
   const [metas, setMetas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erroCarregar, setErroCarregar] = useState("");
+
+  // RF-05: ordem da lista (prioridade, prazo ou progresso).
+  const [ordenacao, setOrdenacao] = useState(lerOrdenacaoSalva);
+  const metasOrdenadas = useMemo(
+    () => ordenarMetas(metas, ordenacao),
+    [metas, ordenacao]
+  );
+
+  function mudarOrdenacao(valor) {
+    setOrdenacao(valor);
+    try {
+      localStorage.setItem(CHAVE_ORDENACAO, valor);
+    } catch {
+      // Sem localStorage: a escolha vale só nesta visita.
+    }
+  }
 
   // Histórico de movimentações por meta (indexado por _id).
   // Ainda local (depósito/retirada vira transação no back-end depois).
@@ -353,7 +393,38 @@ function Metas() {
 
       {/* Lista de metas */}
       <section className={styles.lista}>
-        <h2>Suas metas</h2>
+        <div className={styles.listaTopo}>
+          <h2>Suas metas</h2>
+
+          {/* RF-05: organizar os objetivos por importância e prazo */}
+          {metas.length > 1 && (
+            <div className={styles.ordenacao}>
+              <span id="rotulo-ordenacao" className="texto-secundario texto-pequeno">
+                Ordenar por
+              </span>
+              <div
+                className={styles.seletor}
+                role="radiogroup"
+                aria-labelledby="rotulo-ordenacao"
+              >
+                {OPCOES_ORDENACAO_METAS.map((opcao) => (
+                  <button
+                    key={opcao.valor}
+                    type="button"
+                    role="radio"
+                    aria-checked={ordenacao === opcao.valor}
+                    className={`${styles.seletorBotao} ${
+                      ordenacao === opcao.valor ? styles.seletorBotaoAtivo : ""
+                    }`}
+                    onClick={() => mudarOrdenacao(opcao.valor)}
+                  >
+                    {opcao.rotulo}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {carregando ? (
           <div className={`card ${styles.vazio}`}>
@@ -371,13 +442,14 @@ function Metas() {
           </div>
         ) : (
           <div className={`grid grid-2 ${styles.gridMetas}`}>
-            {metas.map((meta) => {
+            {metasOrdenadas.map((meta) => {
               const progresso = calcularProgresso(
                 meta.valorAtual,
                 meta.valorAlvo
               );
               const concluida = progresso >= 100;
               const animar = recemConcluidas.has(meta._id);
+              const prazo = descreverPrazo(meta.prazo);
 
               return (
                 <article
@@ -411,10 +483,22 @@ function Metas() {
                           styles[`tag-${meta.prioridade}`]
                         }`}
                       >
-                        {meta.prioridade}
+                        {ROTULO_PRIORIDADE[meta.prioridade] ?? meta.prioridade}
                       </span>
                     )}
                   </header>
+
+                  {/* Prazo da meta (vencido em destaque se ainda não concluída) */}
+                  {prazo && (
+                    <p
+                      className={`${styles.metaPrazo} ${
+                        prazo.vencido && !concluida ? styles.metaPrazoVencido : ""
+                      }`}
+                    >
+                      <CalendarClock size={14} aria-hidden="true" />
+                      {concluida ? prazo.data : prazo.texto}
+                    </p>
+                  )}
 
                   {/* Barra de progresso */}
                   <div className={styles.progresso}>

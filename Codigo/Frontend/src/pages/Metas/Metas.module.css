@@ -65,6 +65,73 @@
   align-items: stretch;
 }
 
+/* Título da lista + seletor de ordenação (RF-05) */
+.listaTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+}
+
+.ordenacao {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+}
+
+.seletor {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background-color: var(--cor-superficie-suave);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--radius-pequeno);
+}
+
+.seletorBotao {
+  height: 30px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color var(--transicao-rapida),
+    color var(--transicao-rapida);
+}
+
+.seletorBotao:hover {
+  color: var(--verde-escuro);
+}
+
+.seletorBotaoAtivo,
+.seletorBotaoAtivo:hover {
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  box-shadow: var(--sombra-leve);
+}
+
+/* Prazo da meta no card */
+.metaPrazo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  margin-top: calc(var(--espaco-2) * -1);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.metaPrazoVencido {
+  color: var(--erro);
+  font-weight: 600;
+}
+
 .vazio {
   text-align: center;
 }
