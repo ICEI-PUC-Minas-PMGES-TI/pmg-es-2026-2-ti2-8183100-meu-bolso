@@ -1,5 +1,6 @@
 package Projeto.MeuBolso.service;
 
+import Projeto.MeuBolso.Config.FusoHorario;
 import Projeto.MeuBolso.model.Gasto;
 import Projeto.MeuBolso.model.Recorrencia;
 import Projeto.MeuBolso.repository.GastoRepository;
@@ -103,8 +104,9 @@ public class GastoRecorrenciaService {
         return hojeIso().substring(0, 7);
     }
 
+    // "Hoje" no fuso do Brasil, e não no do servidor (ver FusoHorario).
     public static String hojeIso() {
-        return LocalDate.now().toString(); // "AAAA-MM-DD"
+        return FusoHorario.hoje().toString(); // "AAAA-MM-DD"
     }
 
     // Soma (ou subtrai) meses de uma chave "AAAA-MM".

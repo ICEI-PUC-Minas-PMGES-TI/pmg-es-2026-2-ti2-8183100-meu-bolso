@@ -1,5 +1,6 @@
 package Projeto.MeuBolso.service;
 
+import Projeto.MeuBolso.Config.FusoHorario;
 import Projeto.MeuBolso.model.Gasto;
 import Projeto.MeuBolso.model.Orcamento;
 import Projeto.MeuBolso.model.PreferenciaResumo;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Service;
 public class ResumoSemanalService {
 
     /** Fuso de Brasília: o resumo e o agendamento seguem a semana local. */
-    public static final ZoneId ZONA = ZoneId.of("America/Sao_Paulo");
+    public static final ZoneId ZONA = FusoHorario.ZONA; // mesmo fuso do resto do sistema
 
     private static final int DIAS_DO_RESUMO = 7;
     private static final int TOP_CATEGORIAS = 5;
