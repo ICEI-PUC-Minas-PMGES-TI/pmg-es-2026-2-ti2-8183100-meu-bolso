@@ -23,17 +23,17 @@ import styles from "./ComoUsarWhatsApp.module.css";
  * e WhatsAppService). Se o fluxo do bot mudar, atualize esta página junto.
  *
  * Número do bot: VITE_WHATSAPP_NUMERO (só dígitos, com DDI).
- * Número oficial: 5531973421628 (+55 (31) 97342-1628).
- * Sem a variável, a página não mostra o botão "Abrir no WhatsApp".
+ * Sem a variável, usa o número oficial (NUMERO_OFICIAL).
  */
 
 // Palavra que inicia a conversa (mesmo padrão do backend: app.whatsapp.palavra-ativacao).
 const PALAVRA_ATIVACAO = "meu bolso";
 
-const NUMERO_BOT = (import.meta.env.VITE_WHATSAPP_NUMERO || "").replace(/\D/g, "");
+// Número oficial do bot, já em produção: +55 (31) 97342-1628.
+const NUMERO_OFICIAL = "5531973421628";
 
-// Exibido enquanto o bot não tem número próprio (VITE_WHATSAPP_NUMERO vazio).
-const NUMERO_PROVISORIO = "+55 31 97342-1628";
+const NUMERO_BOT =
+  (import.meta.env.VITE_WHATSAPP_NUMERO || "").replace(/\D/g, "") || NUMERO_OFICIAL;
 
 // "5531999990000" -> "+55 (31) 99999-0000"
 function formatarNumeroBot(digitos) {
@@ -115,9 +115,7 @@ function formatarTelefone(digitos) {
 function ComoUsarWhatsApp() {
   const usuario = obterUsuario();
   const telefone = formatarTelefone(usuario?.telefone);
-  const linkWhatsApp = NUMERO_BOT
-    ? `https://wa.me/${NUMERO_BOT}?text=${encodeURIComponent(PALAVRA_ATIVACAO)}`
-    : null;
+  const linkWhatsApp = `https://wa.me/${NUMERO_BOT}?text=${encodeURIComponent(PALAVRA_ATIVACAO)}`;
 
   return (
     <div className={styles.pagina}>
@@ -137,16 +135,12 @@ function ComoUsarWhatsApp() {
         <div className={`card ${styles.numeroBot}`}>
           <span className={styles.numeroRotulo}>Número do bot</span>
           <strong className={styles.numeroValor}>
-            {NUMERO_BOT ? formatarNumeroBot(NUMERO_BOT) : NUMERO_PROVISORIO}
+            {formatarNumeroBot(NUMERO_BOT)}
           </strong>
-          {linkWhatsApp ? (
-            <a className={`btn btn-verde ${styles.botaoAbrir}`} href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
-              <Send size={18} aria-hidden="true" />
-              Abrir no WhatsApp
-            </a>
-          ) : (
-            <span className="texto-secundario texto-pequeno">Em breve</span>
-          )}
+          <a className={`btn btn-verde ${styles.botaoAbrir}`} href={linkWhatsApp} target="_blank" rel="noopener noreferrer">
+            <Send size={18} aria-hidden="true" />
+            Abrir no WhatsApp
+          </a>
         </div>
       </header>
 
