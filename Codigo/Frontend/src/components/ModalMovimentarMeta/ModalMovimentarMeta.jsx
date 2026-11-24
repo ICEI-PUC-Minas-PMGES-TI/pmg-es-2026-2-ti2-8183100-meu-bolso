@@ -55,11 +55,11 @@ function ModalMovimentarMeta({ aberto, meta, onFechar, onConfirmar }) {
   // Carteiras com saldo (contas) disponíveis como
   // origem/destino da movimentação. Carregadas da API ao montar o modal.
   const [carteiras, setCarteiras] = useState([]);
+  // Começa em true: o efeito abaixo roda uma vez, ao montar o modal.
   const [carregandoCarteiras, setCarregandoCarteiras] = useState(true);
 
   useEffect(() => {
     let ativo = true;
-    setCarregandoCarteiras(true);
     listarCarteirasComSaldo()
       .then((lista) => {
         if (ativo) setCarteiras(lista);

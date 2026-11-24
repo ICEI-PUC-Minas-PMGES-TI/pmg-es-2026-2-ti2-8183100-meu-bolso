@@ -69,8 +69,22 @@ export default function ModalReceita({ receita, mesSelecionado, carteiras = [], 
     }
   }
 
+  // Carga inicial. O estado só é atualizado depois da resposta (e só se o
+  // modal ainda estiver aberto); carregarCategorias fica para recarregar
+  // depois de "Gerenciar categorias".
   useEffect(() => {
-    carregarCategorias();
+    let ativo = true;
+    categoriasService
+      .listar(TIPO_RECEITA)
+      .then((lista) => {
+        if (ativo) setCategoriasBanco(lista.map((c) => c.nome));
+      })
+      .catch(() => {
+        if (ativo) setCategoriasBanco(CATEGORIAS);
+      });
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   const base = categoriasBanco ?? CATEGORIAS;

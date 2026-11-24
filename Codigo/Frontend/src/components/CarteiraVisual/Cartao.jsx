@@ -10,25 +10,23 @@ import styles from "./Cartao.module.css";
 
 /**
  * Cartão visual (carteira tipo "cartao"). Apenas estético.
- * Mostra sempre a frente (sem virar). Titular e validade são
- * opcionais: só aparecem quando estiverem cadastrados.
+ * Mostra sempre a frente (sem virar).
  *
  * props:
  *  - apelido, bandeira, ultimosDigitos
  *  - banco (opcional): nome do banco/conta associada
- *  - titular, validade (opcionais)
  *  - tema: "roxo" | "escuro" | "verde" | "azul"
  *  - compacto: versão reduzida (topo do painel)
+ *
+ * Titular, validade e subtipo continuam no cadastro do cartão, mas o
+ * visual não os exibe (por isso não são lidos aqui).
  */
 function Cartao({
-  titular = "",
   ultimosDigitos = "",
-  validade = "",
   bandeira = "",
   apelido = "",
   banco: bancoTexto = "",
   tema = "roxo",
-  subtipo = "",
   compacto = false,
 }) {
   // Resolve a chave do banco:

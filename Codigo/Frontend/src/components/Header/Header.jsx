@@ -109,10 +109,14 @@ function Header() {
     };
   }, [navAberta]);
 
-  // Ao trocar de rota, garante que o menu de navegação feche.
-  useEffect(() => {
+  // Ao trocar de rota, garante que o menu de navegação feche. Compara com a
+  // rota anterior durante a renderização (padrão recomendado pelo React para
+  // "ajustar estado quando uma prop muda"), em vez de um efeito.
+  const [rotaAnterior, setRotaAnterior] = useState(location.pathname);
+  if (rotaAnterior !== location.pathname) {
+    setRotaAnterior(location.pathname);
     setNavAberta(false);
-  }, [location.pathname]);
+  }
 
   function handleSair() {
     sair(); // apaga o token e os dados do usuário

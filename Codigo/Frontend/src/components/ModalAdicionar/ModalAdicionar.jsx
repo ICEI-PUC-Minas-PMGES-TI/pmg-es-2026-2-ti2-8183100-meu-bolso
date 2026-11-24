@@ -61,29 +61,6 @@ function primeiraPosicaoLivre(contas) {
   return POSICOES_CONTA.find((p) => !usadas.has(p)) ?? "";
 }
 
-/**
- * Máscara de validade MM/AA.
- * - insere "/" automaticamente após os 2 primeiros dígitos
- * - aceita 4 dígitos colados
- * - permite apagar (não força a barra ao voltar para 2 dígitos ou menos)
- * - limita o mês a 01–12 assim que o 2º dígito é digitado
- */
-function formatarValidade(texto) {
-  const d = String(texto).replace(/\D/g, "").slice(0, 4);
-  if (d.length === 0) return "";
-
-  let mes = d.slice(0, 2);
-
-  // corrige mês inválido quando já há 2 dígitos
-  if (mes.length === 2) {
-    if (mes === "00") mes = "01";
-    else if (Number(mes) > 12) mes = "12";
-  }
-
-  if (d.length <= 2) return mes;
-  return `${mes}/${d.slice(2)}`;
-}
-
 /** Monta o estado do formulário a partir de um item existente. */
 function formDoItem(item) {
   if (!item) return formInicial;

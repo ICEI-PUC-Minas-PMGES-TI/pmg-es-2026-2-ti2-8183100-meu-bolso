@@ -89,8 +89,6 @@ import {
   PenTool,
   Monitor,
   Keyboard,
-  Mouse,
-  HardDrive,
   Cpu,
   Printer,
   Mail,

@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { createElement, useEffect, useId, useRef, useState } from "react";
 import { X, Plus, Pencil, Trash2, Check, Library } from "lucide-react";
 
 import categoriasService from "../../service/categoriasService";
@@ -297,27 +297,30 @@ function SeletorIcone({ valor, onEscolher, desabilitado }) {
   const [aberto, setAberto] = useState(false);
   const [busca, setBusca] = useState("");
   const ref = useRef(null);
-  const Atual = iconeDe(valor);
 
   const resultados = buscarIcones(busca);
+
+  // Fecha o painel e limpa a busca, para a próxima abertura começar do zero.
+  function fechar() {
+    setAberto(false);
+    setBusca("");
+  }
 
   useEffect(() => {
     if (!aberto) return;
     function aoClicarFora(e) {
-      if (ref.current && !ref.current.contains(e.target)) setAberto(false);
+      if (ref.current && !ref.current.contains(e.target)) {
+        setAberto(false);
+        setBusca("");
+      }
     }
     document.addEventListener("mousedown", aoClicarFora);
     return () => document.removeEventListener("mousedown", aoClicarFora);
   }, [aberto]);
 
-  // Ao fechar, limpa a busca para a próxima abertura começar do zero.
-  useEffect(() => {
-    if (!aberto) setBusca("");
-  }, [aberto]);
-
   function escolher(nome) {
     onEscolher(nome);
-    setAberto(false);
+    fechar();
   }
 
   return (
@@ -325,14 +328,16 @@ function SeletorIcone({ valor, onEscolher, desabilitado }) {
       <button
         type="button"
         className={styles.seletorBotao}
-        onClick={() => setAberto((v) => !v)}
+        onClick={() => (aberto ? fechar() : setAberto(true))}
         disabled={desabilitado}
         aria-label="Escolher ícone"
         aria-haspopup="true"
         aria-expanded={aberto}
         title="Escolher ícone"
       >
-        <Atual size={18} aria-hidden="true" />
+        {/* iconeDe busca o componente num mapa fixo; createElement evita
+            declarar um "componente" dentro da renderização. */}
+        {createElement(iconeDe(valor), { size: 18, "aria-hidden": true })}
       </button>
 
       {aberto && (
