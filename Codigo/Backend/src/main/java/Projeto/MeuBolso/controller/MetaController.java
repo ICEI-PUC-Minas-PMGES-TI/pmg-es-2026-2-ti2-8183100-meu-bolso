@@ -93,12 +93,19 @@ public class MetaController {
     }
 
     // Exclui uma meta do usuário (e o histórico de movimentações dela).
+    // Meta com dinheiro guardado não pode ser excluída: o valor não volta para
+    // nenhuma conta, então ele sumiria. O usuário precisa retirar antes.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable String id, Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
         Meta meta = metaRepository.findByIdAndUsuarioId(id, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
+
+        if (meta.getValorAtual() != null && meta.getValorAtual().signum() > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Retire o dinheiro guardado nesta meta antes de excluí-la.");
+        }
 
         metaRepository.delete(meta);
         movimentacaoRepository.deleteByMetaIdAndUsuarioId(id, usuarioId);
