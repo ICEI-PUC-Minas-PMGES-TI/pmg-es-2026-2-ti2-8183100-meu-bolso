@@ -13,11 +13,13 @@ import {
   calcularAcumuladoInvestido,
   extrairAportesInvestimento,
   paraTransacoes,
+  PREVISAO_PADRAO,
 } from "./dados";
 import GraficoEvolucao from "./GraficoEvolucao";
 import GraficoBarras from "./GraficoBarras";
 import GraficoInvestimento from "./GraficoInvestimento";
 import SeletorGrafico from "./SeletorGrafico";
+import SeletorPrevisao from "./SeletorPrevisao";
 
 // ============================================================
 // EVOLUÇÃO FINANCEIRA (RF-06)
@@ -42,6 +44,9 @@ function EvolucaoFinanceira() {
 
   // Gráfico em exibição: "mensal" (barras, padrão) ou "acumulado" (linha).
   const [graficoAtivo, setGraficoAtivo] = useState("mensal");
+
+  // Horizonte da prospecção: 3, 6 ou 12 meses à frente.
+  const [mesesPrevisao, setMesesPrevisao] = useState(PREVISAO_PADRAO);
 
   // Carrega tudo ao montar a página, com o mínimo de requisições:
   //  - gastos (gastosService) e receitas (receitasService): gastos/renda
@@ -82,10 +87,11 @@ function EvolucaoFinanceira() {
     };
   }, []);
 
-  // Agrega as transações por mês e deriva as séries dos gráficos.
+  // Agrega as transações por mês (realizado x previsto, até o horizonte
+  // escolhido no filtro) e deriva as séries dos gráficos.
   const dadosMensais = useMemo(
-    () => agruparPorMes(transacoes),
-    [transacoes],
+    () => agruparPorMes(transacoes, { mesesPrevisao }),
+    [transacoes, mesesPrevisao],
   );
   const dadosAcumulado = useMemo(
     () => calcularAcumulado(dadosMensais),
@@ -98,16 +104,26 @@ function EvolucaoFinanceira() {
 
   const temDados = dadosMensais.length > 0;
 
-  // Meses reais x meses de prospecção (recorrências projetadas).
-  const mesesPrevistos = dadosMensais.filter((d) => d.projetado).length;
-  const mesesReais = dadosMensais.length - mesesPrevistos;
+  // Meses até o atual x meses futuros (prospecção das recorrências).
+  const mesesFuturos = dadosMensais.filter((d) => d.futuro).length;
+  const mesesAteHoje = dadosMensais.length - mesesFuturos;
+  const plural = (n) => `${n} ${n === 1 ? "mês" : "meses"}`;
   const subtituloAcumulado =
-    mesesPrevistos > 0
-      ? `Saldo acumulado em ${mesesReais} ${mesesReais === 1 ? "mês" : "meses"} e previsão para os próximos ${mesesPrevistos}`
-      : `Saldo acumulado nos últimos ${mesesReais} ${mesesReais === 1 ? "mês" : "meses"}`;
+    mesesFuturos > 0
+      ? `Saldo de ${plural(mesesAteHoje)} e previsão para ${plural(mesesFuturos)}`
+      : `Saldo acumulado em ${plural(mesesAteHoje)}`;
 
   const seletor = (
     <SeletorGrafico ativo={graficoAtivo} aoMudar={setGraficoAtivo} />
+  );
+
+  // Gastos/renda e saldo têm o filtro da previsão; investimentos não
+  // (não há projeção de aportes).
+  const acoesComPrevisao = (
+    <div className={styles.acoesGrafico}>
+      <SeletorPrevisao meses={mesesPrevisao} aoMudar={setMesesPrevisao} />
+      {seletor}
+    </div>
   );
 
   function renderConteudo() {
@@ -158,18 +174,18 @@ function EvolucaoFinanceira() {
     // key força a remontagem ao trocar de gráfico, reexecutando as animações
     return graficoAtivo === "acumulado" ? (
       <GraficoEvolucao
-        key="acumulado"
+        key={`acumulado-${mesesPrevisao}`}
         dados={dadosAcumulado}
         subtitulo={subtituloAcumulado}
         altura={ALTURA_GRAFICO}
-        acoes={seletor}
+        acoes={acoesComPrevisao}
       />
     ) : (
       <GraficoBarras
-        key="mensal"
+        key={`mensal-${mesesPrevisao}`}
         dados={dadosMensais}
         altura={ALTURA_GRAFICO}
-        acoes={seletor}
+        acoes={acoesComPrevisao}
       />
     );
   }

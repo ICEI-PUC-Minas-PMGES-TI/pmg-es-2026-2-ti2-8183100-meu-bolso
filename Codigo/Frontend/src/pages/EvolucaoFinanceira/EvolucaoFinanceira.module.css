@@ -253,25 +253,48 @@
   stroke-opacity: 0.7;
 }
 
-/* Colunas de barras previstas: mais claras e com contorno tracejado. */
-.colunaPrevista .barraRenda,
-.colunaPrevista .barraGastos {
-  fill-opacity: 0.35;
-  stroke-width: 1.5;
-  stroke-dasharray: 4 3;
+/* Parte PREVISTA das barras: a mesma cor, bem mais clara. Fica
+   empilhada em cima da parte realizada (ou sozinha nos meses futuros). */
+.barraRendaPrevista,
+.barraGastosPrevista {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: cresceBarra 0.6s ease both;
+  transition: opacity var(--transicao-rapida);
 }
 
-.colunaPrevista .barraRenda {
-  stroke: var(--verde-principal);
+.barraRendaPrevista {
+  fill: color-mix(in srgb, var(--verde-principal) 35%, transparent);
 }
 
-.colunaPrevista .barraGastos {
-  stroke: var(--erro);
+.barraGastosPrevista {
+  fill: color-mix(in srgb, var(--erro) 30%, transparent);
 }
 
+/* Legenda "Previsto": quadradinho claro, como as barras previstas. */
 .corPrevisao {
-  background-color: transparent;
-  border: 1.5px dashed var(--cor-texto-secundario);
+  background-color: color-mix(in srgb, var(--cor-texto-secundario) 30%, transparent);
+}
+
+/* Mês futuro no eixo X fica mais apagado. */
+.rotuloXFuturo {
+  fill: var(--cor-texto-desabilitado);
+}
+
+/* Filtro da previsão (3 meses / 6 meses / 1 ano) ao lado do seletor. */
+.acoesGrafico {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+}
+
+.seletorTexto {
+  width: auto;
+  padding: 0 10px;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* Tooltip */

@@ -7,7 +7,7 @@ import { useLarguraGrafico } from "./useLarguraGrafico";
 // esquerda maior para caber os rótulos do eixo Y (ex.: "R$ 3 mil")
 const MARGEM = { topo: 12, direita: 24, base: 28, esquerda: 72 };
 const RECUO = 18; // afasta o primeiro e o último ponto das bordas
-const LARGURA_TOOLTIP = 120; // igual a .tooltip no CSS Module
+const LARGURA_TOOLTIP = 150; // largura do tooltip (passada no style)
 
 // Gráfico de linha: total guardado acumulado ao longo dos meses.
 function GraficoEvolucao({
@@ -214,7 +214,11 @@ function GraficoEvolucao({
         {ponto && (
           <div
             className={styles.tooltip}
-            style={{ left: tooltipEsquerda, top: Math.max(ponto.y - 58, 0) }}
+            style={{
+              left: tooltipEsquerda,
+              top: Math.max(ponto.y - (ponto.valorPrevistoFimMes != null ? 74 : 58), 0),
+              width: LARGURA_TOOLTIP,
+            }}
           >
             <span className={styles.tooltipMes}>
               {ponto.mesCompleto ?? ponto.mes}
@@ -223,6 +227,12 @@ function GraficoEvolucao({
             <strong className={styles.tooltipValor}>
               {formatarReal(ponto.valor)}
             </strong>
+            {/* Mês atual com recorrências ainda por cair: saldo esperado no fim do mês */}
+            {ponto.valorPrevistoFimMes != null && (
+              <span className={styles.tooltipMes}>
+                Fim do mês: {formatarReal(ponto.valorPrevistoFimMes)}
+              </span>
+            )}
           </div>
         )}
       </div>
