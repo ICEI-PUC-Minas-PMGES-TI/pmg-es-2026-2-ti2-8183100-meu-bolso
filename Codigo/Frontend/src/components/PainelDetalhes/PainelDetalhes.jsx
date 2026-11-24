@@ -11,7 +11,7 @@ import styles from "./PainelDetalhes.module.css";
  * props:
  *  - item: objeto selecionado (ou null = fechado)
  *  - movimentacoes: lista de movimentações do item
- *  - contaAssociada: conta vinculada (para cartões/reservas), opcional
+ *  - contaAssociada: conta vinculada (para cartões), opcional
  *  - onFechar: fecha o painel
  *  - onVerMovimentacoes, onEditar, onExcluir: callbacks (placeholders)
  */
@@ -238,20 +238,6 @@ function ResumoPorTipo({ item, contaAssociada }) {
   if (item.tipo === "dinheiro") {
     return (
       <Linha rotulo="Saldo registrado" valor={formatarBRL(item.saldo)} destaque />
-    );
-  }
-
-  if (item.tipo === "reserva") {
-    return (
-      <>
-        <Linha rotulo="Valor reservado" valor={formatarBRL(item.valorReservado)} destaque />
-        {item.objetivo ? (
-          <Linha rotulo="Objetivo" valor={formatarBRL(item.objetivo)} />
-        ) : null}
-        {contaAssociada ? (
-          <Linha rotulo="Guardado em" valor={contaAssociada.apelido} />
-        ) : null}
-      </>
     );
   }
 

@@ -61,7 +61,10 @@ public class CarteiraController {
         Set<String> idsVistos = new HashSet<>();
         validarLista("cartoes", cartoes, Set.of("cartao"), idsVistos);
         validarLista("contas", contas, Set.of("conta"), idsVistos);
-        validarLista("dinheiroEReservas", dinheiroEReservas, Set.of("dinheiro", "reserva"), idsVistos);
+        // A lista mantém o nome "dinheiroEReservas" por compatibilidade com os
+        // documentos já gravados, mas só aceita dinheiro em espécie: o tipo
+        // "reserva" da carteira foi removido (a reserva de emergência é uma meta).
+        validarLista("dinheiroEReservas", dinheiroEReservas, Set.of("dinheiro"), idsVistos);
         carteira.setCartoes(cartoes);
         carteira.setContas(contas);
         carteira.setDinheiroEReservas(dinheiroEReservas);

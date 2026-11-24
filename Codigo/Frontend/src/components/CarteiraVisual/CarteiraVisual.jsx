@@ -8,7 +8,7 @@ import Conta from "./Conta";
  * qual componente usar.
  *
  * props:
- *  - tipo: "cartao" | "dinheiro" | "conta" | "reserva"
+ *  - tipo: "cartao" | "dinheiro" | "conta"
  *  - ...demais props repassadas ao componente específico
  */
 function CarteiraVisual({ tipo = "cartao", ...props }) {
@@ -16,7 +16,6 @@ function CarteiraVisual({ tipo = "cartao", ...props }) {
     case "dinheiro":
       return <Cedula {...props} />;
     case "conta":
-    case "reserva":
       return <Conta tipo={tipo} {...props} />;
     case "cartao":
     default:

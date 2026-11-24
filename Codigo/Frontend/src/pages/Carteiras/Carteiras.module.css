@@ -465,7 +465,7 @@
 }
 
 /* ========================================
-   CARDS DE CONTA / RESERVA / ADICIONAR (padrão da referência)
+   CARDS DE CONTA / ADICIONAR (padrão da referência)
 ======================================== */
 .contaCard {
   position: relative;
@@ -534,7 +534,7 @@
   object-fit: contain;
 }
 
-/* Ícone circular verde-claro (reserva / adicionar) */
+/* Ícone circular verde-claro (card de adicionar) */
 .contaIcone {
   display: inline-flex;
   align-items: center;

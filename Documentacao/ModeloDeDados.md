@@ -14,7 +14,7 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 |---|---|---|
 | `usuarios` | `Usuario` | Conta, login, telefone e papel (role). Dono de todos os demais dados. |
 | `metas` | `Meta` | Metas e reserva financeira (reserva = meta comum). |
-| `carteiras` | `CarteiraUsuario` | Cartões, contas, dinheiro/reservas e movimentações de dinheiro do usuário. |
+| `carteiras` | `CarteiraUsuario` | Cartões, contas, dinheiro em espécie e movimentações de dinheiro do usuário. |
 | `gastos` | `Gasto` | Gastos (saídas) classificados por categoria e carteira. |
 | `orcamentos` | `Orcamento` | Teto mensal de gastos; um por usuário. |
 | `recorrencias` | `Recorrencia` | Regras de gasto recorrente (repetir todo mês). |
@@ -62,15 +62,15 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `usuarioId` | String (ref → `usuarios`, **único**) | Dono da carteira (uma por usuário). |
 | `cartoes` | Array de Objetos (embutido) | Cartões do usuário (estrutura flexível). |
 | `contas` | Array de Objetos (embutido) | Contas bancárias (apelido, banco, saldo, posição de destaque). |
-| `dinheiroEReservas` | Array de Objetos (embutido) | Dinheiro em espécie e reservas; o dinheiro guarda a contagem por denominação. |
+| `dinheiroEReservas` | Array de Objetos (embutido) | Dinheiro em espécie, com a contagem por denominação. O nome da lista ficou por compatibilidade; o antigo tipo `reserva` foi removido (a reserva de emergência é uma meta). |
 | `movsDinheiro` | Array de Objetos (embutido) | Movimentações do dinheiro em espécie (entradas/saídas). |
 | `versao` | Long | Controle de concorrência otimista; começa em 0 e sobe a cada gravação. `PUT` com versão diferente da do banco retorna 409. |
 
 > As quatro listas são salvas como subdocumentos flexíveis (`List<Map<String,Object>>`), espelhando o estado da tela de Carteira no front. **Chaves com ponto:** a contagem de cédulas usa chaves como `"0.5"`; o `MappingMongoConverter` está configurado com `setMapKeyDotReplacement("_DOT_")` para permitir pontos em chaves de mapa.
 
-> **Validação no `PUT`:** `id` obrigatório e único entre todas as listas, `tipo` coerente com a lista (`conta`, `cartao`, `dinheiro` ou `reserva`), `saldo` numérico e no máximo 200 itens por lista (400 se violar).
+> **Validação no `PUT`:** `id` obrigatório e único entre todas as listas, `tipo` coerente com a lista (`conta`, `cartao` ou `dinheiro`), `saldo` numérico e no máximo 200 itens por lista (400 se violar).
 
-> **Saldos alterados pelos gastos:** conta (`saldo` diminui), cartão de crédito (`faturaAtual` aumenta) e cartão de débito (`saldo` da conta indicada em `contaId` diminui). Dinheiro em espécie e reservas NÃO são alterados: o saldo do dinheiro deriva da `contagem` e só muda pelo modal de cédulas.
+> **Saldos alterados pelos gastos:** conta (`saldo` diminui), cartão de crédito (`faturaAtual` aumenta) e cartão de débito (`saldo` da conta indicada em `contaId` diminui). Dinheiro em espécie NÃO é alterado: o saldo do dinheiro deriva da `contagem` e só muda pelo modal de cédulas.
 
 ### 3.4 `gastos` (`Gasto`)
 | Atributo | Tipo | Descrição |

@@ -11,8 +11,7 @@ import { obterCarteiras } from "./Api";
 /**
  * Retorna as contas bancárias que possuem saldo, no formato
  * { id, nome, saldo, origem }. São as únicas que podem ceder ou receber
- * dinheiro numa movimentação de meta — cartões, dinheiro físico e reservas
- * ficam de fora.
+ * dinheiro numa movimentação de meta — cartões e dinheiro físico ficam de fora.
  *
  * `origem` indica a lista de origem para saber onde gravar de volta.
  */

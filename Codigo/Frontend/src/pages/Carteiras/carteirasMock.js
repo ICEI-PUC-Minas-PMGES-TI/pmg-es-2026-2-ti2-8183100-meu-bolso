@@ -26,9 +26,6 @@ export const movimentacoesPorItem = {
   "dinheiro-especie": [
     { id: 1, descricao: "Troco do almoço", categoria: "Alimentação", data: "17 out", valor: -12.0, entrada: false },
   ],
-  "reserva-emergencia": [
-    { id: 1, descricao: "Aporte mensal", categoria: "Reserva", data: "05 out", valor: 150.0, entrada: true },
-  ],
 };
 
 /** Formata número para BRL. */

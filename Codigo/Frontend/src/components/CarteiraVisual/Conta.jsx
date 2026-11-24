@@ -1,20 +1,19 @@
-import { Landmark, PiggyBank, Wallet } from "lucide-react";
+import { Landmark, Wallet } from "lucide-react";
 import styles from "./Conta.module.css";
 
 /**
  * Representação simples (placeholder) para itens que ainda não têm
- * arte própria: conta bancária, reserva e (fallback) dinheiro.
+ * arte própria: conta bancária e (fallback) dinheiro.
  * Sem gradiente/efeitos — refino visual fica para depois.
  *
  * props:
- *  - tipo: "conta" | "reserva" | "dinheiro"
+ *  - tipo: "conta" | "dinheiro"
  *  - apelido: nome exibido
  *  - instituicao: banco/origem (opcional)
  *  - compacto: versão reduzida para o topo do painel
  */
 const icones = {
   conta: Landmark,
-  reserva: PiggyBank,
   dinheiro: Wallet,
 };
 

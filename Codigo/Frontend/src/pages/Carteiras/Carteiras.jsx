@@ -5,7 +5,6 @@ import {
   Landmark,
   Coins,
   ChevronRight,
-  PiggyBank,
 } from "lucide-react";
 
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
@@ -28,11 +27,14 @@ import { obterCarteiras, salvarCarteiras, obterMovimentacoes } from "../../servi
 
 import styles from "./Carteiras.module.css";
 
-// Normaliza a lista de dinheiro/reservas (itens de dinheiro ganham contagem/saldo).
+// Normaliza a lista de dinheiro em espécie (cada item ganha contagem/saldo).
+// A lista da API ainda se chama `dinheiroEReservas`, mas o tipo "reserva" foi
+// removido: itens antigos desse tipo (que nunca apareciam na tela) são
+// descartados aqui, para o próximo salvamento não ser recusado pelo back-end.
 function normalizarListaDinheiro(lista) {
-  return (lista ?? []).map((item) =>
-    item.tipo === "dinheiro" ? normalizarDinheiro(item) : item
-  );
+  return (lista ?? [])
+    .filter((item) => item.tipo === "dinheiro")
+    .map(normalizarDinheiro);
 }
 
 function Carteiras() {
@@ -165,7 +167,7 @@ function Carteiras() {
   function setListaPorTipo(tipo, atualizador) {
     if (tipo === "cartao") setCartoes(atualizador);
     else if (tipo === "conta") setContas(atualizador);
-    else setDinheiroEReservas(atualizador); // dinheiro e reserva
+    else setDinheiroEReservas(atualizador); // dinheiro em espécie
   }
 
   // Troca de posição: a conta `alvoId` passa a ocupar `novaPosicao`. Quem já
@@ -227,10 +229,9 @@ function Carteiras() {
   function excluirItem(item) {
     setListaPorTipo(item.tipo, (lista) => lista.filter((i) => i.id !== item.id));
 
-    // Ao excluir uma conta, limpa vínculos órfãos em cartões e reservas.
+    // Ao excluir uma conta, limpa vínculos órfãos nos cartões.
     if (item.tipo === "conta") {
       setCartoes((lista) => desvincularConta(item.id, lista));
-      setDinheiroEReservas((lista) => desvincularConta(item.id, lista));
     }
 
     setItemSelecionado(null);
@@ -241,7 +242,7 @@ function Carteiras() {
     setModalAberto(true);
   }
 
-  // Conta associada ao item selecionado (cartão/reserva), quando houver.
+  // Conta associada ao cartão selecionado, quando houver.
   const contaAssociada =
     itemSelecionado?.contaId
       ? contas.find((c) => c.id === itemSelecionado.contaId) || null
@@ -353,7 +354,7 @@ function Carteiras() {
 
         {cartoes.length > 0 && (
           <p className={styles.carteiraLegenda}>
-            Seus cartões, contas e reservas em um só lugar.
+            Seus cartões, contas e dinheiro em um só lugar.
           </p>
         )}
       </section>
@@ -546,9 +547,7 @@ function Secao({ titulo, icone: Icone, vazio, children, className = "", acao = n
  *  `semRodape` oculta o texto abaixo (usado dentro do corpo da carteira). */
 function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
   const valorRodape =
-    item.tipo === "reserva"
-      ? formatarBRL(item.valorReservado)
-      : item.subtipo === "credito"
+    item.subtipo === "credito"
       ? `Fatura ${formatarBRL(item.faturaAtual)}`
       : item.saldo != null
       ? formatarBRL(item.saldo)
@@ -633,14 +632,13 @@ function movimentacoesDoItem(item, historico, cartoes) {
 }
 
 /**
- * Card de conta/reserva no padrão da referência:
- * logo/ícone circular, nome, subtítulo, valor dentro, seta e rodapé
+ * Card de conta no padrão da referência:
+ * logo circular, nome, subtítulo, valor dentro, seta e rodapé
  * com a última movimentação. Apenas apresentação; não altera dados.
  */
 function CardConta({ item, selecionado, onSelecionar, ultimaMov = null }) {
-  const ehReserva = item.tipo === "reserva";
-  const chave = ehReserva ? null : chaveBanco(item);
-  const banco = ehReserva ? null : bancoDe(chave);
+  const chave = chaveBanco(item);
+  const banco = bancoDe(chave);
   const nomeExibido = item.apelido || item.nome || banco?.nome || "Conta";
 
   // Fundo do círculo da logo: exceções de contraste (BTG, Caixa) ou tom da cor.
@@ -659,13 +657,9 @@ function CardConta({ item, selecionado, onSelecionar, ultimaMov = null }) {
     secundaria: "Conta secundária",
     terciaria: "Conta terciária",
   };
-  const subtitulo = ehReserva
-    ? "Reserva guardada"
-    : rotuloPosicao[item.posicaoEfetiva ?? item.posicao] || "Conta";
+  const subtitulo = rotuloPosicao[item.posicaoEfetiva ?? item.posicao] || "Conta";
 
-  const valor = ehReserva
-    ? formatarBRL(item.valorReservado)
-    : formatarBRL(item.saldo);
+  const valor = formatarBRL(item.saldo);
 
   const mov = ultimaMov;
 
@@ -692,28 +686,22 @@ function CardConta({ item, selecionado, onSelecionar, ultimaMov = null }) {
       ) : null}
 
       <div className={styles.contaTopo}>
-        {ehReserva ? (
-          <span className={styles.contaIcone}>
-            <PiggyBank size={22} />
-          </span>
-        ) : (
-          <span
-            className={styles.contaLogo}
-            style={estiloLogoCirculo}
-          >
-            <img
-              src={banco.logo}
-              alt={banco.nome}
-              className={styles.contaLogoImg}
-              onError={(e) => {
-                if (!e.currentTarget.dataset.fallback) {
-                  e.currentTarget.dataset.fallback = "1";
-                  e.currentTarget.src = "/bancos/padrao.png";
-                }
-              }}
-            />
-          </span>
-        )}
+        <span
+          className={styles.contaLogo}
+          style={estiloLogoCirculo}
+        >
+          <img
+            src={banco.logo}
+            alt={banco.nome}
+            className={styles.contaLogoImg}
+            onError={(e) => {
+              if (!e.currentTarget.dataset.fallback) {
+                e.currentTarget.dataset.fallback = "1";
+                e.currentTarget.src = "/bancos/padrao.png";
+              }
+            }}
+          />
+        </span>
         <ChevronRight size={18} className={styles.contaSeta} />
       </div>
 

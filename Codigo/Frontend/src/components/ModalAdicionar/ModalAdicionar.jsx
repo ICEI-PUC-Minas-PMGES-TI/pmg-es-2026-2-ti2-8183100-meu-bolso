@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, CreditCard, Landmark, Wallet, PiggyBank } from "lucide-react";
+import { X, CreditCard, Landmark, Wallet } from "lucide-react";
 import { BANCOS, bancoDe } from "../../data/bancos";
 import styles from "./ModalAdicionar.module.css";
 
@@ -24,7 +24,6 @@ const tiposDisponiveis = [
   { tipo: "cartao", nome: "Cartão", descricao: "Crédito ou débito", icone: CreditCard },
   { tipo: "conta", nome: "Conta bancária", descricao: "Conta corrente ou pagamento", icone: Landmark },
   { tipo: "dinheiro", nome: "Dinheiro físico", descricao: "Espécie na carteira", icone: Wallet },
-  { tipo: "reserva", nome: "Reserva", descricao: "Emergência, poupança...", icone: PiggyBank },
 ];
 
 const formInicial = {
@@ -42,9 +41,8 @@ const formInicial = {
   instituicao: "",
   saldo: "",
   posicao: "",
-  // dinheiro / reserva
+  // dinheiro
   valor: "",
-  objetivo: "",
 };
 
 /** Número -> string editável no input (sem forçar formato de moeda). */
@@ -78,8 +76,7 @@ function formDoItem(item) {
     instituicao: item.instituicao || "",
     saldo: numParaTexto(item.saldo),
     posicao: item.posicao || "",
-    valor: numParaTexto(item.valorReservado ?? (item.tipo === "dinheiro" ? item.saldo : undefined)),
-    objetivo: numParaTexto(item.objetivo),
+    valor: numParaTexto(item.tipo === "dinheiro" ? item.saldo : undefined),
   };
 }
 
@@ -167,23 +164,11 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
       };
     }
 
-    if (tipoSelecionado === "dinheiro") {
-      return {
-        ...base,
-        apelido: form.apelido.trim() || "Dinheiro",
-        saldo: converterValor(form.valor) ?? 0,
-      };
-    }
-
-    // reserva
+    // dinheiro
     return {
       ...base,
-      apelido: form.apelido.trim() || "Reserva",
-      valorReservado: converterValor(form.valor) ?? 0,
-      ...(converterValor(form.objetivo) != null
-        ? { objetivo: converterValor(form.objetivo) }
-        : {}),
-      ...(form.contaId ? { contaId: form.contaId } : {}),
+      apelido: form.apelido.trim() || "Dinheiro",
+      saldo: converterValor(form.valor) ?? 0,
     };
   }
 
@@ -324,7 +309,7 @@ function CamposPorTipo({ tipo, form, atualizar, contas, erros = {} }) {
         <input
           id="apelido"
           type="text"
-          placeholder="Ex: Nubank, Carteira, Reserva..."
+          placeholder="Ex: Nubank, Carteira..."
           value={form.apelido}
           onChange={(e) => atualizar("apelido", e.target.value)}
         />
@@ -531,51 +516,6 @@ function CamposPorTipo({ tipo, form, atualizar, contas, erros = {} }) {
         </div>
       )}
 
-      {tipo === "reserva" && (
-        <>
-          <div className={styles.campo}>
-            <label htmlFor="valor">Valor reservado</label>
-            <input
-              id="valor"
-              type="text"
-              inputMode="decimal"
-              placeholder="R$ 0,00"
-              value={form.valor}
-              onChange={(e) => atualizar("valor", e.target.value)}
-            />
-          </div>
-          <div className={styles.campo}>
-            <label htmlFor="objetivo">Objetivo (opcional)</label>
-            <input
-              id="objetivo"
-              type="text"
-              inputMode="decimal"
-              placeholder="R$ 0,00"
-              value={form.objetivo}
-              onChange={(e) => atualizar("objetivo", e.target.value)}
-            />
-          </div>
-          {/* Conta onde o dinheiro está guardado */}
-          <div className={styles.campo}>
-            <label htmlFor="contaReserva">Guardado em (opcional)</label>
-            <select
-              id="contaReserva"
-              value={form.contaId}
-              onChange={(e) => atualizar("contaId", e.target.value)}
-              disabled={!temContas}
-            >
-              <option value="">
-                {temContas ? "Nenhuma" : "Cadastre uma conta primeiro"}
-              </option>
-              {contas.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.apelido}
-                </option>
-              ))}
-            </select>
-          </div>
-        </>
-      )}
     </>
   );
 }
