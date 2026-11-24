@@ -69,6 +69,9 @@ function GraficoBarras({
 
   const barra = barraAtiva !== null ? (barras[barraAtiva] ?? null) : null;
 
+  // Meses futuros são prospecção (recorrências projetadas).
+  const temPrevisao = dados.some((d) => d.projetado);
+
   const tooltipEsquerda = barra
     ? Math.min(
         Math.max(barra.centroX - LARGURA_TOOLTIP / 2, 0),
@@ -90,6 +93,12 @@ function GraficoBarras({
               <span className={`${styles.legendaCor} ${styles.corGastos}`} />
               Gastos
             </span>
+            {temPrevisao && (
+              <span className={styles.legendaItem}>
+                <span className={`${styles.legendaCor} ${styles.corPrevisao}`} />
+                Previsão
+              </span>
+            )}
           </div>
           {acoes}
         </div>
@@ -104,9 +113,9 @@ function GraficoBarras({
           aria-label={`${titulo}: ${dados
             .map(
               (d) =>
-                `${d.mes}, renda ${formatarReal(d.renda)}, gastos ${formatarReal(
-                  d.gastos,
-                )}`,
+                `${d.mesCompleto ?? d.mes}${d.projetado ? " (previsão)" : ""}, renda ${formatarReal(
+                  d.renda,
+                )}, gastos ${formatarReal(d.gastos)}`,
             )
             .join("; ")}`}
         >
@@ -125,7 +134,8 @@ function GraficoBarras({
           {/* Barras lado a lado (renda e gastos) */}
           {barras.map((b, i) => (
             <g
-              key={b.mes}
+              key={b.chave ?? b.mes}
+              className={b.projetado ? styles.colunaPrevista : undefined}
               onPointerEnter={() => setBarraAtiva(i)}
               onPointerLeave={() => setBarraAtiva(null)}
             >
@@ -191,7 +201,10 @@ function GraficoBarras({
               width: LARGURA_TOOLTIP,
             }}
           >
-            <span className={styles.tooltipMes}>{barra.mes}</span>
+            <span className={styles.tooltipMes}>
+              {barra.mesCompleto ?? barra.mes}
+              {barra.projetado ? " · previsão" : ""}
+            </span>
             <span className={`${styles.tooltipLinha} ${styles.tooltipRenda}`}>
               Renda: {formatarReal(barra.renda)}
             </span>

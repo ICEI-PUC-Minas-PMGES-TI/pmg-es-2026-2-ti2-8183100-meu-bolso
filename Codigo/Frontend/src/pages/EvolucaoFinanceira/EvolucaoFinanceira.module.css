@@ -235,6 +235,45 @@
   stroke: var(--verde-escuro);
 }
 
+/* ---------- Prospecção (meses futuros projetados) ---------- */
+/* Linha tracejada e mais suave; aparece depois da parte real. */
+.linhaPrevista {
+  fill: none;
+  stroke: var(--verde-principal);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  stroke-linecap: round;
+  stroke-opacity: 0.7;
+  opacity: 0;
+  animation: aparece 0.3s ease 0.9s forwards;
+}
+
+.pontoPrevisto {
+  stroke-dasharray: 3 2;
+  stroke-opacity: 0.7;
+}
+
+/* Colunas de barras previstas: mais claras e com contorno tracejado. */
+.colunaPrevista .barraRenda,
+.colunaPrevista .barraGastos {
+  fill-opacity: 0.35;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.colunaPrevista .barraRenda {
+  stroke: var(--verde-principal);
+}
+
+.colunaPrevista .barraGastos {
+  stroke: var(--erro);
+}
+
+.corPrevisao {
+  background-color: transparent;
+  border: 1.5px dashed var(--cor-texto-secundario);
+}
+
 /* Tooltip */
 .tooltip {
   position: absolute;

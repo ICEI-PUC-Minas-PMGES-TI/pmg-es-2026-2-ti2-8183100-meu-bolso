@@ -22,6 +22,12 @@ function rotuloMes(chave) {
   return NOMES_MESES[mes - 1].slice(0, 3);
 }
 
+// Rótulo com o ano, para o tooltip ("Mai 2027"): com a prospecção,
+// o mesmo mês pode aparecer em dois anos no gráfico.
+function rotuloMesAno(chave) {
+  return `${rotuloMes(chave)} ${chave.slice(0, 4)}`;
+}
+
 // Converte os gastos e as receitas do usuário no formato único de
 // transação usado aqui: { data, valor, tipo }. Gastos viram "saida"
 // e receitas viram "entrada"; o valor é sempre positivo.
@@ -43,17 +49,17 @@ export function paraTransacoes(gastos, receitas) {
 // `transacoes`: itens com { data: "AAAA-MM-DD", valor, tipo? }.
 // Sem o campo `tipo`, o item é tratado como gasto.
 //
-// Gastos e receitas recorrentes já lançam ocorrências nos meses
-// seguintes (projeções); o gráfico mostra só o mês atual e os
-// anteriores, então os meses futuros são ignorados aqui.
+// Meses FUTUROS entram como PROSPECÇÃO: são as projeções dos gastos
+// e receitas recorrentes (comProjecoes, até MESES_PROJETADOS à
+// frente). Cada mês sai com `projetado: true` quando é posterior ao
+// mês atual, para os gráficos desenharem a previsão de outro jeito.
 export function agruparPorMes(transacoes) {
   const porMes = new Map();
-  const mesLimite = mesAtualChave(); // "AAAA-MM" do mês corrente
+  const mesAtual = mesAtualChave(); // "AAAA-MM" do mês corrente
 
   for (const t of transacoes) {
     const chave = String(t.data).slice(0, 7); // "AAAA-MM"
     if (chave.length !== 7) continue;
-    if (chave > mesLimite) continue; // ignora meses futuros
 
     const atual = porMes.get(chave) ?? { gastos: 0, renda: 0 };
     if (t.tipo === "entrada") {
@@ -69,19 +75,28 @@ export function agruparPorMes(transacoes) {
     .map(([chave, valores]) => ({
       chave,
       mes: rotuloMes(chave),
+      mesCompleto: rotuloMesAno(chave),
       gastos: valores.gastos,
       renda: valores.renda,
+      projetado: chave > mesAtual,
     }));
 }
 
 // Deriva a série acumulada (gráfico de linha): o saldo vai somando
 // a renda e subtraindo os gastos de cada mês. O resultado é o
-// dinheiro acumulado ao longo do tempo.
+// dinheiro acumulado ao longo do tempo; nos meses projetados, é a
+// previsão do saldo se as recorrências se mantiverem.
 export function calcularAcumulado(dadosMensais) {
   let total = 0;
   return dadosMensais.map((d) => {
     total += d.renda - d.gastos;
-    return { mes: d.mes, valor: total };
+    return {
+      chave: d.chave,
+      mes: d.mes,
+      mesCompleto: d.mesCompleto,
+      valor: total,
+      projetado: Boolean(d.projetado),
+    };
   });
 }
 

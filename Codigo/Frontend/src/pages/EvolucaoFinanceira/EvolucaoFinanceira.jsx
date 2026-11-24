@@ -98,6 +98,14 @@ function EvolucaoFinanceira() {
 
   const temDados = dadosMensais.length > 0;
 
+  // Meses reais x meses de prospecção (recorrências projetadas).
+  const mesesPrevistos = dadosMensais.filter((d) => d.projetado).length;
+  const mesesReais = dadosMensais.length - mesesPrevistos;
+  const subtituloAcumulado =
+    mesesPrevistos > 0
+      ? `Saldo acumulado em ${mesesReais} ${mesesReais === 1 ? "mês" : "meses"} e previsão para os próximos ${mesesPrevistos}`
+      : `Saldo acumulado nos últimos ${mesesReais} ${mesesReais === 1 ? "mês" : "meses"}`;
+
   const seletor = (
     <SeletorGrafico ativo={graficoAtivo} aoMudar={setGraficoAtivo} />
   );
@@ -152,7 +160,7 @@ function EvolucaoFinanceira() {
       <GraficoEvolucao
         key="acumulado"
         dados={dadosAcumulado}
-        subtitulo={`Saldo acumulado nos últimos ${dadosMensais.length} meses`}
+        subtitulo={subtituloAcumulado}
         altura={ALTURA_GRAFICO}
         acoes={seletor}
       />

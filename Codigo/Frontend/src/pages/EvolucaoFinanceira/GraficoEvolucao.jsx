@@ -52,9 +52,22 @@ function GraficoEvolucao({
     y: posicaoY(d.valor),
   }));
 
-  const linha = pontos
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`)
-    .join(" ");
+  const caminho = (lista) =>
+    lista.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+
+  // A linha é dividida em duas: a parte real (meses até o atual) e a
+  // prospecção (meses futuros), que parte do último ponto real para
+  // não deixar um buraco entre as duas.
+  const indicePrimeiraPrevisao = pontos.findIndex((p) => p.projetado);
+  const reais =
+    indicePrimeiraPrevisao === -1 ? pontos : pontos.slice(0, indicePrimeiraPrevisao);
+  const previstos =
+    indicePrimeiraPrevisao === -1
+      ? []
+      : pontos.slice(Math.max(indicePrimeiraPrevisao - 1, 0));
+
+  const linha = caminho(reais);
+  const linhaPrevista = previstos.length > 1 ? caminho(previstos) : "";
 
   // Mede o comprimento do path sempre que ele muda (dados/largura).
   useEffect(() => {
@@ -107,7 +120,10 @@ function GraficoEvolucao({
           height={altura}
           role="img"
           aria-label={`${titulo}: ${dados
-            .map((d) => `${d.mes} ${formatarReal(d.valor)}`)
+            .map(
+              (d) =>
+                `${d.mesCompleto ?? d.mes}${d.projetado ? " (previsão)" : ""} ${formatarReal(d.valor)}`,
+            )
             .join(", ")}`}
           onPointerMove={handleMouseMove}
           onPointerDown={handleMouseMove}
@@ -142,7 +158,7 @@ function GraficoEvolucao({
           {pontos.map((p) => (
             <text
               className={styles.rotuloX}
-              key={p.mes}
+              key={p.chave ?? p.mes}
               x={p.x}
               y={altura - 6}
               textAnchor="middle"
@@ -171,17 +187,22 @@ function GraficoEvolucao({
             style={{
               "--comprimento-linha": comprimentoLinha,
               // esconde até medir o comprimento, evitando um flash
-              visibility: comprimentoLinha ? "visible" : "hidden",
+              visibility: comprimentoLinha || !linha ? "visible" : "hidden",
             }}
           />
+
+          {/* Prospecção: linha tracejada dos meses futuros */}
+          {linhaPrevista && (
+            <path className={styles.linhaPrevista} d={linhaPrevista} />
+          )}
 
           {/* Bolinhas de cada mês */}
           {pontos.map((p, i) => (
             <circle
-              key={p.mes}
+              key={p.chave ?? p.mes}
               className={`${styles.ponto} ${
-                pontoAtivo === i ? styles.pontoAtivo : ""
-              }`}
+                p.projetado ? styles.pontoPrevisto : ""
+              } ${pontoAtivo === i ? styles.pontoAtivo : ""}`}
               cx={p.x}
               cy={p.y}
               r={pontoAtivo === i ? 6 : 4.5}
@@ -195,7 +216,10 @@ function GraficoEvolucao({
             className={styles.tooltip}
             style={{ left: tooltipEsquerda, top: Math.max(ponto.y - 58, 0) }}
           >
-            <span className={styles.tooltipMes}>{ponto.mes}</span>
+            <span className={styles.tooltipMes}>
+              {ponto.mesCompleto ?? ponto.mes}
+              {ponto.projetado ? " · previsão" : ""}
+            </span>
             <strong className={styles.tooltipValor}>
               {formatarReal(ponto.valor)}
             </strong>
