@@ -1,18 +1,36 @@
-import { NOMES_MESES, mesAtualChave } from "../../utils/Gastosutils";
-import { movimentacoesPorItem } from "../Carteiras/carteirasMock";
+import {
+  NOMES_MESES,
+  hojeISO,
+  mesAtualChave,
+  mudarMes,
+} from "../../utils/Gastosutils";
 
 // ============================================================
 // DADOS — Evolução Financeira (RF-06)
 // ------------------------------------------------------------
 // A evolução NÃO é armazenada: é calculada em tempo de consulta
-// a partir das transações do usuário. Hoje o modelo de dados do
-// projeto só tem "gastos" (saídas); quando houver entradas, basta
-// somá-las no agrupamento (ver agruparPorMes).
+// a partir dos gastos e receitas do usuário.
 //
-// Fluxo: a página busca os gastos via gastosService.carregarTudo()
-// e passa a lista para estas funções, que agrupam por mês e
-// derivam as duas séries usadas pelos gráficos.
+// Fluxo: a página busca os gastos (gastosService) e as receitas
+// (receitasService), converte tudo com paraTransacoes() e passa a
+// lista para estas funções, que agrupam por mês e derivam as
+// séries usadas pelos gráficos.
+//
+// REALIZADO x PREVISTO (a classificação é por lançamento, não por mês):
+//  - realizado: lançamento real com data até hoje;
+//  - previsto:  projeção de recorrência (ainda não lançada) ou
+//               lançamento com data depois de hoje.
+// Assim, no mês atual, uma recorrência que ainda vai cair (ex.: dia 28,
+// hoje é dia 23) aparece como previsão, e não somada ao que já aconteceu.
 // ============================================================
+
+// Horizontes da prospecção oferecidos no filtro (meses à frente).
+export const OPCOES_PREVISAO = [
+  { meses: 3, rotulo: "3 meses" },
+  { meses: 6, rotulo: "6 meses" },
+  { meses: 12, rotulo: "1 ano" },
+];
+export const PREVISAO_PADRAO = 3;
 
 // Altura (px) usada pelos dois gráficos, para que fiquem sempre
 // do mesmo tamanho ao alternar no seletor.
@@ -24,97 +42,112 @@ function rotuloMes(chave) {
   return NOMES_MESES[mes - 1].slice(0, 3);
 }
 
-// Abreviações de mês usadas nas datas das carteiras ("17 out").
-const ABREV_MESES = [
-  "jan", "fev", "mar", "abr", "mai", "jun",
-  "jul", "ago", "set", "out", "nov", "dez",
-];
-
-// Converte a data curta das carteiras ("17 out") em "AAAA-MM-DD",
-// usando o ano atual (o dado da carteira não traz o ano). Retorna
-// null se o formato não for reconhecido.
-function dataCurtaParaISO(dataCurta) {
-  const partes = String(dataCurta).trim().toLowerCase().split(/\s+/);
-  if (partes.length < 2) return null;
-
-  const dia = Number(partes[0]);
-  const mes = ABREV_MESES.indexOf(partes[1].slice(0, 3));
-  if (!dia || mes < 0) return null;
-
-  const ano = new Date().getFullYear();
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${ano}-${pad(mes + 1)}-${pad(dia)}`;
+// Rótulo com o ano, para o tooltip ("Mai 2027"): com a prospecção,
+// o mesmo mês pode aparecer em dois anos no gráfico.
+function rotuloMesAno(chave) {
+  return `${rotuloMes(chave)} ${chave.slice(0, 4)}`;
 }
 
-// Lê as movimentações das carteiras (sem alterar aquele módulo) e as
-// devolve no formato de transação usado aqui: { data, valor, tipo }.
-// O valor é sempre positivo; o sinal fica no `tipo`.
-export function movimentacoesDasCarteiras() {
-  const resultado = [];
+// Converte os gastos e as receitas do usuário no formato único de
+// transação usado aqui: { data, valor, tipo, projetado }. Gastos viram
+// "saida" e receitas viram "entrada"; o valor é sempre positivo.
+// `projetado` vem das projeções de recorrência (comProjecoes).
+export function paraTransacoes(gastos, receitas) {
+  const converter = (lista, tipo) =>
+    (lista ?? []).map((item) => ({
+      data: item.data,
+      valor: Math.abs(Number(item.valor) || 0),
+      tipo,
+      projetado: Boolean(item.projetado),
+    }));
 
-  for (const lista of Object.values(movimentacoesPorItem)) {
-    for (const mov of lista) {
-      const data = dataCurtaParaISO(mov.data);
-      if (!data) continue;
-      resultado.push({
-        data,
-        valor: Math.abs(Number(mov.valor) || 0),
-        tipo: mov.entrada ? "entrada" : "saida",
-      });
-    }
-  }
-
-  return resultado;
+  return [...converter(gastos, "saida"), ...converter(receitas, "entrada")];
 }
 
-// Agrupa as transações por mês ("AAAA-MM"), separando a RENDA
-// (entradas) dos GASTOS (saídas) de cada mês. Retorna a lista
-// ordenada por mês.
+// Agrupa as transações por mês ("AAAA-MM"), separando renda e gastos
+// em REALIZADO e PREVISTO (ver o topo do arquivo). Retorna a lista
+// ordenada por mês, com:
+//   rendaRealizada, gastosRealizados  -> o que já aconteceu
+//   rendaPrevista,  gastosPrevistos   -> o que ainda deve acontecer
+//   renda, gastos                     -> total do mês (realizado + previsto)
+//   futuro                            -> mês depois do atual
 //
-// `transacoes`: itens com { data: "AAAA-MM-DD", valor, tipo? }.
-// Sem o campo `tipo`, o item é tratado como gasto (modelo atual).
-// Entradas das carteiras são contadas como renda até existir a
-// futura página de Renda.
-//
-// Gastos recorrentes já lançam ocorrências nos meses seguintes; o
-// gráfico mostra só o mês atual e os anteriores, então os meses
-// futuros são ignorados aqui.
-export function agruparPorMes(transacoes) {
+// `mesesPrevisao`: quantos meses depois do atual entram na prospecção
+// (3, 6 ou 12). Lançamentos além desse horizonte são descartados.
+// `hoje`: "AAAA-MM-DD" (parâmetro só para facilitar testes).
+export function agruparPorMes(
+  transacoes,
+  { mesesPrevisao = PREVISAO_PADRAO, hoje = hojeISO() } = {},
+) {
+  const mesAtual = hoje.slice(0, 7);
+  const mesLimite = mudarMes(mesAtual, mesesPrevisao);
   const porMes = new Map();
-  const mesLimite = mesAtualChave(); // "AAAA-MM" do mês corrente
 
-  for (const t of transacoes) {
-    const chave = String(t.data).slice(0, 7); // "AAAA-MM"
+  for (const t of transacoes ?? []) {
+    const data = String(t.data);
+    const chave = data.slice(0, 7); // "AAAA-MM"
     if (chave.length !== 7) continue;
-    if (chave > mesLimite) continue; // ignora meses futuros
+    if (chave > mesLimite) continue; // além do horizonte escolhido
 
-    const atual = porMes.get(chave) ?? { gastos: 0, renda: 0 };
+    const valor = Number(t.valor) || 0;
+    const previsto = t.projetado || data > hoje;
+    const atual = porMes.get(chave) ?? {
+      rendaRealizada: 0,
+      gastosRealizados: 0,
+      rendaPrevista: 0,
+      gastosPrevistos: 0,
+    };
+
     if (t.tipo === "entrada") {
-      atual.renda += Number(t.valor) || 0;
+      if (previsto) atual.rendaPrevista += valor;
+      else atual.rendaRealizada += valor;
+    } else if (previsto) {
+      atual.gastosPrevistos += valor;
     } else {
-      atual.gastos += Number(t.valor) || 0;
+      atual.gastosRealizados += valor;
     }
     porMes.set(chave, atual);
   }
 
   return [...porMes.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([chave, valores]) => ({
+    .map(([chave, v]) => ({
       chave,
       mes: rotuloMes(chave),
-      gastos: valores.gastos,
-      renda: valores.renda,
+      mesCompleto: rotuloMesAno(chave),
+      ...v,
+      renda: v.rendaRealizada + v.rendaPrevista,
+      gastos: v.gastosRealizados + v.gastosPrevistos,
+      futuro: chave > mesAtual,
     }));
 }
 
-// Deriva a série acumulada (gráfico de linha): o saldo vai somando
-// a renda e subtraindo os gastos de cada mês. O resultado é o
-// dinheiro acumulado ao longo do tempo.
+// Deriva a série do saldo acumulado (gráfico de linha):
+//  - até o mês atual, o ponto é o saldo REALIZADO
+//    (soma de renda realizada menos gastos realizados);
+//  - nos meses futuros, o ponto é a PREVISÃO: realizado + tudo o que
+//    está previsto até aquele mês (inclusive o que ainda falta cair
+//    no mês atual).
+// No mês atual, `valorPrevistoFimMes` traz o saldo esperado no fim do
+// mês, quando houver algo previsto nele.
 export function calcularAcumulado(dadosMensais) {
-  let total = 0;
+  let realizado = 0;
+  let comPrevisao = 0;
+
   return dadosMensais.map((d) => {
-    total += d.renda - d.gastos;
-    return { mes: d.mes, valor: total };
+    realizado += d.rendaRealizada - d.gastosRealizados;
+    comPrevisao += d.renda - d.gastos;
+
+    const temPrevistoNoMes = d.rendaPrevista > 0 || d.gastosPrevistos > 0;
+    return {
+      chave: d.chave,
+      mes: d.mes,
+      mesCompleto: d.mesCompleto,
+      valor: d.futuro ? comPrevisao : realizado,
+      projetado: d.futuro,
+      valorPrevistoFimMes:
+        !d.futuro && temPrevistoNoMes ? comPrevisao : null,
+    };
   });
 }
 

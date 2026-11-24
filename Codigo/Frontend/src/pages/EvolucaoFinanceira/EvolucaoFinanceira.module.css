@@ -235,6 +235,68 @@
   stroke: var(--verde-escuro);
 }
 
+/* ---------- Prospecção (meses futuros projetados) ---------- */
+/* Linha tracejada e mais suave; aparece depois da parte real. */
+.linhaPrevista {
+  fill: none;
+  stroke: var(--verde-principal);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  stroke-linecap: round;
+  stroke-opacity: 0.7;
+  opacity: 0;
+  animation: aparece 0.3s ease 0.9s forwards;
+}
+
+.pontoPrevisto {
+  stroke-dasharray: 3 2;
+  stroke-opacity: 0.7;
+}
+
+/* Parte PREVISTA das barras: a mesma cor, bem mais clara. Fica
+   empilhada em cima da parte realizada (ou sozinha nos meses futuros). */
+.barraRendaPrevista,
+.barraGastosPrevista {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: cresceBarra 0.6s ease both;
+  transition: opacity var(--transicao-rapida);
+}
+
+.barraRendaPrevista {
+  fill: color-mix(in srgb, var(--verde-principal) 35%, transparent);
+}
+
+.barraGastosPrevista {
+  fill: color-mix(in srgb, var(--erro) 30%, transparent);
+}
+
+/* Legenda "Previsto": quadradinho claro, como as barras previstas. */
+.corPrevisao {
+  background-color: color-mix(in srgb, var(--cor-texto-secundario) 30%, transparent);
+}
+
+/* Mês futuro no eixo X fica mais apagado. */
+.rotuloXFuturo {
+  fill: var(--cor-texto-desabilitado);
+}
+
+/* Filtro da previsão (3 meses / 6 meses / 1 ano) ao lado do seletor. */
+.acoesGrafico {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+}
+
+.seletorTexto {
+  width: auto;
+  padding: 0 10px;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* Tooltip */
 .tooltip {
   position: absolute;
