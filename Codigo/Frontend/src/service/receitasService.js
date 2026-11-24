@@ -4,15 +4,16 @@
  * Espelho de service/gastosService.js, sem a parte de orçamento (que é
  * exclusiva de gastos). Existem duas implementações com o MESMO contrato
  * (todas async):
- *   - "local":  localStorage — fallback de desenvolvimento.
- *   - "remoto": API Spring Boot (service/Api.js -> receitasApi).
+ *   - "remoto": API Spring Boot (service/Api.js -> receitasApi). É o PADRÃO.
+ *   - "local":  localStorage — só para desenvolver sem back-end, ligado com
+ *               VITE_RECEITAS_API=false ou VITE_GASTOS_API=false
+ *               (ver service/modoDados.js).
  *
- * Para usar o back-end, coloque VITE_RECEITAS_API=true no .env do Frontend
- * (ou VITE_GASTOS_API=true, que também liga as receitas por padrão).
  * A tela (pages/Receitas) só conhece o objeto exportado no final deste arquivo.
  */
 
 import { receitasApi } from "./Api";
+import { USAR_API_RECEITAS } from "./modoDados";
 import {
   comProjecoes,
   dataDaOcorrencia,
@@ -21,9 +22,7 @@ import {
   mudarMes,
 } from "../utils/Receitasutils";
 
-const USAR_API =
-  import.meta.env.VITE_RECEITAS_API === "true" ||
-  import.meta.env.VITE_GASTOS_API === "true";
+const USAR_API = USAR_API_RECEITAS;
 
 /* ========================================
    IMPLEMENTAÇÃO LOCAL (localStorage)

@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Mail, Eye, Send, CheckCircle2, Info } from "lucide-react";
 
 import { resumoSemanalApi } from "../../service/Api";
+import { USAR_API_GASTOS } from "../../service/modoDados";
 import styles from "./ResumoSemanalConfig.module.css";
 
 // O resumo reflete os gastos da API. Com localStorage, ele sairia vazio.
-const SINCRONIZACAO_ATIVA = import.meta.env.VITE_GASTOS_API === "true";
+const SINCRONIZACAO_ATIVA = USAR_API_GASTOS;
 
 function formatarMoeda(valor) {
   return Number(valor ?? 0).toLocaleString("pt-BR", {

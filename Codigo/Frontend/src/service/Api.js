@@ -259,7 +259,7 @@ export async function trocarSenha(dados) {
 
 /* ========================================
    GASTOS, RECORRÊNCIAS E ORÇAMENTO
-   (usados por service/gastosService.js quando VITE_GASTOS_API=true)
+   (usados por service/gastosService.js; é o modo padrão, ver modoDados.js)
    ======================================== */
 
 export const gastosApi = {
@@ -350,7 +350,7 @@ export const assistenteApi = {
 
 /* ========================================
    RECEITAS E RECORRÊNCIAS
-   (usados por service/receitasService.js quando VITE_RECEITAS_API=true)
+   (usados por service/receitasService.js; é o modo padrão, ver modoDados.js)
    ======================================== */
 
 export const receitasApi = {

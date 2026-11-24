@@ -24,7 +24,9 @@ Copie `.env.example` para `.env`. Variáveis do Vite precisam do prefixo `VITE_`
 |---|---|
 | `VITE_EMAIL_TESTE` | E-mail usado para preencher o login em desenvolvimento. |
 | `VITE_SENHA_TESTE` | Senha usada para preencher o login em desenvolvimento. |
-| `VITE_GASTOS_API` | `true` faz a página de Gastos usar a API; sem ela, usa o `localStorage`. |
+| `VITE_API_URL` | Endereço do back-end. Padrão: `http://localhost:8080`. |
+| `VITE_GASTOS_API` | Opcional. Gastos e receitas usam a API por padrão; `false` guarda os dois no `localStorage` do navegador (só para desenvolver sem back-end). |
+| `VITE_RECEITAS_API` | Opcional. `false` guarda só as receitas no `localStorage`. Sem ela, as receitas seguem o `VITE_GASTOS_API`. |
 
 ## Como executar
 

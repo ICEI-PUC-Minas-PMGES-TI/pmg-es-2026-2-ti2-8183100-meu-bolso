@@ -2,14 +2,15 @@
      * Acesso aos dados da página de Gastos.
      *
      * Existem duas implementações com o MESMO contrato (todas as funções são async):
-     *   - "local":  localStorage — é o que o projeto usa na Sprint 1.
-     *   - "remoto": API Spring Boot (service/Api.js -> gastosApi).
+     *   - "remoto": API Spring Boot (service/Api.js -> gastosApi). É o PADRÃO.
+     *   - "local":  localStorage — só para desenvolver sem back-end, ligado
+     *               com VITE_GASTOS_API=false (ver service/modoDados.js).
      *
-     * Para usar o back-end, coloque VITE_GASTOS_API=true no .env do Frontend.
      * A tela (pages/Gastos) só conhece o objeto exportado no final deste arquivo.
      */
 
     import { gastosApi } from "./Api";
+    import { USAR_API_GASTOS } from "./modoDados";
     import {
     comProjecoes,
     dataDaOcorrencia,
@@ -18,7 +19,7 @@
     mudarMes,
     } from "../utils/Gastosutils";
 
-    const USAR_API = import.meta.env.VITE_GASTOS_API === "true";
+    const USAR_API = USAR_API_GASTOS;
 
     /* ========================================
     IMPLEMENTAÇÃO LOCAL (localStorage)
