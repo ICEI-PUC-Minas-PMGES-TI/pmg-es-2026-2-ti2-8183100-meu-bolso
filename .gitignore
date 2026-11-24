@@ -13,3 +13,8 @@
 # Rede de seguranca: nunca versionar arquivos de ambiente com segredos,
 # em qualquer pasta (reforca o que os subprojetos ja ignoram).
 **/.env
+
+# Arquivos de IDE (IntelliJ/WebStorm) e de tooling local — nao versionar.
+.idea/
+**/.idea/
+.github/modernize/

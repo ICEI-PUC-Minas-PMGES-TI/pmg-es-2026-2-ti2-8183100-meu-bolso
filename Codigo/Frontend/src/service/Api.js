@@ -403,6 +403,40 @@ export const receitasApi = {
 };
 
 /* ========================================
+   BIBLIOTECA DE CATEGORIAS
+   (usada por service/categoriasService.js)
+   {tipo} = "gasto" | "receita"
+   ======================================== */
+
+export const categoriasApi = {
+  // Lista as categorias do tipo (o back semeia os padrões na primeira vez).
+  listar: (tipo) =>
+    requisicao(`/api/categorias/${tipo}`, { autenticado: true }),
+
+  // Cria uma categoria. `corpo` = { nome, icone }.
+  criar: (tipo, corpo) =>
+    requisicao(`/api/categorias/${tipo}`, {
+      metodo: "POST",
+      corpo,
+      autenticado: true,
+    }),
+
+  // Renomeia / troca o ícone. `corpo` = { nome, icone }.
+  atualizar: (tipo, id, corpo) =>
+    requisicao(`/api/categorias/${tipo}/${id}`, {
+      metodo: "PUT",
+      corpo,
+      autenticado: true,
+    }),
+
+  excluir: (tipo, id) =>
+    requisicao(`/api/categorias/${tipo}/${id}`, {
+      metodo: "DELETE",
+      autenticado: true,
+    }),
+};
+
+/* ========================================
    CARTEIRAS
    ======================================== */
 

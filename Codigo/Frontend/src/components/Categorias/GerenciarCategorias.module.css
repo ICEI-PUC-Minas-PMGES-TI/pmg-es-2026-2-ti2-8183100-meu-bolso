@@ -1,0 +1,298 @@
+/* ========================================
+   MODAL: GERENCIAR CATEGORIAS (biblioteca)
+   Reaproveita variáveis, .btn e .form-input do global.css.
+======================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-4);
+  background-color: rgba(16, 24, 23, 0.5);
+  overflow-y: auto;
+  animation: cat-overlay 160ms ease-out backwards;
+}
+
+.modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: var(--espaco-6);
+  background-color: var(--branco);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  animation: cat-modal 200ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--espaco-3);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  color: var(--preto);
+}
+
+.titulo svg {
+  color: var(--verde-escuro);
+}
+
+.fechar {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-500);
+  transition: background-color var(--transicao-rapida);
+}
+
+.fechar:hover {
+  background-color: var(--cinza-100);
+  color: var(--preto);
+}
+
+.intro {
+  margin-bottom: var(--espaco-4);
+}
+
+/* ---------- Formulário de nova categoria ---------- */
+
+.novo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-4);
+  padding-bottom: var(--espaco-4);
+  border-bottom: var(--borda-padrao);
+}
+
+.novoNome {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- Lista de categorias ---------- */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-2) var(--espaco-3);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+  background-color: var(--branco);
+}
+
+.itemIcone {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.itemNome {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--preto);
+  overflow-wrap: anywhere;
+}
+
+.editNome {
+  flex: 1;
+  min-width: 0;
+}
+
+.acoes {
+  display: inline-flex;
+  gap: var(--espaco-1);
+  flex-shrink: 0;
+}
+
+.iconeBtn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--cinza-500);
+  transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.iconeBtn:hover:not(:disabled) {
+  background-color: var(--cinza-100);
+  color: var(--preto);
+}
+
+.iconeExcluir:hover:not(:disabled) {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+/* ---------- Seletor de ícone ---------- */
+
+.seletor {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.seletorBotao {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cinza-300);
+  border-radius: var(--radius-pequeno);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  transition: border-color var(--transicao-rapida);
+}
+
+.seletorBotao:hover:not(:disabled) {
+  border-color: var(--verde-principal);
+}
+
+/* Painel suspenso do seletor: busca no topo + grade rolável de ícones */
+.seletorPainel {
+  position: absolute;
+  top: calc(100% + var(--espaco-1));
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  width: 288px;
+  padding: var(--espaco-2);
+  background-color: var(--branco);
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-card);
+}
+
+.seletorBusca {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.seletorGrade {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.seletorVazio {
+  padding: var(--espaco-3);
+  text-align: center;
+  font-size: var(--texto-sm);
+  color: var(--cinza-500);
+}
+
+.seletorOpcao {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pequeno);
+  background: transparent;
+  color: var(--cinza-700);
+  transition: background-color var(--transicao-rapida), border-color var(--transicao-rapida);
+}
+
+.seletorOpcao:hover {
+  background-color: var(--verde-fundo);
+}
+
+.seletorOpcaoAtiva {
+  background-color: var(--verde-claro);
+  border-color: var(--verde-principal);
+  color: var(--verde-escuro);
+}
+
+/* ---------- Rodapé ---------- */
+
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--espaco-5);
+}
+
+/* ---------- Animações ---------- */
+
+@keyframes cat-overlay {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes cat-modal {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* ---------- Responsividade ---------- */
+
+@media (max-width: 480px) {
+  .modal {
+    padding: var(--espaco-4);
+  }
+
+  .novo {
+    flex-wrap: wrap;
+  }
+
+  .novoNome {
+    flex: 1 1 140px;
+  }
+
+  .seletorPainel {
+    width: min(288px, calc(100vw - var(--espaco-8)));
+  }
+
+  .seletorGrade {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .modal {
+    animation: none;
+  }
+}

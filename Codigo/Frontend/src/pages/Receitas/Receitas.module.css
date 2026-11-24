@@ -1217,3 +1217,30 @@
   background-color: var(--verde-hover);
   border-color: var(--verde-hover);
 }
+
+/* ---------- Linha do rótulo com ação "Gerenciar categorias" ---------- */
+.receitas-label-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.receitas-link-gerenciar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--verde-escuro);
+  cursor: pointer;
+  transition: background-color var(--transicao-rapida);
+}
+
+.receitas-link-gerenciar:hover {
+  background-color: var(--verde-claro);
+}

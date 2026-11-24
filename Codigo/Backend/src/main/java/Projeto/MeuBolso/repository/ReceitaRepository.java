@@ -27,4 +27,8 @@ public interface ReceitaRepository extends MongoRepository<Receita, String> {
     // Funciona porque a data é texto ISO: comparar texto equivale a comparar datas.
     @Query("{ 'usuarioId': ?0, 'data': { $gte: ?1, $lte: ?2 } }")
     List<Receita> findPorPeriodo(String usuarioId, String inicio, String fim);
+
+    // Usados pela biblioteca de categorias: refletir rename/remoção nas receitas.
+    List<Receita> findByUsuarioIdAndCategoria(String usuarioId, String categoria);
+    boolean existsByUsuarioIdAndCategoria(String usuarioId, String categoria);
 }

@@ -27,4 +27,8 @@ public interface GastoRepository extends MongoRepository<Gasto, String> {
     // Funciona porque a data é texto ISO: comparar texto equivale a comparar datas.
     @Query("{ 'usuarioId': ?0, 'data': { $gte: ?1, $lte: ?2 } }")
     List<Gasto> findPorPeriodo(String usuarioId, String inicio, String fim);
+
+    // Usados pela biblioteca de categorias: refletir rename/remoção nos gastos.
+    List<Gasto> findByUsuarioIdAndCategoria(String usuarioId, String categoria);
+    boolean existsByUsuarioIdAndCategoria(String usuarioId, String categoria);
 }
