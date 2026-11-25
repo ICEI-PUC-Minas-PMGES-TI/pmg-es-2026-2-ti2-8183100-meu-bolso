@@ -64,6 +64,13 @@ function Previa({ resumo }) {
         </ul>
       )}
 
+      {resumo.reserva && (
+        <>
+          <p>Reserva de emergência:</p>
+          <p>{resumo.reserva.mensagem}</p>
+        </>
+      )}
+
       <p>Contas a vencer nos próximos 7 dias:</p>
       {resumo.contasAVencer.length === 0 ? (
         <p>Nenhuma conta recorrente a vencer.</p>

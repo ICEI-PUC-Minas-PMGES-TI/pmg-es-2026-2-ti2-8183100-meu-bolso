@@ -2,6 +2,7 @@ package Projeto.MeuBolso.service;
 
 import Projeto.MeuBolso.Config.FusoHorario;
 import Projeto.MeuBolso.model.Gasto;
+import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.model.Orcamento;
 import Projeto.MeuBolso.model.PreferenciaResumo;
 import Projeto.MeuBolso.model.Recorrencia;
@@ -10,6 +11,7 @@ import Projeto.MeuBolso.model.ResumoSemanalDtos.ContaAVencer;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.MetaProgresso;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.OrcamentoUso;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.PreferenciaResponse;
+import Projeto.MeuBolso.model.ResumoSemanalDtos.ReservaResumo;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.Resumo;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.GastoRepository;
@@ -142,12 +144,22 @@ public class ResumoSemanalService {
         OrcamentoUso orcamento = new OrcamentoUso(gastoNoMes, limite, percentual(gastoNoMes, limite));
 
         // Objetivo: progresso até o valor-alvo. Reserva de emergência: até o mínimo.
-        List<MetaProgresso> metas = metaRepository.findByUsuarioId(usuarioId).stream()
+        List<Meta> todasAsMetas = metaRepository.findByUsuarioId(usuarioId);
+        List<MetaProgresso> metas = todasAsMetas.stream()
             .map(m -> {
                 BigDecimal alvo = reservaService.referencia(usuarioId, m);
                 return new MetaProgresso(m.getNome(), m.getValorAtual(), alvo, percentual(m.getValorAtual(), alvo));
             })
             .toList();
+
+        // Alerta da reserva de emergência (ou convite para configurá-la).
+        ReservaResumo reserva = todasAsMetas.stream()
+            .filter(Meta::isReserva)
+            .findFirst()
+            .map(m -> new ReservaResumo(m.getNome(), reservaService.situacao(usuarioId, m).nivel(),
+                reservaService.mensagemSituacao(usuarioId, m)))
+            .orElse(new ReservaResumo(null, "sem_reserva",
+                "Você ainda não configurou sua reserva de emergência. Comece pela página de Metas."));
 
         LocalDate ateLimite = hoje.plusDays(DIAS_DO_RESUMO);
         List<ContaAVencer> contas = recorrenciaRepository.findByUsuarioId(usuarioId).stream()
@@ -157,7 +169,7 @@ public class ResumoSemanalService {
             .sorted(Comparator.comparing(ContaAVencer::vencimento))
             .toList();
 
-        return new Resumo(inicio, hoje, totalSemana, semana.size(), categorias, orcamento, metas, contas);
+        return new Resumo(inicio, hoje, totalSemana, semana.size(), categorias, orcamento, metas, contas, reserva);
     }
 
     /* ========================================

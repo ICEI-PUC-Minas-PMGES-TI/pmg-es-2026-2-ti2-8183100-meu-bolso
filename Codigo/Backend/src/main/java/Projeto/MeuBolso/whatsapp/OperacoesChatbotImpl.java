@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 /**
@@ -98,6 +99,12 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
         MetaService.MovimentacaoAplicada r = metaService.movimentar(
             usuarioId, metaId, deposito ? "deposito" : "retirada", valor, contaId, COMENTARIO);
         return r.meta().getValorAtual();
+    }
+
+    @Override
+    public Optional<String> avisoRetirada(String usuarioId, String metaId, BigDecimal valor) {
+        return metaRepository.findByIdAndUsuarioId(metaId, usuarioId)
+            .flatMap(m -> reservaService.avisoRetirada(usuarioId, m, valor));
     }
 
     @Override

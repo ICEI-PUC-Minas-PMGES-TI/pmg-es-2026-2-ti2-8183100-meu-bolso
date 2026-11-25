@@ -222,6 +222,59 @@ class ReservaServiceTest {
         assertThat(ReservaService.horizonte(reserva("0", true, null, 12))).isEqualTo(12);
     }
 
+    /* ---------- Textos (WhatsApp e resumo semanal) ---------- */
+
+    @Test
+    void coberturaAbaixoDeUmMesEmDias() {
+        BigDecimal custo = new BigDecimal("200");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("100"), custo)).isEqualTo("15 dias");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("7"), custo)).isEqualTo("1 dia");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("1"), custo)).isEqualTo("menos de 1 dia");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("200"), custo)).isEqualTo("1 mês");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("300"), custo)).isEqualTo("1,5 mês");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("480"), custo)).isEqualTo("2,4 meses");
+        assertThat(ReservaService.textoCobertura(new BigDecimal("600"), custo)).isEqualTo("3 meses");
+        assertThat(ReservaService.textoCobertura(BigDecimal.ZERO, custo)).isEmpty();
+        assertThat(ReservaService.textoCobertura(new BigDecimal("100"), null)).isEmpty();
+    }
+
+    @Test
+    void mensagemDaReservaCriticaUsaDias() {
+        // Mínimo manual 1200, custo informado 200/mês, guardado 100 -> 8% -> crítica, 15 dias.
+        gastos();
+        recorrencias();
+        Meta r = reserva("100", false, "1200", 6);
+        r.setCustoMensalInformado(new BigDecimal("200"));
+
+        assertThat(service.mensagemSituacao(USUARIO, r))
+            .startsWith("Perigo: sua reserva só cobre 15 dias de gastos")
+            .contains("1.200,00");
+    }
+
+    @Test
+    void avisoDeRetiradaSoQuandoFuraOMinimo() {
+        gastos();
+        recorrencias();
+        Meta r = reserva("1500", false, "1200", 6);
+        r.setCustoMensalInformado(new BigDecimal("200"));
+
+        // 1500 - 200 = 1300 >= 1200: sem aviso.
+        assertThat(service.avisoRetirada(USUARIO, r, new BigDecimal("200"))).isEmpty();
+        // 1500 - 1400 = 100: abaixo do mínimo, cobre 15 dias.
+        assertThat(service.avisoRetirada(USUARIO, r, new BigDecimal("1400")))
+            .hasValueSatisfying(t -> assertThat(t).contains("abaixo do mínimo").contains("15 dias"));
+        // Tudo: fica vazia.
+        assertThat(service.avisoRetirada(USUARIO, r, new BigDecimal("1500")))
+            .hasValueSatisfying(t -> assertThat(t).endsWith("e fica vazia."));
+    }
+
+    @Test
+    void avisoDeRetiradaNaoValeParaObjetivo() {
+        Meta objetivo = new Meta(USUARIO, "Viagem", new BigDecimal("3000"), null, "media");
+        objetivo.setValorAtual(new BigDecimal("500"));
+        assertThat(service.avisoRetirada(USUARIO, objetivo, new BigDecimal("500"))).isEmpty();
+    }
+
     @Test
     void referenciaDoObjetivoEOValorAlvo() {
         Meta objetivo = new Meta(USUARIO, "Viagem", new BigDecimal("3000"), null, "media");

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -189,6 +190,31 @@ class FluxoChatbotTest {
     }
 
     @Test
+    void retiradaQueFuraOMinimoDaReservaAvisaNaConfirmacao() {
+        ops.avisoRetirada = "Atenção: depois desta retirada sua reserva de emergência fica abaixo do mínimo.";
+        enviar("oi");
+        enviar("4");
+        enviar("50");
+        enviar("1");
+        String confirmacao = enviar("1");
+        assertThat(confirmacao).contains("Confirma a retirada da meta?")
+            .contains("⚠️ Atenção: depois desta retirada")
+            .endsWith("1 - Confirmar\n2 - Cancelar");
+        // O aviso não bloqueia: confirmar registra normalmente.
+        assertThat(enviar("1")).startsWith("✅ Retirada de");
+        assertThat(ops.registros).containsExactly("meta retirada m1 50.00 conta-1");
+    }
+
+    @Test
+    void retiradaSemAvisoMantemAConfirmacaoDeSempre() {
+        enviar("oi");
+        enviar("4");
+        enviar("50");
+        enviar("1");
+        assertThat(enviar("1")).contains("Confirma a retirada da meta?").doesNotContain("⚠️");
+    }
+
+    @Test
     void semMetasAvisaLogoNoMenu() {
         ops.metas.clear();
         enviar("oi");
@@ -266,6 +292,13 @@ class FluxoChatbotTest {
             new Opcao("m1", "Viagem", "guardado R$ 200,00 de R$ 1.000,00", new BigDecimal("200"))));
         final List<String> registros = new ArrayList<>();
         String falhaComMotivo;
+        // Aviso que a "reserva" devolve na retirada (null = sem aviso).
+        String avisoRetirada;
+
+        @Override
+        public Optional<String> avisoRetirada(String u, String metaId, BigDecimal valor) {
+            return Optional.ofNullable(avisoRetirada);
+        }
 
         @Override public List<Opcao> metas(String usuarioId) { return metas; }
         @Override public List<Opcao> contas(String usuarioId) { return contas; }

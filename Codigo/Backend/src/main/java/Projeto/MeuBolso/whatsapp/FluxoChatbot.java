@@ -343,7 +343,11 @@ public class FluxoChatbot {
             case META_RETIRADA -> "Confirma a retirada da meta?\n\n"
                 + "💰 Valor: " + valor + "\n"
                 + "🎯 Meta: " + c.getMeta().nome() + "\n"
-                + "🏦 Vai para a conta: " + c.getCarteira().nome();
+                + "🏦 Vai para a conta: " + c.getCarteira().nome()
+                // Reserva de emergência abaixo do mínimo: avisa antes do "1 - Confirmar".
+                + ops.avisoRetirada(c.getUsuarioId(), c.getMeta().id(), c.getValor())
+                    .map(aviso -> "\n\n⚠️ " + aviso)
+                    .orElse("");
             case TRANSFERENCIA -> "Confirma a transferência?\n\n"
                 + "💰 Valor: " + valor + "\n"
                 + "⬅️ De: " + c.getCarteira().nome() + "\n"
