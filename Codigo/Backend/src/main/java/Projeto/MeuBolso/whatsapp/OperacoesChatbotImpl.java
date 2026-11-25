@@ -9,6 +9,7 @@ import Projeto.MeuBolso.service.CarteiraService;
 import Projeto.MeuBolso.service.GastoService;
 import Projeto.MeuBolso.service.MetaService;
 import Projeto.MeuBolso.service.ReceitaService;
+import Projeto.MeuBolso.service.ReservaService;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -35,6 +36,7 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
     private final GastoService gastoService;
     private final ReceitaService receitaService;
     private final CarteiraService carteiraService;
+    private final ReservaService reservaService;
     private final Clock clock;
 
     public OperacoesChatbotImpl(MetaRepository metaRepository,
@@ -43,6 +45,7 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
                                 GastoService gastoService,
                                 ReceitaService receitaService,
                                 CarteiraService carteiraService,
+                                ReservaService reservaService,
                                 Clock clock) {
         this.metaRepository = metaRepository;
         this.carteiraRepository = carteiraRepository;
@@ -50,14 +53,17 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
         this.gastoService = gastoService;
         this.receitaService = receitaService;
         this.carteiraService = carteiraService;
+        this.reservaService = reservaService;
         this.clock = clock;
     }
 
+    // A reserva de emergência vem sempre primeiro; as demais em ordem alfabética.
     @Override
     public List<Opcao> metas(String usuarioId) {
         return metaRepository.findByUsuarioId(usuarioId).stream()
-            .sorted(Comparator.comparing(m -> nulo(m.getNome()), String.CASE_INSENSITIVE_ORDER))
-            .map(OperacoesChatbotImpl::opcaoDaMeta)
+            .sorted(Comparator.comparing((Meta m) -> m.isReserva() ? 0 : 1)
+                .thenComparing(m -> nulo(m.getNome()), String.CASE_INSENSITIVE_ORDER))
+            .map(m -> opcaoDaMeta(usuarioId, m))
             .toList();
     }
 
@@ -104,10 +110,13 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
         return LocalDate.now(clock);
     }
 
-    private static Opcao opcaoDaMeta(Meta m) {
+    private Opcao opcaoDaMeta(String usuarioId, Meta m) {
         BigDecimal atual = m.getValorAtual() == null ? BigDecimal.ZERO : m.getValorAtual();
-        BigDecimal alvo = m.getValorAlvo() == null ? BigDecimal.ZERO : m.getValorAlvo();
-        String detalhe = "guardado " + FormatoBRL.moeda(atual) + " de " + FormatoBRL.moeda(alvo);
+        BigDecimal alvo = reservaService.referencia(usuarioId, m);
+        String detalhe = m.isReserva()
+            ? "reserva de emergência · guardado " + FormatoBRL.moeda(atual)
+                + (alvo.signum() > 0 ? " de mínimo " + FormatoBRL.moeda(alvo) : "")
+            : "guardado " + FormatoBRL.moeda(atual) + " de " + FormatoBRL.moeda(alvo);
         return new Opcao(m.getId(), nulo(m.getNome()), detalhe, atual);
     }
 

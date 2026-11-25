@@ -58,6 +58,7 @@ public class ResumoSemanalService {
     private final PreferenciaResumoRepository preferenciaRepository;
     private final GastoRecorrenciaService gastoRecorrenciaService;
     private final ResumoEmailService resumoEmailService;
+    private final ReservaService reservaService;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -68,7 +69,8 @@ public class ResumoSemanalService {
                                 RecorrenciaRepository recorrenciaRepository,
                                 PreferenciaResumoRepository preferenciaRepository,
                                 GastoRecorrenciaService gastoRecorrenciaService,
-                                ResumoEmailService resumoEmailService) {
+                                ResumoEmailService resumoEmailService,
+                                ReservaService reservaService) {
         this.gastoRepository = gastoRepository;
         this.orcamentoRepository = orcamentoRepository;
         this.metaRepository = metaRepository;
@@ -76,6 +78,7 @@ public class ResumoSemanalService {
         this.preferenciaRepository = preferenciaRepository;
         this.gastoRecorrenciaService = gastoRecorrenciaService;
         this.resumoEmailService = resumoEmailService;
+        this.reservaService = reservaService;
     }
 
     /* ========================================
@@ -138,12 +141,12 @@ public class ResumoSemanalService {
             .orElse(BigDecimal.ZERO);
         OrcamentoUso orcamento = new OrcamentoUso(gastoNoMes, limite, percentual(gastoNoMes, limite));
 
+        // Objetivo: progresso até o valor-alvo. Reserva de emergência: até o mínimo.
         List<MetaProgresso> metas = metaRepository.findByUsuarioId(usuarioId).stream()
-            .map(m -> new MetaProgresso(
-                m.getNome(),
-                m.getValorAtual(),
-                m.getValorAlvo(),
-                percentual(m.getValorAtual(), m.getValorAlvo())))
+            .map(m -> {
+                BigDecimal alvo = reservaService.referencia(usuarioId, m);
+                return new MetaProgresso(m.getNome(), m.getValorAtual(), alvo, percentual(m.getValorAtual(), alvo));
+            })
             .toList();
 
         LocalDate ateLimite = hoje.plusDays(DIAS_DO_RESUMO);

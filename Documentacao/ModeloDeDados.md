@@ -13,7 +13,7 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | Coleção | Classe | Finalidade |
 |---|---|---|
 | `usuarios` | `Usuario` | Conta, login, telefone e papel (role). Dono de todos os demais dados. |
-| `metas` | `Meta` | Metas e reserva financeira (reserva = meta comum). |
+| `metas` | `Meta` | Metas (objetivos) e a reserva de emergência (meta do tipo `reserva`, uma por usuário). |
 | `carteiras` | `CarteiraUsuario` | Cartões, contas, dinheiro em espécie e movimentações de dinheiro do usuário. |
 | `gastos` | `Gasto` | Gastos (saídas) classificados por categoria e carteira. |
 | `orcamentos` | `Orcamento` | Teto mensal de gastos; um por usuário. |
@@ -50,10 +50,19 @@ O **Meu Bolso** controla a vida financeira de jovens. Cada **usuário** faz logi
 | `_id` | ObjectId/String | Identificador único. |
 | `usuarioId` | String (ref → `usuarios`, **indexado**) | Dono da meta. |
 | `nome` | String | Ex.: "Viagem", "Reserva de emergência". |
-| `valorAlvo` | Decimal128 (BigDecimal) | Quanto se quer alcançar. |
-| `valorAtual` | Decimal128 (BigDecimal) | Quanto já foi acumulado; nasce em zero. |
-| `prazo` | Date (LocalDate) | Data-alvo (pode ser nula). |
-| `prioridade` | String | `"alta"`, `"media"` ou `"baixa"`. |
+| `tipo` | String | `"objetivo"` (padrão; documentos sem tipo também são objetivo) ou `"reserva"` (reserva de emergência, **no máximo uma por usuário**). |
+| `valorAlvo` | Decimal128 (BigDecimal) | Quanto se quer alcançar. Obrigatório no objetivo; nulo na reserva. |
+| `valorAtual` | Decimal128 (BigDecimal) | Quanto já foi acumulado; nasce em zero e só muda por depósito/retirada. |
+| `prazo` | Date (LocalDate) | Data-alvo (pode ser nula; sempre nula na reserva). |
+| `prioridade` | String | `"alta"`, `"media"` ou `"baixa"` (a reserva é sempre `"alta"`). |
+| `horizonteMeses` | Integer | Só na reserva: quantos meses ela deve sustentar (3, 6 ou 12; padrão 6). |
+| `minimoAutomatico` | Boolean | Só na reserva: `true` = mínimo calculado na consulta a partir dos gastos; `false` = usa `valorMinimo`. |
+| `valorMinimo` | Decimal128 (BigDecimal) | Só na reserva com mínimo manual: valor mínimo fixo informado pelo usuário. |
+| `custoMensalInformado` | Decimal128 (BigDecimal) | Só na reserva: custo mensal informado pelo usuário, usado quando não há dados para estimar. |
+
+> **Reserva de emergência (RF-03):** não tem valor-alvo, só um **valor mínimo** para os próximos `horizonteMeses`. No modo automático, o mínimo **não é gravado**: o `ReservaService` calcula na consulta a prospecção mês a mês (gastos fixos previstos pelas recorrências ativas + média dos gastos não recorrentes dos 3 últimos meses completos), arredondada para cima na centena. Sem histórico, usa o orçamento do mês, depois só os fixos, depois o `custoMensalInformado`. O `GET /api/metas` devolve também o mínimo efetivo, o nível de alerta (`vazia`, `critica` < 50%, `atencao` < 100%, `protegida`) e quantos meses de gastos o valor guardado cobre.
+>
+> **Exclusão:** meta com `valorAtual` > 0 não pode ser excluída (409); o dinheiro precisa ser retirado antes.
 
 ### 3.3 `carteiras` (`CarteiraUsuario`)
 | Atributo | Tipo | Descrição |

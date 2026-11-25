@@ -86,9 +86,10 @@ O token é obtido no login e identifica o usuário pelo e-mail.
 | Método | Rota | Descrição |
 |---|---|---|
 | `GET` | `/api/metas` | Lista as metas do usuário. |
-| `POST` | `/api/metas` | Cria uma meta (nome, valorAlvo, prazo, prioridade). |
-| `PUT` | `/api/metas/{id}` | Edita os dados da meta (não altera o valor acumulado). |
-| `DELETE` | `/api/metas/{id}` | Exclui a meta. |
+| `POST` | `/api/metas` | Cria uma meta. Objetivo: nome, valorAlvo, prazo, prioridade. Reserva de emergência (`tipo: "reserva"`, uma por usuário; 409 na segunda): nome, horizonteMeses (3/6/12), minimoAutomatico e, se manual, valorMinimo. Regras do tipo violadas = 422. |
+| `PUT` | `/api/metas/{id}` | Edita os dados da meta (não altera o valor acumulado nem o tipo). |
+| `DELETE` | `/api/metas/{id}` | Exclui a meta. Com dinheiro guardado (valorAtual > 0) responde 409. |
+| `GET` | `/api/metas/reserva/sugestao?custoInformado=` | Mínimo sugerido da reserva para 3, 6 e 12 meses e a base do cálculo (`historico`, `orcamento`, `recorrencias`, `informado` ou `sem_dados`). |
 
 ### Carteira — `/api/carteiras` (requer token)
 
@@ -373,6 +374,7 @@ Testes unitários (JUnit 5 + Mockito + AssertJ) das regras de saldo e de metas. 
 | `ComparativoMesPerguntaTest` | Mais/menos/igual, período anterior vazio, virada de ano, categoria que mais subiu |
 | `MetaFaltantePerguntaTest` | Situações da meta (em andamento, sem prazo, atingida, vencida), parâmetro `metaId` |
 | `MetasTotalGuardadoPerguntaTest` | Soma e % geral, meta mais avançada (desempate alfabético), alvo zero |
+| `ReservaServiceTest` | Reserva de emergência: mínimo por histórico (fixos + média dos variáveis, arredondado na centena), mês pulado, conta nova, bases orçamento/recorrências/informado/sem dados, mínimo manual, níveis de alerta e horizonte |
 | `GastosRecentesFerramentaTest` | Últimos gastos lançados; parâmetro `quantidade` (opções 5, 10) |
 | `GastosPeriodoFerramentaTest` | Total e detalhes dos gastos num período; filtro por `categoria` |
 | `ReceitasPeriodoFerramentaTest` | Total e detalhes das receitas num período; filtro por `categoria` |

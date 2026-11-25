@@ -13,4 +13,7 @@ public interface MetaRepository extends MongoRepository<Meta, String> {
 
     // Uma meta específica, garantindo que pertence ao usuário.
     Optional<Meta> findByIdAndUsuarioId(String id, String usuarioId);
+
+    // Usado para garantir uma só reserva de emergência por usuário.
+    boolean existsByUsuarioIdAndTipo(String usuarioId, String tipo);
 }
