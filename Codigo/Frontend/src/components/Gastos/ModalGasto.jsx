@@ -10,6 +10,9 @@
     import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
     import categoriasService, { TIPO_GASTO } from "../../service/categoriasService";
     import GerenciarCategorias from "../Categorias/GerenciarCategorias";
+    import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
+    import { opcoesDeCategoria, opcoesDeConta } from "../SeletorOpcoes/opcoes";
+    import IconeCategoria from "./IconeCategoria";
     import Modal from "./Modal";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
@@ -34,7 +37,9 @@
      * onSalvar recebe os dados prontos e devolve uma Promise; se ela falhar,
      * a mensagem de erro aparece aqui dentro do modal.
      */
-    export default function ModalGasto({ gasto, mesSelecionado, carteiras = [], onFechar, onSalvar }) {
+    // "seletorTipo" (opcional): conteúdo mostrado no topo do formulário. A página
+    // de Movimentações usa para alternar entre Gasto e Receita ao adicionar.
+    export default function ModalGasto({ gasto, mesSelecionado, carteiras = [], onFechar, onSalvar, seletorTipo }) {
     const editando = Boolean(gasto);
 
     const [form, setForm] = useState(() =>
@@ -161,6 +166,8 @@
     return (
         <Modal titulo={editando ? "Editar gasto" : "Adicionar gasto"} onFechar={onFechar}>
         <form className={styles["gastos-form"]} onSubmit={enviar} noValidate>
+            {seletorTipo && <div className={styles["gastos-form-campo-largo"]}>{seletorTipo}</div>}
+
             <div className={`form-group ${styles["gastos-form-campo-largo"]}`}>
             <label className="form-label" htmlFor="gasto-descricao">
                 Descrição
@@ -193,20 +200,16 @@
                 Gerenciar
                 </button>
             </div>
-            <select
+            <SeletorOpcoes
                 id="gasto-categoria"
-                name="categoria"
-                className="form-input"
-                value={form.categoria}
-                onChange={alterarCampo}
-            >
-                <option value="">Selecione</option>
-                {categorias.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                    {categoria}
-                </option>
-                ))}
-            </select>
+                valor={form.categoria}
+                opcoes={opcoesDeCategoria(categorias, IconeCategoria)}
+                invalido={Boolean(erros.categoria)}
+                onAlterar={(categoria) => {
+                setForm((atual) => ({ ...atual, categoria }));
+                setErros((atual) => ({ ...atual, categoria: undefined }));
+                }}
+            />
             {erros.categoria && (
                 <span className={styles["gastos-erro-campo"]}>{erros.categoria}</span>
             )}
@@ -216,13 +219,13 @@
             <label className="form-label" htmlFor="gasto-carteira">
                 Carteira
             </label>
-            <select
+            <SeletorOpcoes
                 id="gasto-carteira"
-                name="carteiraId"
-                className="form-input"
-                value={form.carteiraId}
-                onChange={(event) => {
-                const id = event.target.value;
+                valor={form.carteiraId}
+                opcoes={opcoesDeConta(opcoesCarteira)}
+                desabilitado={semCarteiras}
+                invalido={Boolean(erros.carteira)}
+                onAlterar={(id) => {
                 const opcao = opcoesCarteira.find((c) => c.id === id);
                 setForm((atual) => ({
                     ...atual,
@@ -231,15 +234,7 @@
                 }));
                 setErros((atual) => ({ ...atual, carteira: undefined }));
                 }}
-                disabled={semCarteiras}
-            >
-                <option value="">Selecione</option>
-                {opcoesCarteira.map((carteira) => (
-                <option key={carteira.id} value={carteira.id}>
-                    {carteira.nome}
-                </option>
-                ))}
-            </select>
+            />
             {semCarteiras && (
                 <span className={styles["gastos-erro-campo"]}>
                 Cadastre uma conta na Carteira antes de registrar gastos.

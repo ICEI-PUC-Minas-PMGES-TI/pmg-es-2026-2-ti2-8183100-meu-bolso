@@ -1,0 +1,718 @@
+/* ========================================
+   PÁGINA DE MOVIMENTAÇÕES
+   Base visual (página, topo, cards, modais, barras) vem de
+   pages/Gastos/Gastos.module.css; aqui só o que é novo.
+   ======================================== */
+
+/* ---------- Resumo: Entradas, Saídas e Saldo ---------- */
+
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaco-4);
+}
+
+.icone-entrada {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.icone-saida {
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+/* O card de saldo já é verde-claro: o ícone ganha fundo de superfície */
+.icone-saldo {
+  background-color: var(--cor-superficie);
+}
+
+.valor-entrada {
+  color: var(--sucesso);
+}
+
+.valor-saida {
+  color: var(--erro);
+}
+
+.resumo-detalhes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--espaco-3);
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda-suave);
+}
+
+.resumo-detalhes div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--espaco-2);
+  font-size: var(--texto-xs);
+}
+
+.resumo-detalhes dt {
+  color: var(--cor-texto-secundario);
+}
+
+.resumo-detalhes dd {
+  color: var(--cor-texto-medio);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resumo-vazio {
+  margin-top: var(--espaco-3);
+  padding-top: var(--espaco-3);
+  border-top: 1px solid var(--cor-borda-suave);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-medio);
+}
+
+.resumo-saldo {
+  background-color: var(--verde-claro);
+  border-color: transparent;
+}
+
+.resumo-previsto {
+  margin-top: var(--espaco-3);
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-medio);
+}
+
+/* ---------- Grade: lista à esquerda, orçamento e categorias à direita ---------- */
+
+.grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--espaco-4);
+  align-items: start;
+}
+
+.lado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.categorias {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.abas {
+  display: flex;
+  padding: 3px;
+  background-color: var(--cor-superficie-realce);
+  border-radius: var(--radius-redondo);
+}
+
+.abas button {
+  flex: 1;
+  padding: 6px var(--espaco-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-redondo);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--cor-texto-medio);
+  transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.abas .aba-ativa {
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  box-shadow: var(--sombra-leve);
+}
+
+/* ---------- Ferramentas: chips, busca e filtros ---------- */
+
+.ferramentas {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  flex-wrap: wrap;
+  padding: var(--espaco-4) var(--espaco-6);
+  border-bottom: var(--borda-padrao);
+}
+
+.chips {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.chip {
+  padding: 7px 14px;
+  background-color: var(--cor-superficie-realce);
+  border: none;
+  border-radius: var(--radius-redondo);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  color: var(--cor-texto-medio);
+  transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.chip-ativo {
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
+}
+
+.busca {
+  flex: 1;
+  min-width: 180px;
+}
+
+.botao-filtros {
+  min-height: 40px;
+}
+
+.avancados {
+  background-color: var(--cor-superficie-suave);
+}
+
+/* Ocupa duas colunas para caber "Categoria (A–Z)", "Data (mais recente)"... */
+.filtro-ordenar {
+  grid-column: span 2;
+}
+
+@media (max-width: 760px) {
+  .filtro-ordenar {
+    grid-column: auto;
+  }
+}
+
+/* ---------- Ordenação (substitui os cabeçalhos clicáveis da tabela) ---------- */
+
+.ordenacao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  flex-wrap: wrap;
+  padding: var(--espaco-3) var(--espaco-6) 0;
+}
+
+.ordenacao-rotulo {
+  margin-right: var(--espaco-1);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-secundario);
+}
+
+.ordenacao-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  font: inherit;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-secundario);
+}
+
+.ordenacao-botao svg {
+  opacity: 0.5;
+}
+
+.ordenacao-ativa {
+  color: var(--cor-texto-principal);
+  background-color: var(--cor-superficie-realce);
+}
+
+.ordenacao-ativa svg {
+  opacity: 1;
+}
+
+/* ---------- Lista agrupada por dia ---------- */
+
+.lista {
+  padding: 0 var(--espaco-6) var(--espaco-3);
+}
+
+.dia {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--espaco-4) 0 var(--espaco-2);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.dia-itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  border-top: 1px solid var(--cor-borda-suave);
+}
+
+.linha-prevista .linha-principal {
+  opacity: 0.6;
+}
+
+.linha-principal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-2);
+  margin-left: calc(var(--espaco-2) * -1);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background-color var(--transicao-rapida);
+}
+
+.linha-icone {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.linha-icone-entrada {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.linha-meio {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.linha-titulo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+}
+
+.linha-descricao {
+  min-width: 0;
+}
+
+.linha-selos {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.linha-selos:empty {
+  display: none;
+}
+
+/* Só aparece no celular, onde o botão de comentário fica escondido */
+.linha-selo-comentario {
+  display: none;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.linha-data {
+  padding: 2px 8px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cor-superficie-realce);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--cor-texto-secundario);
+}
+
+.linha-sub {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linha-valor {
+  flex-shrink: 0;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.linha-acoes {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  flex-shrink: 0;
+}
+
+/* ---------- Seletor Gasto | Receita (no modal de nova movimentação) ---------- */
+
+.segmento {
+  display: flex;
+  padding: 4px;
+  background-color: var(--cor-superficie-realce);
+  border-radius: var(--radius-redondo);
+}
+
+.segmento button {
+  flex: 1;
+  padding: 9px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-redondo);
+  font: inherit;
+  font-weight: 600;
+  color: var(--cor-texto-medio);
+  transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+}
+
+.segmento .segmento-ativo {
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
+}
+
+/* ---------- Menu "Recorrentes" ---------- */
+
+.menu-recorrentes {
+  position: relative;
+}
+
+.menu-recorrentes-lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+  padding: var(--espaco-1);
+  background-color: var(--cor-superficie);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-card);
+}
+
+.menu-recorrentes-lista button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: 10px var(--espaco-3);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  text-align: left;
+  color: var(--cor-texto-principal);
+}
+
+/* ---------- Painel lateral de detalhes ---------- */
+
+.painel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900; /* abaixo dos modais (1000), que podem abrir por cima */
+  display: flex;
+  justify-content: flex-end;
+  background-color: var(--cor-overlay-leve);
+}
+
+.painel {
+  width: 100%;
+  max-width: 420px;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+  padding: var(--espaco-6);
+  background-color: var(--cor-superficie);
+  box-shadow: var(--sombra-painel);
+  animation: painel-entra 220ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.painel-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.painel-tipo {
+  padding: 4px 10px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+.painel-tipo-entrada {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.painel-fechar {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  color: var(--cor-texto-secundario);
+}
+
+.painel-cabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.painel-titulo {
+  font-size: var(--titulo-sm);
+}
+
+.painel-valor {
+  font-size: var(--titulo-md);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.painel-dados {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+  padding: var(--espaco-4);
+  background-color: var(--cor-superficie-suave);
+  border-radius: var(--radius-medio);
+}
+
+.painel-dados dt {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+.painel-dados dd {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+}
+
+.painel-recorrente {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.painel-comentario h3 {
+  margin-bottom: var(--espaco-2);
+  font-size: var(--texto-sm);
+}
+
+.painel-comentario p {
+  font-size: var(--texto-sm);
+  white-space: pre-wrap;
+}
+
+.painel-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+  margin-top: auto;
+}
+
+.painel-excluir {
+  color: var(--erro);
+}
+
+@keyframes painel-entra {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+/* ---------- Hover só em quem tem mouse ---------- */
+
+@media (hover: hover) and (pointer: fine) {
+  .linha-principal:hover,
+  .menu-recorrentes-lista button:hover,
+  .ordenacao-botao:hover {
+    background-color: var(--cor-superficie-suave);
+  }
+
+  .chip:not(.chip-ativo):hover {
+    background-color: var(--cor-superficie-forte);
+  }
+
+  .painel-fechar:hover {
+    background-color: var(--cor-superficie-realce);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .painel {
+    animation: none;
+  }
+}
+
+/* ---------- Responsivo ---------- */
+
+@media (max-width: 1100px) {
+  .grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lado {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .resumo,
+  .lado {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Ferramentas: chips na primeira linha; busca + Filtros na segunda */
+  .ferramentas {
+    gap: var(--espaco-2);
+    padding: var(--espaco-4);
+  }
+
+  .chips {
+    flex: 1 1 100%;
+  }
+
+  .chip {
+    flex: 1;
+  }
+
+  .busca {
+    min-width: 0;
+  }
+
+  /* Ordenar: uma linha só, com rolagem lateral */
+  .ordenacao {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: var(--espaco-3) var(--espaco-4) 0;
+    scrollbar-width: none;
+  }
+
+  .ordenacao::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ordenacao-botao,
+  .ordenacao-rotulo {
+    flex-shrink: 0;
+  }
+
+  .lista {
+    padding: 0 var(--espaco-4) var(--espaco-3);
+  }
+
+  /* Linha: tocar abre o painel com as ações, então os botões saem da linha */
+  .linha-acoes {
+    display: none;
+  }
+
+  .linha-principal {
+    margin-left: 0;
+    padding: var(--espaco-3) 0;
+  }
+
+  .linha-icone {
+    width: 36px;
+    height: 36px;
+  }
+
+  .linha-titulo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .linha-descricao {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .linha-selos {
+    gap: 4px;
+  }
+
+  .linha-selo-comentario {
+    display: inline-flex;
+  }
+
+  /* Rodapé: contagem numa linha, total na de baixo */
+  .rodape {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  /* Painel lateral: tela inteira, ações fixas no rodapé */
+  .painel {
+    max-width: none;
+    padding: var(--espaco-4);
+  }
+
+  .painel-acoes {
+    position: sticky;
+    bottom: calc(var(--espaco-4) * -1);
+    flex-direction: column;
+    margin: auto calc(var(--espaco-4) * -1) calc(var(--espaco-4) * -1);
+    padding: var(--espaco-3) var(--espaco-4) var(--espaco-4);
+    background-color: var(--cor-superficie);
+    border-top: var(--borda-padrao);
+  }
+
+  .painel-acoes :global(.btn) {
+    width: 100%;
+    justify-content: center;
+  }
+}

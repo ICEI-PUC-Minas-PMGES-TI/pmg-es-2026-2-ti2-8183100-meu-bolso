@@ -12,6 +12,8 @@
     import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Gastos/Constantes";
     import IconeCategoria from "./IconeCategoria";
     import Modal from "./Modal";
+    import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
+    import { opcoesDeCategoria, opcoesDeConta } from "../SeletorOpcoes/opcoes";
     import styles from "../../pages/Gastos/Gastos.module.css";
 
     // ---------- Formulário de edição de uma recorrência ----------
@@ -108,35 +110,28 @@
             <label className="form-label" htmlFor="rec-categoria">
             Categoria
             </label>
-            <select
+            <SeletorOpcoes
             id="rec-categoria"
-            name="categoria"
-            className="form-input"
-            value={form.categoria}
-            onChange={alterarCampo}
-            >
-            {(CATEGORIAS.includes(form.categoria)
-                ? CATEGORIAS
-                : [...CATEGORIAS, form.categoria]
-            ).map((categoria) => (
-                <option key={categoria} value={categoria}>
-                {categoria}
-                </option>
-            ))}
-            </select>
+            valor={form.categoria}
+            opcoes={opcoesDeCategoria(
+                CATEGORIAS.includes(form.categoria) ? CATEGORIAS : [...CATEGORIAS, form.categoria],
+                IconeCategoria,
+            )}
+            onAlterar={(categoria) => setForm((atual) => ({ ...atual, categoria }))}
+            />
         </div>
 
         <div className="form-group">
             <label className="form-label" htmlFor="rec-carteira">
             Carteira
             </label>
-            <select
+            <SeletorOpcoes
             id="rec-carteira"
-            name="carteiraId"
-            className="form-input"
-            value={form.carteiraId}
-            onChange={(event) => {
-                const id = event.target.value;
+            valor={form.carteiraId}
+            opcoes={opcoesDeConta(opcoesCarteira)}
+            desabilitado={semCarteiras}
+            invalido={Boolean(erros.carteira)}
+            onAlterar={(id) => {
                 const opcao = opcoesCarteira.find((c) => c.id === id);
                 setForm((atual) => ({
                 ...atual,
@@ -145,15 +140,7 @@
                 }));
                 setErros((atual) => ({ ...atual, carteira: undefined }));
             }}
-            disabled={semCarteiras}
-            >
-            <option value="">Selecione</option>
-            {opcoesCarteira.map((carteira) => (
-                <option key={carteira.id} value={carteira.id}>
-                {carteira.nome}
-                </option>
-            ))}
-            </select>
+            />
             {semCarteiras && (
             <span className={styles["gastos-erro-campo"]}>
                 Cadastre uma conta na Carteira antes de registrar gastos.
