@@ -43,7 +43,15 @@ export async function listarContas() {
   try { dados = await obterCarteiras(); } catch { return []; }
   if (!dados) return [];
 
-  return (dados.contas ?? []).map((c) => ({ id: c.id, nome: c.apelido, tipo: "conta" }));
+  // banco, instituicao e saldo servem só para o seletor mostrar logo e saldo.
+  return (dados.contas ?? []).map((c) => ({
+    id: c.id,
+    nome: c.apelido,
+    tipo: "conta",
+    banco: c.banco ?? "",
+    instituicao: c.instituicao ?? "",
+    saldo: typeof c.saldo === "number" ? c.saldo : null,
+  }));
 }
 
 /**

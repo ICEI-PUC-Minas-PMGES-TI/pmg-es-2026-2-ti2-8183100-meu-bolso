@@ -1,0 +1,178 @@
+/* ========================================
+   SELETOR DE OPÇÕES (substitui o <select> nativo)
+   Mesma altura, borda e foco dos .form-input do global.css.
+   ======================================== */
+
+.gatilho {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: 6px 12px 6px 8px;
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--radius-pequeno);
+  font: inherit;
+  font-size: var(--texto-base);
+  color: var(--cor-texto-principal);
+  text-align: left;
+  transition:
+    border-color var(--transicao-rapida),
+    box-shadow var(--transicao-rapida);
+}
+
+.gatilho:focus-visible,
+.gatilho-aberto {
+  outline: none;
+  border-color: var(--verde-principal);
+  box-shadow: var(--sombra-foco);
+}
+
+.gatilho-invalido {
+  border-color: var(--erro);
+}
+
+.gatilho-invalido:focus-visible {
+  box-shadow: var(--sombra-foco-erro);
+}
+
+.gatilho:disabled {
+  background-color: var(--cor-superficie-realce);
+  color: var(--cor-texto-desabilitado);
+  cursor: not-allowed;
+}
+
+.conteudo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.placeholder {
+  flex: 1;
+  padding-left: 4px;
+  color: var(--cor-texto-secundario);
+}
+
+.seta {
+  flex-shrink: 0;
+  color: var(--cor-texto-secundario);
+  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.gatilho-aberto .seta {
+  transform: rotate(180deg);
+}
+
+/* Ícone (categoria) ou logo (banco), em círculo */
+.icone {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  overflow: hidden;
+}
+
+.icone img {
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  object-fit: contain;
+}
+
+.rotulo {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Lista suspensa ---------- */
+
+.lista {
+  position: fixed;
+  z-index: 1100; /* acima dos modais (1000) */
+  margin: 0;
+  padding: var(--espaco-1);
+  list-style: none;
+  overflow-y: auto;
+  background-color: var(--cor-superficie);
+  border: var(--borda-padrao);
+  border-radius: var(--radius-medio);
+  box-shadow: var(--sombra-card);
+  animation: lista-entra 160ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: 8px 10px;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-principal);
+  cursor: pointer;
+  user-select: none;
+}
+
+.opcao-ativa {
+  background-color: var(--cor-superficie-suave);
+}
+
+.opcao-marcada {
+  background-color: var(--verde-claro);
+  font-weight: 600;
+}
+
+.opcao-marcada .icone {
+  background-color: var(--cor-superficie);
+}
+
+.textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.descricao {
+  font-size: var(--texto-xs);
+  font-weight: 400;
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.check {
+  flex-shrink: 0;
+  color: var(--verde-escuro);
+}
+
+.vazio {
+  padding: 10px;
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+@keyframes lista-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lista,
+  .seta {
+    animation: none;
+    transition: none;
+  }
+}
