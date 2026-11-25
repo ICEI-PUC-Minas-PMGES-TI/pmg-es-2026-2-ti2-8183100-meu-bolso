@@ -2,6 +2,7 @@ package Projeto.MeuBolso.assistente;
 
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.repository.MetaRepository;
+import Projeto.MeuBolso.service.ReservaService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,10 +29,12 @@ public class MetaFaltantePergunta implements PerguntaPronta {
     private static final DateTimeFormatter DIA_MES = DateTimeFormatter.ofPattern("dd/MM");
 
     private final MetaRepository metaRepository;
+    private final ReservaService reservaService;
     private final Clock clock;
 
-    public MetaFaltantePergunta(MetaRepository metaRepository, Clock clock) {
+    public MetaFaltantePergunta(MetaRepository metaRepository, ReservaService reservaService, Clock clock) {
         this.metaRepository = metaRepository;
+        this.reservaService = reservaService;
         this.clock = clock;
     }
 
@@ -64,7 +67,8 @@ public class MetaFaltantePergunta implements PerguntaPronta {
         Meta meta = metaRepository.findByIdAndUsuarioId(metaId, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parâmetro inválido: metaId"));
 
-        BigDecimal alvo = valor(meta.getValorAlvo());
+        // Objetivo: valor-alvo. Reserva de emergência: o mínimo efetivo dela.
+        BigDecimal alvo = reservaService.referencia(usuarioId, meta);
         BigDecimal atual = valor(meta.getValorAtual());
         BigDecimal faltante = alvo.subtract(atual).max(BigDecimal.ZERO);
         int percentual = alvo.signum() > 0
@@ -79,7 +83,25 @@ public class MetaFaltantePergunta implements PerguntaPronta {
         Integer mesesRestantes = null;
         BigDecimal porMes = null;
 
-        if (atual.compareTo(alvo) >= 0) {
+        if (meta.isReserva()) {
+            if (alvo.signum() <= 0) {
+                situacao = "reserva_sem_minimo";
+                texto = String.format(
+                    "Sua reserva \"%s\" tem %s guardados. Ainda não há gastos suficientes para calcular o mínimo; "
+                        + "defina um valor mínimo na tela de Metas.",
+                    meta.getNome(), FormatoBRL.moeda(atual));
+            } else if (atual.compareTo(alvo) >= 0) {
+                situacao = "reserva_protegida";
+                texto = String.format("Sua reserva \"%s\" já cobre o mínimo: %s de %s.",
+                    meta.getNome(), FormatoBRL.moeda(atual), FormatoBRL.moeda(alvo));
+            } else {
+                situacao = "reserva_abaixo";
+                texto = String.format(
+                    "Para a reserva \"%s\" chegar ao mínimo faltam %s (você já guardou %s de %s, %d%%).",
+                    meta.getNome(), FormatoBRL.moeda(faltante), FormatoBRL.moeda(atual),
+                    FormatoBRL.moeda(alvo), percentual);
+            }
+        } else if (atual.compareTo(alvo) >= 0) {
             situacao = "atingida";
             texto = String.format("Parabéns! Você já atingiu a meta \"%s\": %s de %s.",
                 meta.getNome(), FormatoBRL.moeda(atual), FormatoBRL.moeda(alvo));

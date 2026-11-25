@@ -193,6 +193,12 @@
   color: var(--sucesso);
 }
 
+/* Tag fixa da reserva de emergência (no lugar da prioridade). */
+.tag-reserva {
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
 /* ---------- Progresso ---------- */
 .progresso {
   display: flex;

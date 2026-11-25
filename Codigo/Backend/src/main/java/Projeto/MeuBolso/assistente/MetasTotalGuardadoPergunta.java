@@ -2,10 +2,12 @@ package Projeto.MeuBolso.assistente;
 
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.repository.MetaRepository;
+import Projeto.MeuBolso.service.ReservaService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +24,11 @@ public class MetasTotalGuardadoPergunta implements PerguntaPronta {
     private static final BigDecimal CEM = BigDecimal.valueOf(100);
 
     private final MetaRepository metaRepository;
+    private final ReservaService reservaService;
 
-    public MetasTotalGuardadoPergunta(MetaRepository metaRepository) {
+    public MetasTotalGuardadoPergunta(MetaRepository metaRepository, ReservaService reservaService) {
         this.metaRepository = metaRepository;
+        this.reservaService = reservaService;
     }
 
     @Override
@@ -46,11 +50,15 @@ public class MetasTotalGuardadoPergunta implements PerguntaPronta {
     public RespostaPronta responder(String usuarioId, Map<String, String> params) {
         List<Meta> metas = metaRepository.findByUsuarioId(usuarioId);
 
+        // Referência de cada meta: valor-alvo do objetivo ou mínimo da reserva.
+        Map<Meta, BigDecimal> alvos = new IdentityHashMap<>();
         BigDecimal totalGuardado = BigDecimal.ZERO;
         BigDecimal totalAlvo = BigDecimal.ZERO;
         for (Meta m : metas) {
+            BigDecimal alvo = reservaService.referencia(usuarioId, m);
+            alvos.put(m, alvo);
             totalGuardado = totalGuardado.add(valor(m.getValorAtual()));
-            totalAlvo = totalAlvo.add(valor(m.getValorAlvo()));
+            totalAlvo = totalAlvo.add(alvo);
         }
 
         int percentual = percentual(totalGuardado, totalAlvo);
@@ -58,10 +66,10 @@ public class MetasTotalGuardadoPergunta implements PerguntaPronta {
 
         // Mais avançada: maior percentual individual; empate = ordem alfabética do nome.
         Meta maisAvancada = metas.stream()
-            .max(Comparator.<Meta>comparingInt(m -> percentual(valor(m.getValorAtual()), valor(m.getValorAlvo())))
+            .max(Comparator.<Meta>comparingInt(m -> percentual(valor(m.getValorAtual()), valor(alvos.get(m))))
                 .thenComparing(Comparator.comparing(Meta::getNome).reversed()))
             .orElseThrow();
-        int percMaisAvancada = percentual(valor(maisAvancada.getValorAtual()), valor(maisAvancada.getValorAlvo()));
+        int percMaisAvancada = percentual(valor(maisAvancada.getValorAtual()), valor(alvos.get(maisAvancada)));
 
         String metasPalavra = quantidade == 1 ? "1 meta" : quantidade + " metas";
         String texto = String.format(

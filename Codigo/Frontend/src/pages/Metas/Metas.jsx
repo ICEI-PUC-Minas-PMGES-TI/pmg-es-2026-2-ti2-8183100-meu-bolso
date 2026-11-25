@@ -13,6 +13,10 @@ import {
 import ModalNovaMeta from "../../components/ModalNovaMeta/ModalNovaMeta";
 import ModalMovimentarMeta from "../../components/ModalMovimentarMeta/ModalMovimentarMeta";
 import PainelDetalhesMeta from "../../components/PainelDetalhesMeta/PainelDetalhesMeta";
+import CardReserva from "../../components/ReservaEmergencia/CardReserva";
+import ConviteReserva from "../../components/ReservaEmergencia/ConviteReserva";
+import ModalReserva from "../../components/ReservaEmergencia/ModalReserva";
+import { ehReserva, textoCobertura } from "../../components/ReservaEmergencia/reserva";
 import {
   listarMetas,
   criarMeta,
@@ -111,11 +115,16 @@ function Metas() {
   const [carregando, setCarregando] = useState(true);
   const [erroCarregar, setErroCarregar] = useState("");
 
+  // RF-03: a reserva de emergência (no máximo uma) fica fora da lista e da
+  // ordenação: aparece sempre no topo, em destaque.
+  const reserva = useMemo(() => metas.find(ehReserva) ?? null, [metas]);
+  const objetivos = useMemo(() => metas.filter((m) => !ehReserva(m)), [metas]);
+
   // RF-05: ordem da lista (prioridade, prazo ou progresso).
   const [ordenacao, setOrdenacao] = useState(lerOrdenacaoSalva);
   const metasOrdenadas = useMemo(
-    () => ordenarMetas(metas, ordenacao),
-    [metas, ordenacao]
+    () => ordenarMetas(objetivos, ordenacao),
+    [objetivos, ordenacao]
   );
 
   function mudarOrdenacao(valor) {
@@ -198,9 +207,31 @@ function Metas() {
   }
 
   // Abre o modal preenchido com a meta escolhida (edição).
+  // A reserva de emergência tem o próprio modal (horizonte e valor mínimo).
   function abrirEdicao(meta) {
+    if (ehReserva(meta)) {
+      setModalReserva({ reserva: meta });
+      return;
+    }
     setMetaEmEdicao(meta);
     setModalAberto(true);
+  }
+
+  // Modal da reserva de emergência: null = fechado; { reserva: null } =
+  // configuração; { reserva } = edição.
+  const [modalReserva, setModalReserva] = useState(null);
+
+  // Cria ou atualiza a reserva. Erros sobem para o modal mostrar.
+  async function salvarReserva(corpo) {
+    const atual = modalReserva?.reserva;
+    const salva = normalizarMeta(
+      atual ? await atualizarMeta(atual._id, corpo) : await criarMeta(corpo)
+    );
+    setMetas((lista) =>
+      atual ? lista.map((m) => (m._id === salva._id ? salva : m)) : [...lista, salva]
+    );
+    setMetaSelecionada((sel) => (sel && sel._id === salva._id ? salva : sel));
+    setModalReserva(null);
   }
 
   // Fecha o modal e limpa a meta em edição.
@@ -241,6 +272,25 @@ function Metas() {
   //  - Depósito: sai da carteira e entra na meta.
   //  - Retirada: entra na carteira e sai da meta.
   async function confirmarMovimentacao(meta, { tipo, valor, titulo, carteiraId }) {
+    // Retirada que deixa a reserva de emergência abaixo do mínimo: confirma antes.
+    if (ehReserva(meta) && tipo === "retirada") {
+      const minimo = Number(meta.valorMinimo ?? 0);
+      const depois = Number(meta.valorAtual ?? 0) - Number(valor ?? 0);
+      if (minimo > 0 && depois < minimo) {
+        const cobertura = textoCobertura(depois, meta.custoMensal);
+        const continuar = window.confirm(
+          `Depois desta retirada sua reserva fica abaixo do mínimo (${formatarMoeda(minimo)})` +
+            (cobertura
+              ? ` e só cobre ${cobertura} de gastos`
+              : depois <= 0
+              ? " e fica vazia"
+              : "") +
+            ".\n\nContinuar mesmo assim?"
+        );
+        if (!continuar) return;
+      }
+    }
+
     let resposta;
     try {
       resposta = await movimentarMeta(meta._id, { tipo, valor, titulo, carteiraId });
@@ -250,6 +300,8 @@ function Metas() {
     }
 
     const novoValorAtual = Number(resposta.meta.valorAtual ?? 0);
+    // A resposta traz a meta inteira já recalculada (na reserva: nível e meses cobertos).
+    const metaAtualizada = normalizarMeta(resposta.meta);
 
     // Detecta a transição para "concluída" (cruzou de <100% para 100%)
     // para disparar a animação de celebração.
@@ -260,9 +312,7 @@ function Metas() {
     }
 
     setMetas((lista) =>
-      lista.map((m) =>
-        m._id === meta._id ? { ...m, valorAtual: novoValorAtual } : m
-      )
+      lista.map((m) => (m._id === meta._id ? { ...m, ...metaAtualizada } : m))
     );
 
     // Adiciona a movimentação recém-criada ao histórico (mais recente primeiro).
@@ -274,9 +324,7 @@ function Metas() {
 
     // Mantém o painel refletindo o novo valor guardado, se estiver aberto.
     setMetaSelecionada((atual) =>
-      atual && atual._id === meta._id
-        ? { ...atual, valorAtual: novoValorAtual }
-        : atual
+      atual && atual._id === meta._id ? { ...atual, ...metaAtualizada } : atual
     );
   }
 
@@ -354,6 +402,23 @@ function Metas() {
         </button>
       </div>
 
+      {/* Reserva de emergência (RF-03): sempre no topo, em destaque.
+          Sem reserva configurada, aparece o convite. */}
+      {!carregando && !erroCarregar && (
+        <section className={styles.reserva} aria-label="Reserva de emergência">
+          {reserva ? (
+            <CardReserva
+              reserva={reserva}
+              onAbrir={() => abrirPainel(reserva)}
+              onEditar={() => abrirEdicao(reserva)}
+              onMovimentar={() => abrirMovimentacao(reserva)}
+            />
+          ) : (
+            <ConviteReserva onConfigurar={() => setModalReserva({ reserva: null })} />
+          )}
+        </section>
+      )}
+
       {/* Cartões de resumo */}
       <section className={`grid grid-3 ${styles.resumo}`}>
         <div className={`card ${styles.cardResumo}`}>
@@ -397,7 +462,7 @@ function Metas() {
           <h2>Suas metas</h2>
 
           {/* RF-05: organizar os objetivos por importância e prazo */}
-          {metas.length > 1 && (
+          {objetivos.length > 1 && (
             <div className={styles.ordenacao}>
               <span id="rotulo-ordenacao" className="texto-secundario texto-pequeno">
                 Ordenar por
@@ -434,7 +499,7 @@ function Metas() {
           <div className={`card ${styles.vazio}`}>
             <p className="texto-secundario">{erroCarregar}</p>
           </div>
-        ) : metas.length === 0 ? (
+        ) : objetivos.length === 0 ? (
           <div className={`card ${styles.vazio}`}>
             <p className="texto-secundario">
               Você ainda não tem metas. Crie a primeira para começar a planejar.
@@ -567,6 +632,20 @@ function Metas() {
         onSalvar={salvarMeta}
         onExcluir={excluirMeta}
       />
+
+      {/* Configuração/edição da reserva de emergência. Montado só quando
+          aberto, para buscar a sugestão do mínimo a cada abertura. */}
+      {modalReserva && (
+        <ModalReserva
+          reserva={modalReserva.reserva}
+          onFechar={() => setModalReserva(null)}
+          onSalvar={salvarReserva}
+          onExcluir={async (r) => {
+            setModalReserva(null);
+            await excluirMeta(r);
+          }}
+        />
+      )}
 
       {/* Modal de movimentação (depósito/retirada) do valor guardado. */}
       <ModalMovimentarMeta

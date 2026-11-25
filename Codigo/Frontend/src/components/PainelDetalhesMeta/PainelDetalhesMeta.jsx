@@ -6,21 +6,30 @@ import {
   Trash2,
   ArrowRight,
   Target,
+  ShieldCheck,
 } from "lucide-react";
 
 import { ROTULO_PRIORIDADE } from "../../pages/Metas/ordenacaoMetas";
+import {
+  coberturaDaReserva,
+  ehReserva,
+  progressoReserva,
+  rotuloHorizonte,
+} from "../ReservaEmergencia/reserva";
 import styles from "./PainelDetalhesMeta.module.css";
 
 /**
  * Painel lateral de detalhes de uma META (abre pela direita).
  *
- * Segue a mesma linha visual do PainelDetalhes usado na página Carteiras
- * (reserva de emergência): resumo da meta + movimentações recentes +
- * botão "Ver todas as movimentações".
+ * Segue a mesma linha visual do PainelDetalhes usado na página Carteiras:
+ * resumo da meta + movimentações recentes + botão "Ver todas as
+ * movimentações".
  *
  * O modelo de dados (ver Documentacao/ModeloDeDados.md, coleção "metas")
  * define: nome, valorAlvo, valorAtual, prazo e prioridade. O progresso é
- * valorAtual / valorAlvo.
+ * valorAtual / valorAlvo. Na reserva de emergência (tipo "reserva") não há
+ * valor-alvo: o progresso é até o valor mínimo, e o painel mostra o mínimo,
+ * quanto falta (ou sobra) e quantos meses de gastos o valor cobre.
  *
  * props:
  *  - meta: objeto da meta selecionada (ou null = fechado)
@@ -76,8 +85,16 @@ function PainelDetalhesMeta({
     onFechar?.();
   }
 
-  const progresso = meta ? calcularProgresso(meta.valorAtual, meta.valorAlvo) : 0;
+  // A reserva de emergência não tem valor-alvo: o progresso é até o mínimo.
+  const reserva = ehReserva(meta);
+  const progresso = !meta
+    ? 0
+    : reserva
+    ? progressoReserva(meta)
+    : calcularProgresso(meta.valorAtual, meta.valorAlvo);
   const prazoFormatado = meta ? formatarPrazo(meta.prazo) : null;
+  const minimo = Number(meta?.valorMinimo ?? 0);
+  const diferencaMinimo = Number(meta?.valorAtual ?? 0) - minimo;
 
   const temMais = movimentacoes.length > QTD_RECENTES;
   const listaVisivel = mostrarTodas
@@ -114,7 +131,11 @@ function PainelDetalhesMeta({
 
               <div className={styles.cabecalhoTexto}>
                 <strong className={styles.titulo}>{meta.nome}</strong>
-                {prazoFormatado ? (
+                {reserva ? (
+                  <span className={styles.subtitulo}>
+                    Para sustentar {rotuloHorizonte(meta.horizonteMeses)}
+                  </span>
+                ) : prazoFormatado ? (
                   <span className={styles.subtitulo}>
                     Prazo: {prazoFormatado}
                   </span>
@@ -162,15 +183,25 @@ function PainelDetalhesMeta({
             {/* Topo visual: ícone + nome + prioridade */}
             <div className={styles.visual}>
               <span className={styles.visualIcone}>
-                <Target size={24} aria-hidden="true" />
+                {reserva ? (
+                  <ShieldCheck size={24} aria-hidden="true" />
+                ) : (
+                  <Target size={24} aria-hidden="true" />
+                )}
               </span>
               <div className={styles.visualTexto}>
                 <span className={styles.visualNome}>{meta.nome}</span>
-                <span
-                  className={`${styles.tag} ${styles[`tag-${meta.prioridade}`]}`}
-                >
-                  {ROTULO_PRIORIDADE[meta.prioridade] ?? meta.prioridade}
-                </span>
+                {reserva ? (
+                  <span className={`${styles.tag} ${styles["tag-reserva"]}`}>
+                    Reserva de emergência
+                  </span>
+                ) : (
+                  <span
+                    className={`${styles.tag} ${styles[`tag-${meta.prioridade}`]}`}
+                  >
+                    {ROTULO_PRIORIDADE[meta.prioridade] ?? meta.prioridade}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -196,18 +227,57 @@ function PainelDetalhesMeta({
                   {formatarMoeda(meta.valorAtual)}
                 </span>
               </div>
-              <div className={styles.linha}>
-                <span className={styles.linhaRotulo}>Valor-alvo</span>
-                <span className={styles.linhaValor}>
-                  {formatarMoeda(meta.valorAlvo)}
-                </span>
-              </div>
-              <div className={styles.linha}>
-                <span className={styles.linhaRotulo}>Falta</span>
-                <span className={styles.linhaValor}>
-                  {formatarMoeda(Math.max(meta.valorAlvo - meta.valorAtual, 0))}
-                </span>
-              </div>
+              {reserva ? (
+                <>
+                  <div className={styles.linha}>
+                    <span className={styles.linhaRotulo}>
+                      Mínimo ({rotuloHorizonte(meta.horizonteMeses)})
+                    </span>
+                    <span className={styles.linhaValor}>
+                      {minimo > 0 ? formatarMoeda(minimo) : "Não calculado"}
+                    </span>
+                  </div>
+                  {minimo > 0 && (
+                    <div className={styles.linha}>
+                      <span className={styles.linhaRotulo}>
+                        {diferencaMinimo >= 0 ? "Acima do mínimo" : "Falta para o mínimo"}
+                      </span>
+                      <span className={styles.linhaValor}>
+                        {formatarMoeda(Math.abs(diferencaMinimo))}
+                      </span>
+                    </div>
+                  )}
+                  {coberturaDaReserva(meta) && (
+                    <div className={styles.linha}>
+                      <span className={styles.linhaRotulo}>Cobre</span>
+                      <span className={styles.linhaValor}>
+                        {coberturaDaReserva(meta)} de gastos
+                      </span>
+                    </div>
+                  )}
+                  <div className={styles.linha}>
+                    <span className={styles.linhaRotulo}>Mínimo</span>
+                    <span className={styles.linhaValor}>
+                      {meta.minimoAutomatico ? "Automático" : "Definido por você"}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.linha}>
+                    <span className={styles.linhaRotulo}>Valor-alvo</span>
+                    <span className={styles.linhaValor}>
+                      {formatarMoeda(meta.valorAlvo)}
+                    </span>
+                  </div>
+                  <div className={styles.linha}>
+                    <span className={styles.linhaRotulo}>Falta</span>
+                    <span className={styles.linhaValor}>
+                      {formatarMoeda(Math.max(meta.valorAlvo - meta.valorAtual, 0))}
+                    </span>
+                  </div>
+                </>
+              )}
               {prazoFormatado ? (
                 <div className={styles.linha}>
                   <span className={styles.linhaRotulo}>Prazo</span>

@@ -5,7 +5,9 @@ import static org.mockito.Mockito.when;
 
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.repository.MetaRepository;
+import Projeto.MeuBolso.service.ReservaService;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,9 @@ class MetasTotalGuardadoPerguntaTest {
 
     @BeforeEach
     void preparar() {
-        pergunta = new MetasTotalGuardadoPergunta(metaRepository);
+        // Os testes usam só objetivos: o ReservaService não consulta os repositórios.
+        pergunta = new MetasTotalGuardadoPergunta(metaRepository,
+            new ReservaService(null, null, null, Clock.systemDefaultZone()));
     }
 
     private static Meta meta(String id, String nome, String alvo, String atual) {

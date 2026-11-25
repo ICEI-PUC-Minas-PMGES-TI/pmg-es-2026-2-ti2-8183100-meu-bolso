@@ -1,0 +1,489 @@
+/* ========================================
+   RESERVA DE EMERGÊNCIA (RF-03)
+   Card em destaque, convite, modal de configuração e alerta da Visão geral.
+   Só tokens do global.css (claro e escuro).
+======================================== */
+
+/* ---------- Tag e ícone ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
+  padding: 2px 10px;
+  border-radius: var(--radius-redondo);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+  white-space: nowrap;
+}
+
+.icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+/* ---------- Card da reserva (sempre no topo) ---------- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+  background-color: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-left: 6px solid var(--verde-principal);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  cursor: pointer;
+  transition: box-shadow var(--transicao-padrao), transform var(--transicao-padrao);
+}
+
+.card:hover {
+  box-shadow: var(--sombra-hover);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--verde-principal);
+  outline-offset: 2px;
+}
+
+/* Cor da borda e da barra conforme o nível de alerta. */
+.card-erro { border-left-color: var(--erro); }
+.card-alerta { border-left-color: var(--alerta); }
+.card-sucesso { border-left-color: var(--sucesso); }
+.card-neutro { border-left-color: var(--cor-borda-forte); }
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.topoTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  min-width: 0;
+}
+
+.topoTexto h3 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitulo {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+}
+
+.valores {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.valorGuardado {
+  font-size: var(--titulo-md);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.trilho {
+  height: 10px;
+  background-color: var(--cor-superficie-forte);
+  border-radius: var(--radius-redondo);
+  overflow: hidden;
+}
+
+.preenchimento {
+  height: 100%;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-principal);
+  transition: width var(--transicao-padrao);
+}
+
+.preenchimento-erro { background-color: var(--erro); }
+.preenchimento-alerta { background-color: var(--alerta); }
+.preenchimento-sucesso { background-color: var(--sucesso); }
+.preenchimento-neutro { background-color: var(--cor-superficie-contraste); }
+
+.rodapeBarra {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-secundario);
+}
+
+/* Faixa de alerta dentro do card. */
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  padding: 10px 12px;
+  border-radius: var(--radius-medio);
+  font-size: var(--texto-sm);
+}
+
+.aviso strong {
+  font-weight: 600;
+}
+
+.aviso-erro { background-color: var(--erro-fundo); color: var(--erro); }
+.aviso-alerta { background-color: var(--alerta-fundo); color: var(--alerta-escuro); }
+.aviso-sucesso { background-color: var(--sucesso-fundo); color: var(--sucesso); }
+.aviso-neutro { background-color: var(--cor-superficie-realce); color: var(--cor-texto-medio); }
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+/* ---------- Convite (antes de configurar) ---------- */
+.convite {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-4);
+  padding: var(--espaco-6);
+  background-color: var(--verde-claro);
+  border-radius: var(--radius-grande);
+}
+
+.conviteTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.conviteTexto h3 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.conviteTexto p {
+  color: var(--cor-texto-medio);
+}
+
+.conviteIcone {
+  background-color: var(--cor-superficie);
+}
+
+.conviteAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+/* Versão recolhida ("Agora não"). */
+.faixa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  background-color: var(--verde-claro);
+  border-radius: var(--radius-medio);
+  font-size: var(--texto-sm);
+  color: var(--cor-texto-medio);
+}
+
+.linkBotao {
+  border: none;
+  background: transparent;
+  padding: 0;
+  color: var(--verde-escuro);
+  font-weight: 600;
+  font-size: var(--texto-sm);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Modal de configuração ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--cor-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaco-4);
+  z-index: 210;
+}
+
+.modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: var(--cor-superficie);
+  border-radius: var(--radius-grande);
+  box-shadow: var(--sombra-card);
+  padding: var(--espaco-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.cabecalho h2 {
+  font-size: var(--titulo-sm);
+  font-weight: 700;
+}
+
+.cabecalho p {
+  color: var(--cor-texto-secundario);
+  font-size: var(--texto-sm);
+  margin-top: var(--espaco-1);
+}
+
+.botaoFechar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pequeno);
+  color: var(--cor-texto-medio);
+}
+
+.botaoFechar:hover {
+  background-color: var(--cor-superficie-realce);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.campo > label,
+.legenda {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cor-texto-forte);
+}
+
+.campo input[type="text"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background-color: var(--cor-superficie);
+  color: var(--cor-texto-principal);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--radius-pequeno);
+  outline: none;
+}
+
+.campo input[type="text"]:focus {
+  border-color: var(--verde-principal);
+  box-shadow: var(--sombra-foco);
+}
+
+.ajuda {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+fieldset.campo {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Opções de horizonte (3, 6, 12 meses) lado a lado. */
+.opcoes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--espaco-2);
+}
+
+.opcao {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--radius-medio);
+  cursor: pointer;
+  transition: border-color var(--transicao-rapida), background-color var(--transicao-rapida);
+}
+
+.opcao input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcao:has(input:checked) {
+  border-color: var(--verde-principal);
+  background-color: var(--verde-fundo-realce);
+  box-shadow: var(--sombra-foco);
+}
+
+.opcao:has(input:focus-visible) {
+  outline: 2px solid var(--verde-principal);
+  outline-offset: 2px;
+}
+
+.opcaoRotulo {
+  font-weight: 600;
+  font-size: var(--texto-sm);
+}
+
+.opcaoValor {
+  font-weight: 700;
+  font-size: var(--texto-lg);
+}
+
+.opcaoDica {
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+/* Modo do mínimo (automático / manual). */
+.modos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.modo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2);
+  font-size: var(--texto-sm);
+  cursor: pointer;
+}
+
+.modo input {
+  margin-top: 3px;
+  accent-color: var(--verde-escuro);
+}
+
+.modo small {
+  display: block;
+  color: var(--cor-texto-secundario);
+}
+
+.linhaInline {
+  display: flex;
+  gap: var(--espaco-2);
+}
+
+.linhaInline input {
+  flex: 1;
+}
+
+.erro {
+  font-size: var(--texto-sm);
+  color: var(--erro);
+  background-color: var(--erro-fundo);
+  border-radius: var(--radius-pequeno);
+  padding: 10px 12px;
+}
+
+.rodapeModal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+}
+
+.rodapeDireita {
+  display: flex;
+  gap: var(--espaco-3);
+  margin-left: auto;
+}
+
+.btnExcluir {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  background-color: var(--cor-superficie);
+  color: var(--erro);
+  border: 1px solid var(--erro);
+}
+
+.btnExcluir:hover:not(:disabled) {
+  background-color: var(--erro-fundo);
+}
+
+.btnExcluir:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Alerta na Visão geral ---------- */
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) var(--espaco-4);
+  border-radius: var(--radius-medio);
+  font-size: var(--texto-sm);
+  text-decoration: none;
+  transition: filter var(--transicao-rapida);
+}
+
+.alerta:hover {
+  filter: brightness(0.97);
+}
+
+.alerta span {
+  flex: 1;
+}
+
+.alerta-erro { background-color: var(--erro-fundo); color: var(--erro); }
+.alerta-alerta { background-color: var(--alerta-fundo); color: var(--alerta-escuro); }
+.alerta-neutro { background-color: var(--verde-claro); color: var(--verde-escuro); }
+
+@media (max-width: 640px) {
+  .convite {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .opcoes {
+    grid-template-columns: 1fr;
+  }
+
+  .valorGuardado {
+    font-size: var(--titulo-sm);
+  }
+}

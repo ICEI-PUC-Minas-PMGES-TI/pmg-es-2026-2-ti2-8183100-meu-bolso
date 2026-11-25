@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.repository.MetaRepository;
+import Projeto.MeuBolso.service.ReservaService;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -35,7 +36,8 @@ class MetaFaltantePerguntaTest {
 
     @BeforeEach
     void preparar() {
-        pergunta = new MetaFaltantePergunta(metaRepository, CLOCK);
+        // Os testes usam só objetivos: o ReservaService não consulta os repositórios.
+        pergunta = new MetaFaltantePergunta(metaRepository, new ReservaService(null, null, null, CLOCK), CLOCK);
     }
 
     private static Meta meta(String nome, String alvo, String atual, LocalDate prazo) {

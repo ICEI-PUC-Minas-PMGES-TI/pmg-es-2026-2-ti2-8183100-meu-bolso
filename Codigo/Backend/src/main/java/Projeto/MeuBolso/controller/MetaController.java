@@ -12,8 +12,10 @@ import Projeto.MeuBolso.repository.MetaRepository;
 import Projeto.MeuBolso.repository.MovimentacaoMetaRepository;
 import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.MetaService;
+import Projeto.MeuBolso.service.ReservaService;
 
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,24 +39,41 @@ public class MetaController {
     private final UsuarioRepository usuarioRepository;
     private final MovimentacaoMetaRepository movimentacaoRepository;
     private final MetaService metaService;
+    private final ReservaService reservaService;
 
     public MetaController(MetaRepository metaRepository,
                           UsuarioRepository usuarioRepository,
                           MovimentacaoMetaRepository movimentacaoRepository,
-                          MetaService metaService) {
+                          MetaService metaService,
+                          ReservaService reservaService) {
         this.metaRepository = metaRepository;
         this.usuarioRepository = usuarioRepository;
         this.movimentacaoRepository = movimentacaoRepository;
         this.metaService = metaService;
+        this.reservaService = reservaService;
     }
 
     // Lista todas as metas do usuário autenticado.
+    // A reserva de emergência vem com mínimo, nível e meses cobertos já calculados.
     @GetMapping
     public List<MetaResponse> listar(Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
         return metaRepository.findByUsuarioId(usuarioId).stream()
-            .map(MetaController::paraResponse)
+            .map(m -> paraResponse(usuarioId, m))
             .toList();
+    }
+
+    /**
+     * Sugestão de valor mínimo da reserva para 3, 6 e 12 meses, com a base do
+     * cálculo (historico | orcamento | recorrencias | informado | sem_dados).
+     * `custoInformado` é opcional: só é usado quando não há dados para estimar.
+     */
+    @GetMapping("/reserva/sugestao")
+    public ReservaService.Sugestao sugestaoReserva(@RequestParam(required = false) BigDecimal custoInformado,
+                                                   Authentication authentication) {
+        String usuarioId = usuarioAutenticado(authentication).getId();
+        if (custoInformado != null && custoInformado.signum() <= 0) custoInformado = null;
+        return reservaService.sugerir(usuarioId, custoInformado);
     }
 
     // Cria uma meta nova para o usuário autenticado (valorAtual nasce em zero).
@@ -61,20 +81,22 @@ public class MetaController {
     public ResponseEntity<MetaResponse> criar(@Valid @RequestBody MetaRequest request,
                                               Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
+        boolean reserva = Meta.TIPO_RESERVA.equals(request.tipo());
 
-        Meta meta = new Meta(
-            usuarioId,
-            request.nome().trim(),
-            request.valorAlvo(),
-            request.prazo(),
-            request.prioridade()
-        );
+        if (reserva && metaRepository.existsByUsuarioIdAndTipo(usuarioId, Meta.TIPO_RESERVA)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Você já tem uma reserva de emergência.");
+        }
+
+        Meta meta = new Meta(usuarioId, request.nome().trim(), null, null, request.prioridade());
+        meta.setTipo(reserva ? Meta.TIPO_RESERVA : Meta.TIPO_OBJETIVO);
+        aplicarDados(meta, request);
 
         Meta salva = metaRepository.save(meta);
-        return ResponseEntity.status(HttpStatus.CREATED).body(paraResponse(salva));
+        return ResponseEntity.status(HttpStatus.CREATED).body(paraResponse(usuarioId, salva));
     }
 
-    // Edita os dados básicos de uma meta do usuário (não altera o valorAtual).
+    // Edita os dados básicos de uma meta do usuário (não altera o valorAtual nem o tipo).
     @PutMapping("/{id}")
     public MetaResponse atualizar(@PathVariable String id,
                                   @Valid @RequestBody MetaRequest request,
@@ -85,20 +107,26 @@ public class MetaController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
 
         meta.setNome(request.nome().trim());
-        meta.setValorAlvo(request.valorAlvo());
-        meta.setPrazo(request.prazo());
         meta.setPrioridade(request.prioridade());
+        aplicarDados(meta, request);
 
-        return paraResponse(metaRepository.save(meta));
+        return paraResponse(usuarioId, metaRepository.save(meta));
     }
 
     // Exclui uma meta do usuário (e o histórico de movimentações dela).
+    // Meta com dinheiro guardado não pode ser excluída: o valor não volta para
+    // nenhuma conta, então ele sumiria. O usuário precisa retirar antes.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable String id, Authentication authentication) {
         String usuarioId = usuarioAutenticado(authentication).getId();
 
         Meta meta = metaRepository.findByIdAndUsuarioId(id, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meta não encontrada."));
+
+        if (meta.getValorAtual() != null && meta.getValorAtual().signum() > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Retire o dinheiro guardado nesta meta antes de excluí-la.");
+        }
 
         metaRepository.delete(meta);
         movimentacaoRepository.deleteByMetaIdAndUsuarioId(id, usuarioId);
@@ -139,8 +167,52 @@ public class MetaController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
             new MovimentacaoAplicadaResponse(
-                paraResponse(aplicada.meta()),
+                paraResponse(usuarioId, aplicada.meta()),
                 paraResponse(aplicada.movimentacao())));
+    }
+
+    /**
+     * Copia os dados do formulário para a meta conforme o tipo dela.
+     *  - objetivo: exige valorAlvo; limpa os campos da reserva.
+     *  - reserva: sem valorAlvo e sem prazo; horizonte 3/6/12 (padrão 6);
+     *    mínimo automático por padrão; mínimo manual exige valorMinimo.
+     * Erros de regra usam 422 para a mensagem chegar à tela (o 400 do front
+     * mostra só um texto genérico).
+     */
+    private static void aplicarDados(Meta meta, MetaRequest request) {
+        if (!meta.isReserva()) {
+            if (request.valorAlvo() == null) {
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Informe o valor-alvo da meta.");
+            }
+            meta.setValorAlvo(request.valorAlvo());
+            meta.setPrazo(request.prazo());
+            meta.setHorizonteMeses(null);
+            meta.setMinimoAutomatico(null);
+            meta.setValorMinimo(null);
+            meta.setCustoMensalInformado(null);
+            return;
+        }
+
+        Integer horizonte = request.horizonteMeses() == null
+            ? ReservaService.HORIZONTE_PADRAO
+            : request.horizonteMeses();
+        if (!ReservaService.HORIZONTES.contains(horizonte)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                "O período da reserva deve ser de 3, 6 ou 12 meses.");
+        }
+        boolean automatico = !Boolean.FALSE.equals(request.minimoAutomatico());
+        if (!automatico && request.valorMinimo() == null) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                "Informe o valor mínimo da reserva.");
+        }
+
+        meta.setValorAlvo(null);
+        meta.setPrazo(null);
+        meta.setPrioridade("alta");
+        meta.setHorizonteMeses(horizonte);
+        meta.setMinimoAutomatico(automatico);
+        meta.setValorMinimo(automatico ? null : request.valorMinimo());
+        meta.setCustoMensalInformado(request.custoMensalInformado());
     }
 
     // Resolve o usuário logado a partir do token (Authentication.getName() = e-mail).
@@ -152,15 +224,24 @@ public class MetaController {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
     }
 
-    private static MetaResponse paraResponse(Meta m) {
+    private MetaResponse paraResponse(String usuarioId, Meta m) {
+        if (!m.isReserva()) {
+            return new MetaResponse(
+                m.getId(), m.getNome(), m.getValorAlvo(), m.getValorAtual(), m.getPrazo(), m.getPrioridade(),
+                Meta.TIPO_OBJETIVO, null, null, null, null, null, null, null, null);
+        }
+        ReservaService.Situacao s = reservaService.situacao(usuarioId, m);
         return new MetaResponse(
-            m.getId(),
-            m.getNome(),
-            m.getValorAlvo(),
-            m.getValorAtual(),
-            m.getPrazo(),
-            m.getPrioridade()
-        );
+            m.getId(), m.getNome(), null, m.getValorAtual(), null, m.getPrioridade(),
+            Meta.TIPO_RESERVA,
+            ReservaService.horizonte(m),
+            !Boolean.FALSE.equals(m.getMinimoAutomatico()),
+            s.valorMinimo(),
+            m.getCustoMensalInformado(),
+            s.nivel(),
+            s.mesesCobertos(),
+            s.custoMensal(),
+            s.base());
     }
 
     private static MovimentacaoResponse paraResponse(MovimentacaoMeta m) {

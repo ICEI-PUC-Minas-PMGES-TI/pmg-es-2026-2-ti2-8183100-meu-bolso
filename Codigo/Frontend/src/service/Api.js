@@ -202,6 +202,15 @@ export async function listarMovimentacoesMeta(id) {
   return requisicao(`/api/metas/${id}/movimentacoes`, { autenticado: true });
 }
 
+// Sugestão do valor mínimo da reserva de emergência para 3, 6 e 12 meses.
+// Devolve { base, custoMensal, opcoes: [{ meses, valor }] }; `base` diz de
+// onde veio a conta (historico | orcamento | recorrencias | informado |
+// sem_dados). `custoInformado` (opcional) só é usado quando não há dados.
+export async function obterSugestaoReserva(custoInformado) {
+  const query = custoInformado > 0 ? `?custoInformado=${encodeURIComponent(custoInformado)}` : "";
+  return requisicao(`/api/metas/reserva/sugestao${query}`, { autenticado: true });
+}
+
 /* ========================================
    PERFIL
    ======================================== */
