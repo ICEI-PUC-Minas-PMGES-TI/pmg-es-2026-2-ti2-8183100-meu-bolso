@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Settings2 } from "lucide-react";
+import { Plus, Settings2 } from "lucide-react";
 
 import {
   converterValor,
@@ -10,6 +10,7 @@ import {
 import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Receitas/Constantes";
 import categoriasService, { TIPO_RECEITA } from "../../service/categoriasService";
 import GerenciarCategorias from "../Categorias/GerenciarCategorias";
+import NovaCategoriaRapida from "../Categorias/NovaCategoriaRapida";
 import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
 import { opcoesDeCategoria, opcoesDeConta } from "../SeletorOpcoes/opcoes";
 import IconeCategoria from "./IconeCategoria";
@@ -80,6 +81,8 @@ export default function ModalReceita({
   // se a busca falhar, para o modal nunca ficar sem opções.
   const [categoriasBanco, setCategoriasBanco] = useState(null);
   const [gerenciarAberto, setGerenciarAberto] = useState(false);
+  // "+ Nova categoria" no seletor: criação rápida sem sair do lançamento.
+  const [criandoCategoria, setCriandoCategoria] = useState(false);
 
   async function carregarCategorias() {
     try {
@@ -225,6 +228,11 @@ export default function ModalReceita({
               setForm((atual) => ({ ...atual, categoria }));
               setErros((atual) => ({ ...atual, categoria: undefined }));
             }}
+            acaoFinal={{
+              rotulo: "Nova categoria",
+              icone: <Plus size={16} aria-hidden="true" />,
+              onClick: () => setCriandoCategoria(true),
+            }}
           />
           {erros.categoria && (
             <span className={styles["receitas-erro-campo"]}>{erros.categoria}</span>
@@ -260,6 +268,22 @@ export default function ModalReceita({
             <span className={styles["receitas-erro-campo"]}>{erros.carteira}</span>
           )}
         </div>
+
+        {/* Linha inteira, logo abaixo de Categoria e Carteira, para o nome caber. */}
+        {criandoCategoria && (
+          <div className={styles["receitas-form-campo-largo"]}>
+            <NovaCategoriaRapida
+              tipo={TIPO_RECEITA}
+              onCancelar={() => setCriandoCategoria(false)}
+              onCriada={async (nome) => {
+                await carregarCategorias();
+                setForm((atual) => ({ ...atual, categoria: nome }));
+                setErros((atual) => ({ ...atual, categoria: undefined }));
+                setCriandoCategoria(false);
+              }}
+            />
+          </div>
+        )}
 
         <div className="form-group">
           <label className="form-label" htmlFor="receita-valor">

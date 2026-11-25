@@ -157,6 +157,40 @@
   color: var(--verde-escuro);
 }
 
+/* Ação no fim da lista (ex.: "+ Nova categoria") */
+.acao-final {
+  margin-top: var(--espaco-1);
+  padding-top: var(--espaco-1);
+  border-top: 1px solid var(--cor-borda-suave);
+}
+
+.acao-final button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--verde-escuro);
+  text-align: left;
+}
+
+.acao-final .icone {
+  background-color: transparent;
+  border: 1px dashed var(--verde-principal);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .acao-final button:hover {
+    background-color: var(--verde-claro);
+  }
+}
+
 .vazio {
   padding: 10px;
   font-size: var(--texto-sm);
