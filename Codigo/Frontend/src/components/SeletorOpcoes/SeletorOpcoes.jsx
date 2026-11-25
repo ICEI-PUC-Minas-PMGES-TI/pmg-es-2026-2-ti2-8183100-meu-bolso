@@ -21,6 +21,8 @@ const MARGEM = 6;
  *  - opcoes: [{ valor, rotulo, descricao?, icone? }]
  *  - onAlterar(valor)
  *  - placeholder, desabilitado, invalido
+ *  - acaoFinal (opcional): { rotulo, icone?, onClick } — botão no fim da
+ *    lista, ex.: "+ Nova categoria". Fecha a lista e chama onClick.
  */
 export default function SeletorOpcoes({
   id,
@@ -30,6 +32,7 @@ export default function SeletorOpcoes({
   placeholder = "Selecione",
   desabilitado = false,
   invalido = false,
+  acaoFinal,
 }) {
   const idLista = useId();
   const botaoRef = useRef(null);
@@ -236,6 +239,20 @@ export default function SeletorOpcoes({
                 </li>
               );
             })}
+            {acaoFinal && (
+              <li role="presentation" className={styles["acao-final"]}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    fechar(false);
+                    acaoFinal.onClick();
+                  }}
+                >
+                  {acaoFinal.icone && <span className={styles.icone}>{acaoFinal.icone}</span>}
+                  {acaoFinal.rotulo}
+                </button>
+              </li>
+            )}
           </ul>,
           document.body,
         )}

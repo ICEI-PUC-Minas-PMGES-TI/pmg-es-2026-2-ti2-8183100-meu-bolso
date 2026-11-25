@@ -1,0 +1,67 @@
+/* Criação rápida de categoria dentro do modal de lançamento */
+
+.caixa {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--espaco-2);
+  padding: var(--espaco-2);
+  background-color: var(--cor-superficie-suave);
+  border: 1px dashed var(--verde-principal);
+  border-radius: var(--radius-pequeno);
+  animation: entra 160ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-1);
+}
+
+.nome {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+.botao {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-pequeno);
+  background-color: var(--cor-superficie-inversa);
+  color: var(--cor-texto-inverso);
+}
+
+.botao:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cancelar {
+  background-color: transparent;
+  color: var(--cor-texto-secundario);
+}
+
+.erro {
+  font-size: var(--texto-xs);
+  color: var(--erro);
+}
+
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caixa {
+    animation: none;
+  }
+}

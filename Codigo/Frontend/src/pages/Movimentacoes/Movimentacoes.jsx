@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ChevronDown, ChevronLeft, ChevronRight, Plus, Repeat } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ChevronDown, ChevronLeft, ChevronRight, Plus, Repeat, Settings2 } from "lucide-react";
 
 import gastosService from "../../service/gastosService";
 import receitasService from "../../service/receitasService";
@@ -31,6 +31,7 @@ import {
   somarComSinal,
   unificar,
 } from "../../utils/Movimentacoesutils";
+import { useCategorias } from "../../service/categoriasService";
 import { CATEGORIAS as CATEGORIAS_GASTO } from "../Gastos/Constantes";
 import { CATEGORIAS as CATEGORIAS_RECEITA } from "../Receitas/Constantes";
 
@@ -252,17 +253,32 @@ export default function Movimentacoes() {
     [resumoDosGastos.total, orcamentoMes],
   );
 
-  // Categorias do filtro: as padrão + as que aparecem no mês, conforme o chip.
+  // Bibliotecas de categorias do usuário (null enquanto carregam).
+  const bibliotecaGasto = useCategorias(TIPO_GASTO);
+  const bibliotecaReceita = useCategorias(TIPO_RECEITA);
+
+  // Categorias do filtro, conforme o chip: as da biblioteca do usuário (ou as
+  // padrão, enquanto carrega) + as que aparecem no mês e saíram da biblioteca.
+  // Cada uma leva o tipo, para o filtro mostrar o ícone certo.
   const categoriasDoFiltro = useMemo(() => {
-    const base =
-      visao === VISOES.entradas
-        ? CATEGORIAS_RECEITA
-        : visao === VISOES.saidas
-          ? CATEGORIAS_GASTO
-          : [...CATEGORIAS_GASTO, ...CATEGORIAS_RECEITA];
-    const doMes = filtrarPorVisao(movimentacoesDoMes, visao).map((item) => item.categoria);
-    return [...new Set([...base, ...doMes])].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [movimentacoesDoMes, visao]);
+    const nomesGasto = bibliotecaGasto?.map((c) => c.nome) ?? CATEGORIAS_GASTO;
+    const nomesReceita = bibliotecaReceita?.map((c) => c.nome) ?? CATEGORIAS_RECEITA;
+    const base = [
+      ...(visao !== VISOES.entradas ? nomesGasto.map((nome) => ({ nome, tipo: TIPO_GASTO })) : []),
+      ...(visao !== VISOES.saidas ? nomesReceita.map((nome) => ({ nome, tipo: TIPO_RECEITA })) : []),
+    ];
+    const doMes = filtrarPorVisao(movimentacoesDoMes, visao).map((item) => ({
+      nome: item.categoria,
+      tipo: item.tipo,
+    }));
+
+    // Um nome aparece uma vez só ("Outros" existe nos dois tipos).
+    const porNome = new Map();
+    for (const categoria of [...base, ...doMes]) {
+      if (!porNome.has(categoria.nome)) porNome.set(categoria.nome, categoria);
+    }
+    return [...porNome.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+  }, [bibliotecaGasto, bibliotecaReceita, movimentacoesDoMes, visao]);
 
   const movimentacoesVisiveis = useMemo(
     () => ordenarMovimentacoes(filtrarMovimentacoes(movimentacoesDoMes, filtros, visao), ordenacao),
@@ -629,6 +645,12 @@ export default function Movimentacoes() {
                     selecionada={visao === VISOES.saidas ? filtros.categoria : ""}
                     onSelecionar={(categoria) => selecionarCategoria(categoria, TIPO_GASTO)}
                     carregando={carregando}
+                    acao={
+                      <Link to="/categorias" className={styles["link-gerenciar"]}>
+                        <Settings2 size={14} aria-hidden="true" />
+                        Gerenciar
+                      </Link>
+                    }
                   />
                 ) : (
                   <DistribuicaoReceitas
@@ -636,6 +658,12 @@ export default function Movimentacoes() {
                     selecionada={visao === VISOES.entradas ? filtros.categoria : ""}
                     onSelecionar={(categoria) => selecionarCategoria(categoria, TIPO_RECEITA)}
                     carregando={carregando}
+                    acao={
+                      <Link to="/categorias?tipo=receita" className={styles["link-gerenciar"]}>
+                        <Settings2 size={14} aria-hidden="true" />
+                        Gerenciar
+                      </Link>
+                    }
                   />
                 )}
               </div>

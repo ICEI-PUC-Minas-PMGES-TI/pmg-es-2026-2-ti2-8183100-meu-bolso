@@ -6,19 +6,6 @@
 // ou parcelada). Nada é escrito em gastos/carteiras.
 // ============================================================
 
-export const CATEGORIAS = [
-  "Eletrônicos",
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Saúde",
-  "Educação",
-  "Lazer",
-  "Vestuário",
-  "Assinaturas",
-  "Outros",
-];
-
 // Formata em reais no padrão brasileiro: 2450 -> "R$ 2.450,00"
 export function formatarMoeda(valor) {
   return new Intl.NumberFormat("pt-BR", {

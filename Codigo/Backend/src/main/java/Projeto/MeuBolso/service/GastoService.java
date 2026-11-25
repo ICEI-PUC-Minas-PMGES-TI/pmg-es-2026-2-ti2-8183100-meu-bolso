@@ -24,13 +24,16 @@ public class GastoService {
     private final GastoRepository gastoRepository;
     private final RecorrenciaRepository recorrenciaRepository;
     private final CarteiraService carteiraService;
+    private final CategoriaService categoriaService;
 
     public GastoService(GastoRepository gastoRepository,
                         RecorrenciaRepository recorrenciaRepository,
-                        CarteiraService carteiraService) {
+                        CarteiraService carteiraService,
+                        CategoriaService categoriaService) {
         this.gastoRepository = gastoRepository;
         this.recorrenciaRepository = recorrenciaRepository;
         this.carteiraService = carteiraService;
+        this.categoriaService = categoriaService;
     }
 
     /**
@@ -46,10 +49,13 @@ public class GastoService {
                 "Cadastre uma conta na Carteira antes de registrar gastos.");
         }
 
+        // A categoria precisa existir na biblioteca de gastos do usuário.
+        String categoriaValida = categoriaService.validar(usuarioId, CategoriaService.TIPO_GASTO, categoria, null);
+
         Gasto gasto = new Gasto(
             usuarioId,
             descricao.trim(),
-            categoria,
+            categoriaValida,
             carteira,
             data,
             valor,

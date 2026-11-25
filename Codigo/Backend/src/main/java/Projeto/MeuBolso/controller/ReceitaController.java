@@ -13,6 +13,7 @@ import Projeto.MeuBolso.repository.ReceitaRecorrenciaRepository;
 import Projeto.MeuBolso.repository.ReceitaRepository;
 import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.CarteiraService;
+import Projeto.MeuBolso.service.CategoriaService;
 import Projeto.MeuBolso.service.GastoRecorrenciaService;
 import Projeto.MeuBolso.service.ReceitaRecorrenciaService;
 import Projeto.MeuBolso.service.ReceitaService;
@@ -58,19 +59,22 @@ public class ReceitaController {
     private final ReceitaRecorrenciaService recorrenciaService;
     private final CarteiraService carteiraService;
     private final ReceitaService receitaService;
+    private final CategoriaService categoriaService;
 
     public ReceitaController(ReceitaRepository receitaRepository,
                         ReceitaRecorrenciaRepository recorrenciaRepository,
                         UsuarioRepository usuarioRepository,
                         ReceitaRecorrenciaService recorrenciaService,
                         CarteiraService carteiraService,
-                        ReceitaService receitaService) {
+                        ReceitaService receitaService,
+                        CategoriaService categoriaService) {
         this.receitaRepository = receitaRepository;
         this.recorrenciaRepository = recorrenciaRepository;
         this.usuarioRepository = usuarioRepository;
         this.recorrenciaService = recorrenciaService;
         this.carteiraService = carteiraService;
         this.receitaService = receitaService;
+        this.categoriaService = categoriaService;
     }
 
     @GetMapping
@@ -121,11 +125,15 @@ public class ReceitaController {
                 "Cadastre uma conta na Carteira antes de registrar receitas.");
         }
 
+        // Categoria precisa estar na biblioteca; a que a receita já tinha continua aceita.
+        String categoria = categoriaService.validar(
+            usuarioId, CategoriaService.TIPO_RECEITA, request.categoria(), receita.getCategoria());
+
         String carteiraAntiga = receita.getCarteiraId();
         BigDecimal valorAntigo = receita.getValor();
 
         receita.setDescricao(request.descricao().trim());
-        receita.setCategoria(request.categoria());
+        receita.setCategoria(categoria);
         receita.setCarteira(request.carteira());
         receita.setData(request.data());
         receita.setValor(request.valor());
@@ -193,10 +201,14 @@ public class ReceitaController {
         ReceitaRecorrencia rec = recorrenciaRepository.findByIdAndUsuarioId(id, usuarioId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recorrência não encontrada."));
 
+        // Categoria precisa estar na biblioteca; a que a regra já tinha continua aceita.
+        String categoria = categoriaService.validar(
+            usuarioId, CategoriaService.TIPO_RECEITA, request.categoria(), rec.getCategoria());
+
         boolean reativando = request.ativa() && !rec.isAtiva();
 
         rec.setDescricao(request.descricao().trim());
-        rec.setCategoria(request.categoria());
+        rec.setCategoria(categoria);
         rec.setCarteira(request.carteira());
         rec.setValor(request.valor());
         rec.setComentario(comentarioLimpo(request.comentario()));

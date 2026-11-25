@@ -2,8 +2,7 @@ import { useId } from "react";
 import { ArrowUpDown, LayoutGrid, Search, SlidersHorizontal, Wallet, X } from "lucide-react";
 
 import { OPCOES_ORDENACAO, temFiltroAtivo } from "../../utils/Gastosutils";
-import { VISOES } from "../../utils/Movimentacoesutils";
-import { CATEGORIAS as CATEGORIAS_RECEITA } from "../../pages/Receitas/Constantes";
+import { TIPO_RECEITA, VISOES } from "../../utils/Movimentacoesutils";
 import IconeGasto from "../Gastos/IconeCategoria";
 import IconeReceita from "../Receitas/IconeCategoria";
 import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
@@ -11,15 +10,10 @@ import { opcoesDeConta } from "../SeletorOpcoes/opcoes";
 import g from "../../pages/Gastos/Gastos.module.css";
 import styles from "../../pages/Movimentacoes/Movimentacoes.module.css";
 
-// Ícone de uma categoria do filtro: com o chip Entradas ou se for uma categoria
-// de receita, usa os ícones de receita; senão, os de gasto. "Outros" existe nos
-// dois e fica com o de gasto, a não ser no chip Entradas.
-function iconeDaCategoria(categoria, visao) {
-  const deReceita =
-    visao === VISOES.entradas ||
-    (visao !== VISOES.saidas && categoria !== "Outros" && CATEGORIAS_RECEITA.includes(categoria));
-  const Icone = deReceita ? IconeReceita : IconeGasto;
-  return <Icone categoria={categoria} tamanho={16} />;
+// Ícone de uma categoria do filtro, a partir da biblioteca do tipo dela.
+function iconeDaCategoria({ nome, tipo }) {
+  const Icone = tipo === TIPO_RECEITA ? IconeReceita : IconeGasto;
+  return <Icone categoria={nome} tamanho={16} />;
 }
 
 const CHIPS = [
@@ -127,9 +121,9 @@ export default function FiltrosMovimentacoes({
               opcoes={[
                 { valor: "", rotulo: "Todas", icone: <LayoutGrid size={16} aria-hidden="true" /> },
                 ...categorias.map((categoria) => ({
-                  valor: categoria,
-                  rotulo: categoria,
-                  icone: iconeDaCategoria(categoria, visao),
+                  valor: categoria.nome,
+                  rotulo: categoria.nome,
+                  icone: iconeDaCategoria(categoria),
                 })),
               ]}
               onAlterar={(categoria) => onAlterar({ ...filtros, categoria })}

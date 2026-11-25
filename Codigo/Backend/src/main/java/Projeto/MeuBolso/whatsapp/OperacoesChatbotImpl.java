@@ -6,6 +6,7 @@ import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.repository.CarteiraUsuarioRepository;
 import Projeto.MeuBolso.repository.MetaRepository;
 import Projeto.MeuBolso.service.CarteiraService;
+import Projeto.MeuBolso.service.CategoriaService;
 import Projeto.MeuBolso.service.GastoService;
 import Projeto.MeuBolso.service.MetaService;
 import Projeto.MeuBolso.service.ReceitaService;
@@ -38,6 +39,7 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
     private final ReceitaService receitaService;
     private final CarteiraService carteiraService;
     private final ReservaService reservaService;
+    private final CategoriaService categoriaService;
     private final Clock clock;
 
     public OperacoesChatbotImpl(MetaRepository metaRepository,
@@ -47,6 +49,7 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
                                 ReceitaService receitaService,
                                 CarteiraService carteiraService,
                                 ReservaService reservaService,
+                                CategoriaService categoriaService,
                                 Clock clock) {
         this.metaRepository = metaRepository;
         this.carteiraRepository = carteiraRepository;
@@ -55,7 +58,14 @@ public class OperacoesChatbotImpl implements OperacoesChatbot {
         this.receitaService = receitaService;
         this.carteiraService = carteiraService;
         this.reservaService = reservaService;
+        this.categoriaService = categoriaService;
         this.clock = clock;
+    }
+
+    @Override
+    public List<String> categorias(String usuarioId, boolean receita) {
+        return categoriaService.nomes(usuarioId,
+            receita ? CategoriaService.TIPO_RECEITA : CategoriaService.TIPO_GASTO);
     }
 
     // A reserva de emergência vem sempre primeiro; as demais em ordem alfabética.

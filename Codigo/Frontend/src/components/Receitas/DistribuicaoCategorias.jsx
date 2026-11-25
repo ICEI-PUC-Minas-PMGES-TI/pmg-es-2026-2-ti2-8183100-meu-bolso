@@ -6,11 +6,13 @@ function formatarPercentual(valor) {
   return valor > 0 && valor < 1 ? "<1%" : `${Math.round(valor)}%`;
 }
 
+// acao (opcional): conteúdo à direita do título, ex.: link "Gerenciar".
 export default function DistribuicaoCategorias({
   itens,
   selecionada,
   onSelecionar,
   carregando,
+  acao,
 }) {
   if (carregando) {
     return (
@@ -33,6 +35,7 @@ export default function DistribuicaoCategorias({
             </p>
           )}
         </div>
+        {acao}
       </div>
 
       {itens.length === 0 ? (

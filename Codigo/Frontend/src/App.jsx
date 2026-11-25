@@ -11,6 +11,7 @@ import CancelarResumo from "./pages/ResumoSemanal/CancelarResumo";
 // Páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Movimentacoes from "./pages/Movimentacoes/Movimentacoes";
+import Categorias from "./pages/Categorias/Categorias";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
 import Simulacao from "./pages/Simulacao/Simulacao";
@@ -42,6 +43,7 @@ function App() {
           >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/movimentacoes" element={<Movimentacoes />} />
+            <Route path="/categorias" element={<Categorias />} />
             {/* Gastos e Receitas agora são uma página só; os links antigos abrem o chip certo */}
             <Route
               path="/gastos"

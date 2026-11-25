@@ -24,13 +24,16 @@ public class ReceitaService {
     private final ReceitaRepository receitaRepository;
     private final ReceitaRecorrenciaRepository recorrenciaRepository;
     private final CarteiraService carteiraService;
+    private final CategoriaService categoriaService;
 
     public ReceitaService(ReceitaRepository receitaRepository,
                           ReceitaRecorrenciaRepository recorrenciaRepository,
-                          CarteiraService carteiraService) {
+                          CarteiraService carteiraService,
+                          CategoriaService categoriaService) {
         this.receitaRepository = receitaRepository;
         this.recorrenciaRepository = recorrenciaRepository;
         this.carteiraService = carteiraService;
+        this.categoriaService = categoriaService;
     }
 
     /**
@@ -46,10 +49,13 @@ public class ReceitaService {
                 "Cadastre uma conta na Carteira antes de registrar receitas.");
         }
 
+        // A categoria precisa existir na biblioteca de receitas do usuário.
+        String categoriaValida = categoriaService.validar(usuarioId, CategoriaService.TIPO_RECEITA, categoria, null);
+
         Receita receita = new Receita(
             usuarioId,
             descricao.trim(),
-            categoria,
+            categoriaValida,
             carteira,
             data,
             valor,

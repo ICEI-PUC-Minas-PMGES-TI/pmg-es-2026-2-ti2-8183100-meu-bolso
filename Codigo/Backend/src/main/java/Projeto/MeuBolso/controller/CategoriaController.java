@@ -5,10 +5,14 @@ import Projeto.MeuBolso.model.CategoriaDtos.CategoriaRequest;
 import Projeto.MeuBolso.model.CategoriaDtos.CategoriaResponse;
 import Projeto.MeuBolso.model.Gasto;
 import Projeto.MeuBolso.model.Receita;
+import Projeto.MeuBolso.model.ReceitaRecorrencia;
+import Projeto.MeuBolso.model.Recorrencia;
 import Projeto.MeuBolso.model.Usuario;
 import Projeto.MeuBolso.repository.CategoriaRepository;
 import Projeto.MeuBolso.repository.GastoRepository;
+import Projeto.MeuBolso.repository.ReceitaRecorrenciaRepository;
 import Projeto.MeuBolso.repository.ReceitaRepository;
+import Projeto.MeuBolso.repository.RecorrenciaRepository;
 import Projeto.MeuBolso.repository.UsuarioRepository;
 import Projeto.MeuBolso.service.CategoriaService;
 
@@ -49,17 +53,23 @@ public class CategoriaController {
     private final GastoRepository gastoRepository;
     private final ReceitaRepository receitaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final RecorrenciaRepository recorrenciaRepository;
+    private final ReceitaRecorrenciaRepository receitaRecorrenciaRepository;
 
     public CategoriaController(CategoriaRepository categoriaRepository,
                                CategoriaService categoriaService,
                                GastoRepository gastoRepository,
                                ReceitaRepository receitaRepository,
-                               UsuarioRepository usuarioRepository) {
+                               UsuarioRepository usuarioRepository,
+                               RecorrenciaRepository recorrenciaRepository,
+                               ReceitaRecorrenciaRepository receitaRecorrenciaRepository) {
         this.categoriaRepository = categoriaRepository;
         this.categoriaService = categoriaService;
         this.gastoRepository = gastoRepository;
         this.receitaRepository = receitaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.recorrenciaRepository = recorrenciaRepository;
+        this.receitaRecorrenciaRepository = receitaRecorrenciaRepository;
     }
 
     @GetMapping("/{tipo}")
@@ -155,7 +165,9 @@ public class CategoriaController {
 
     /* ---------- Apoio ---------- */
 
-    // Aplica o novo nome de categoria nos gastos OU receitas do usuário.
+    // Aplica o novo nome de categoria nos gastos OU receitas do usuário e nas
+    // regras de recorrência do mesmo tipo. Sem as regras, os próximos
+    // lançamentos automáticos nasceriam com o nome antigo, fora da biblioteca.
     private void renomearEmLancamentos(String usuarioId, String tipo, String nomeAntigo, String nomeNovo) {
         if (CategoriaService.TIPO_GASTO.equals(tipo)) {
             List<Gasto> afetados = gastoRepository.findByUsuarioIdAndCategoria(usuarioId, nomeAntigo);
@@ -163,12 +175,24 @@ public class CategoriaController {
                 g.setCategoria(nomeNovo);
             }
             if (!afetados.isEmpty()) gastoRepository.saveAll(afetados);
+
+            List<Recorrencia> regras = recorrenciaRepository.findByUsuarioIdAndCategoria(usuarioId, nomeAntigo);
+            for (Recorrencia r : regras) {
+                r.setCategoria(nomeNovo);
+            }
+            if (!regras.isEmpty()) recorrenciaRepository.saveAll(regras);
         } else {
             List<Receita> afetados = receitaRepository.findByUsuarioIdAndCategoria(usuarioId, nomeAntigo);
             for (Receita r : afetados) {
                 r.setCategoria(nomeNovo);
             }
             if (!afetados.isEmpty()) receitaRepository.saveAll(afetados);
+
+            List<ReceitaRecorrencia> regras = receitaRecorrenciaRepository.findByUsuarioIdAndCategoria(usuarioId, nomeAntigo);
+            for (ReceitaRecorrencia r : regras) {
+                r.setCategoria(nomeNovo);
+            }
+            if (!regras.isEmpty()) receitaRecorrenciaRepository.saveAll(regras);
         }
     }
 

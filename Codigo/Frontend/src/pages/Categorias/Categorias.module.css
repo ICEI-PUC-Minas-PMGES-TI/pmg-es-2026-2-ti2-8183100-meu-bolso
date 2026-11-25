@@ -1,0 +1,280 @@
+/* ========================================
+   PÁGINA DE CATEGORIAS
+   Desktop: cards de gasto e de receita lado a lado.
+   Celular (até 900px): um card por vez, escolhido pelas abas.
+   Base (página, topo, card, botões de ícone) vem de
+   pages/Gastos/Gastos.module.css. O seletor de ícones usa
+   components/Categorias/GerenciarCategorias.module.css.
+   ======================================== */
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--espaco-4);
+  align-items: start;
+}
+
+.painel {
+  overflow: visible; /* o painel de ícones abre por cima do card */
+}
+
+/* Abas: só no celular */
+.abas {
+  display: none;
+}
+
+/* ---------- Cabeçalho do card ---------- */
+
+.painel-topo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-5) var(--espaco-6) 0;
+}
+
+.painel-icone {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-redondo);
+  background-color: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.painel-icone-receita {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.painel-titulo {
+  font-size: var(--texto-lg);
+}
+
+.painel-legenda {
+  margin-top: 2px;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+}
+
+/* ---------- Nova categoria ---------- */
+
+.novo {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  padding: var(--espaco-4) var(--espaco-6);
+  border-bottom: var(--borda-padrao);
+}
+
+.novo-nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.novo-botao {
+  flex-shrink: 0;
+}
+
+.erro {
+  margin: var(--espaco-4) var(--espaco-6) 0;
+}
+
+/* ---------- Lista ---------- */
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: var(--espaco-1) var(--espaco-6) var(--espaco-3);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3) 0;
+  border-top: 1px solid var(--cor-borda-suave);
+}
+
+.item:first-child {
+  border-top: none;
+}
+
+.item-editando {
+  gap: var(--espaco-2);
+}
+
+.icone {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
+.icone-receita {
+  background-color: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.textos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nome {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  min-width: 0;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--cor-texto-principal);
+}
+
+.nome-texto {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--cor-superficie-realce);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--cor-texto-secundario);
+}
+
+.uso {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: var(--espaco-2);
+  row-gap: 2px;
+  font-size: var(--texto-xs);
+  color: var(--cor-texto-secundario);
+  font-variant-numeric: tabular-nums;
+}
+
+.recorrentes {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.editar-nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.acoes {
+  display: inline-flex;
+  gap: var(--espaco-1);
+  flex-shrink: 0;
+}
+
+/* Mesmo tamanho do botão de ícone, para alinhar a linha de "Outros" */
+.acao-vazia {
+  width: 36px;
+  height: 36px;
+}
+
+/* ---------- Telas médias e celular: um card por vez ---------- */
+
+@media (max-width: 900px) {
+  .grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .abas {
+    display: flex;
+    padding: 3px;
+    background-color: var(--cor-superficie-realce);
+    border-radius: var(--radius-redondo);
+  }
+
+  .abas button {
+    flex: 1;
+    padding: 9px var(--espaco-3);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-redondo);
+    font: inherit;
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    color: var(--cor-texto-medio);
+    transition: background-color var(--transicao-rapida), color var(--transicao-rapida);
+  }
+
+  .abas .aba-ativa {
+    background-color: var(--cor-superficie);
+    color: var(--cor-texto-principal);
+    box-shadow: var(--sombra-leve);
+  }
+
+  .oculto-celular {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .link-movimentacoes {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .painel-topo {
+    padding: var(--espaco-4) var(--espaco-4) 0;
+  }
+
+  .novo {
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  /* Só o "+" no botão, para o campo de nome ter espaço */
+  .novo-botao {
+    width: 44px;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+  }
+
+  .novo-botao-texto {
+    display: none;
+  }
+
+  .lista {
+    padding: var(--espaco-1) var(--espaco-4) var(--espaco-3);
+  }
+
+  .item {
+    gap: var(--espaco-2);
+  }
+
+  .icone {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .abas button:not(.aba-ativa):hover {
+    color: var(--cor-texto-principal);
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, UserPen, LogOut, Menu, X, Moon, Sun } from "lucide-react";
+import { ChevronDown, UserPen, LogOut, Menu, X, Moon, Sun, Tags } from "lucide-react";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
@@ -126,6 +126,12 @@ function Header() {
     setMenuAberto(false);
     setMenuFechando(false);
     setPerfilAberto(true);
+  }
+
+  function handleCategorias() {
+    setMenuAberto(false);
+    setMenuFechando(false);
+    navigate("/categorias");
   }
 
   return (
@@ -255,6 +261,16 @@ function Header() {
               >
                 <UserPen size={18} aria-hidden="true" />
                 Editar perfil
+              </button>
+
+              <button
+                type="button"
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={handleCategorias}
+              >
+                <Tags size={18} aria-hidden="true" />
+                Categorias
               </button>
 
               <button

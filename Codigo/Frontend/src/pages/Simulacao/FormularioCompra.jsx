@@ -1,7 +1,12 @@
 import { Calculator } from "lucide-react";
 
 import styles from "./Simulacao.module.css";
-import { CATEGORIAS, formatarMoeda } from "./calculoSimulacao";
+import { formatarMoeda } from "./calculoSimulacao";
+import { CATEGORIAS } from "../Gastos/Constantes";
+import { TIPO_GASTO, useCategorias } from "../../service/categoriasService";
+import IconeCategoria from "../../components/Gastos/IconeCategoria";
+import SeletorOpcoes from "../../components/SeletorOpcoes/SeletorOpcoes";
+import { opcoesDeCategoria } from "../../components/SeletorOpcoes/opcoes";
 
 // Mensagem de erro de um campo do formulário.
 function ErroCampo({ texto }) {
@@ -16,6 +21,10 @@ function ErroCampo({ texto }) {
 function FormularioCompra({ form, erros, carteiras, aoAlterar, aoCalcular }) {
   const { valor, categoria, forma, parcelas, juros, carteiraId } = form;
   const semCarteiras = carteiras.length === 0;
+
+  // Mesma biblioteca de categorias de gasto do site (padrões enquanto carrega).
+  const biblioteca = useCategorias(TIPO_GASTO);
+  const nomesCategorias = biblioteca?.map((c) => c.nome) ?? CATEGORIAS;
 
   return (
     <form className={`card ${styles.formulario}`} onSubmit={aoCalcular} noValidate>
@@ -46,18 +55,13 @@ function FormularioCompra({ form, erros, carteiras, aoAlterar, aoCalcular }) {
         <label className="form-label" htmlFor="categoria">
           Categoria
         </label>
-        <select
+        <SeletorOpcoes
           id="categoria"
-          className="form-input"
-          value={categoria}
-          onChange={(e) => aoAlterar("categoria", e.target.value)}
-        >
-          {CATEGORIAS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          valor={categoria}
+          opcoes={opcoesDeCategoria(nomesCategorias, IconeCategoria)}
+          placeholder="Selecione (opcional)"
+          onAlterar={(nova) => aoAlterar("categoria", nova)}
+        />
       </div>
 
       <div className="form-group">
