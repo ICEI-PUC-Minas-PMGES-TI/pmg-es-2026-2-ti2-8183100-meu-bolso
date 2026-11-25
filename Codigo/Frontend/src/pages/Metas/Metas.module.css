@@ -26,6 +26,12 @@
   margin-top: var(--espaco-1);
 }
 
+/* Reserva de emergência (card em destaque ou convite), logo abaixo do cabeçalho */
+.reserva {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Cartões de resumo */
 .resumo {
   margin-top: var(--espaco-1);

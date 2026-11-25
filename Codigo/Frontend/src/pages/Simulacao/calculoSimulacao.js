@@ -109,8 +109,9 @@ export function simular({ valor, forma, parcelas, juros, saldoAtual, metas }) {
 
   // Reflexo nas metas: o quanto do saldo que sobra ainda cobre o que
   // falta guardar em cada meta. Mostra se a compra compromete a meta.
+  // A reserva de emergência não tem valor-alvo: a referência é o mínimo dela.
   const reflexoMetas = (metas ?? []).map((meta) => {
-    const alvo = Number(meta.valorAlvo ?? 0);
+    const alvo = Number((meta.tipo === "reserva" ? meta.valorMinimo : meta.valorAlvo) ?? 0);
     const atual = Number(meta.valorAtual ?? 0);
     const faltava = Math.max(alvo - atual, 0);
 
