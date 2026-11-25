@@ -175,6 +175,17 @@
   background-color: var(--cor-superficie-suave);
 }
 
+/* Ocupa duas colunas para caber "Categoria (A–Z)", "Data (mais recente)"... */
+.filtro-ordenar {
+  grid-column: span 2;
+}
+
+@media (max-width: 760px) {
+  .filtro-ordenar {
+    grid-column: auto;
+  }
+}
+
 /* ---------- Ordenação (substitui os cabeçalhos clicáveis da tabela) ---------- */
 
 .ordenacao {

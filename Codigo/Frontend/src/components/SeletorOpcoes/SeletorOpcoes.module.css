@@ -5,7 +5,8 @@
 
 .gatilho {
   width: 100%;
-  min-height: 44px;
+  /* Mesma altura final do .form-input de data (o mais alto dos campos, 52px) */
+  min-height: 52px;
   display: flex;
   align-items: center;
   gap: var(--espaco-2);

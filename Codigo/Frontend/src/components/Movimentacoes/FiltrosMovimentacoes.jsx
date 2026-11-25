@@ -1,10 +1,26 @@
 import { useId } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { ArrowUpDown, LayoutGrid, Search, SlidersHorizontal, Wallet, X } from "lucide-react";
 
 import { OPCOES_ORDENACAO, temFiltroAtivo } from "../../utils/Gastosutils";
 import { VISOES } from "../../utils/Movimentacoesutils";
+import { CATEGORIAS as CATEGORIAS_RECEITA } from "../../pages/Receitas/Constantes";
+import IconeGasto from "../Gastos/IconeCategoria";
+import IconeReceita from "../Receitas/IconeCategoria";
+import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
+import { opcoesDeConta } from "../SeletorOpcoes/opcoes";
 import g from "../../pages/Gastos/Gastos.module.css";
 import styles from "../../pages/Movimentacoes/Movimentacoes.module.css";
+
+// Ícone de uma categoria do filtro: com o chip Entradas ou se for uma categoria
+// de receita, usa os ícones de receita; senão, os de gasto. "Outros" existe nos
+// dois e fica com o de gasto, a não ser no chip Entradas.
+function iconeDaCategoria(categoria, visao) {
+  const deReceita =
+    visao === VISOES.entradas ||
+    (visao !== VISOES.saidas && categoria !== "Outros" && CATEGORIAS_RECEITA.includes(categoria));
+  const Icone = deReceita ? IconeReceita : IconeGasto;
+  return <Icone categoria={categoria} tamanho={16} />;
+}
 
 const CHIPS = [
   { valor: VISOES.tudo, rotulo: "Tudo" },
@@ -105,40 +121,34 @@ export default function FiltrosMovimentacoes({
             <label className="form-label" htmlFor={`${id}-categoria`}>
               Categoria
             </label>
-            <select
+            <SeletorOpcoes
               id={`${id}-categoria`}
-              name="categoria"
-              className="form-input"
-              value={filtros.categoria}
-              onChange={alterar}
-            >
-              <option value="">Todas</option>
-              {categorias.map((categoria) => (
-                <option key={categoria} value={categoria}>
-                  {categoria}
-                </option>
-              ))}
-            </select>
+              valor={filtros.categoria}
+              opcoes={[
+                { valor: "", rotulo: "Todas", icone: <LayoutGrid size={16} aria-hidden="true" /> },
+                ...categorias.map((categoria) => ({
+                  valor: categoria,
+                  rotulo: categoria,
+                  icone: iconeDaCategoria(categoria, visao),
+                })),
+              ]}
+              onAlterar={(categoria) => onAlterar({ ...filtros, categoria })}
+            />
           </div>
 
           <div className="form-group">
             <label className="form-label" htmlFor={`${id}-carteira`}>
               Carteira
             </label>
-            <select
+            <SeletorOpcoes
               id={`${id}-carteira`}
-              name="carteira"
-              className="form-input"
-              value={filtros.carteira}
-              onChange={alterar}
-            >
-              <option value="">Todas</option>
-              {carteiras.map((carteira) => (
-                <option key={carteira.id} value={carteira.id}>
-                  {carteira.nome}
-                </option>
-              ))}
-            </select>
+              valor={filtros.carteira}
+              opcoes={[
+                { valor: "", rotulo: "Todas", icone: <Wallet size={16} aria-hidden="true" /> },
+                ...opcoesDeConta(carteiras),
+              ]}
+              onAlterar={(carteira) => onAlterar({ ...filtros, carteira })}
+            />
           </div>
 
           <div className="form-group">
@@ -173,25 +183,23 @@ export default function FiltrosMovimentacoes({
             />
           </div>
 
-          <div className="form-group">
+          <div className={`form-group ${styles["filtro-ordenar"]}`}>
             <label className="form-label" htmlFor={`${id}-ordenar`}>
               Ordenar por
             </label>
-            <select
+            <SeletorOpcoes
               id={`${id}-ordenar`}
-              className="form-input"
-              value={`${ordenacao.campo}:${ordenacao.direcao}`}
-              onChange={(event) => {
-                const [campo, direcao] = event.target.value.split(":");
+              valor={`${ordenacao.campo}:${ordenacao.direcao}`}
+              opcoes={OPCOES_ORDENACAO.map((opcao) => ({
+                valor: opcao.valor,
+                rotulo: opcao.rotulo,
+                icone: <ArrowUpDown size={16} aria-hidden="true" />,
+              }))}
+              onAlterar={(valor) => {
+                const [campo, direcao] = valor.split(":");
                 onOrdenar({ campo, direcao });
               }}
-            >
-              {OPCOES_ORDENACAO.map((opcao) => (
-                <option key={opcao.valor} value={opcao.valor}>
-                  {opcao.rotulo}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </div>
       )}
