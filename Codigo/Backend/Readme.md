@@ -374,7 +374,9 @@ Testes unitários (JUnit 5 + Mockito + AssertJ) das regras de saldo e de metas. 
 | `ComparativoMesPerguntaTest` | Mais/menos/igual, período anterior vazio, virada de ano, categoria que mais subiu |
 | `MetaFaltantePerguntaTest` | Situações da meta (em andamento, sem prazo, atingida, vencida), parâmetro `metaId` |
 | `MetasTotalGuardadoPerguntaTest` | Soma e % geral, meta mais avançada (desempate alfabético), alvo zero |
-| `ReservaServiceTest` | Reserva de emergência: mínimo por histórico (fixos + média dos variáveis, arredondado na centena), mês pulado, conta nova, bases orçamento/recorrências/informado/sem dados, mínimo manual, níveis de alerta, horizonte, cobertura em dias abaixo de 1 mês, mensagem do resumo e aviso de retirada abaixo do mínimo |
+| `ReservaServiceTest` | Reserva de emergência: mínimo por histórico (fixos + média dos variáveis, arredondado na centena), mês pulado, conta nova, bases orçamento/recorrências/informado/sem dados, mínimo manual, níveis de alerta, horizonte, cobertura em dias abaixo de 1 mês, mensagens de cada nível (vazia, crítica, atenção, protegida, sem mínimo) e aviso de retirada abaixo do mínimo |
+| `ResumoEmailServiceTest` | Seção da reserva no e-mail (texto e HTML): mensagem, convite sem reserva, resumo sem o campo, cor de cada nível e escape de HTML |
+| `ResumoSemanalServiceTest` | Montagem do resumo sem reserva (convite), sem metas e com reserva (nível, mensagem em dias e progresso até o mínimo) |
 | `GastosRecentesFerramentaTest` | Últimos gastos lançados; parâmetro `quantidade` (opções 5, 10) |
 | `GastosPeriodoFerramentaTest` | Total e detalhes dos gastos num período; filtro por `categoria` |
 | `ReceitasPeriodoFerramentaTest` | Total e detalhes das receitas num período; filtro por `categoria` |

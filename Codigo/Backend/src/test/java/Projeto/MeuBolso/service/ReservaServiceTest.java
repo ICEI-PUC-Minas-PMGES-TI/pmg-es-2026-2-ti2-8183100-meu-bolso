@@ -268,6 +268,49 @@ class ReservaServiceTest {
             .hasValueSatisfying(t -> assertThat(t).endsWith("e fica vazia."));
     }
 
+    // Reserva com mínimo manual de 1200 e custo informado de 200/mês.
+    private Meta reservaDe1200(String atual) {
+        gastos();
+        recorrencias();
+        Meta r = reserva(atual, false, "1200", 6);
+        r.setCustoMensalInformado(new BigDecimal("200"));
+        return r;
+    }
+
+    @Test
+    void mensagemDaReservaVazia() {
+        assertThat(service.mensagemSituacao(USUARIO, reservaDe1200("0")))
+            .isEqualTo("Sua reserva de emergência está vazia. Qualquer imprevisto vira dívida.");
+    }
+
+    @Test
+    void mensagemDaReservaEmAtencaoMostraOQueFaltaEACobertura() {
+        // 900 de 1200 = 75% -> atenção; 900 / 200 = 4,5 meses.
+        assertThat(service.mensagemSituacao(USUARIO, reservaDe1200("900")))
+            .startsWith("Faltam ")
+            .contains("300,00").contains("1.200,00")
+            .endsWith("hoje ela cobre 4,5 meses de gastos.");
+    }
+
+    @Test
+    void mensagemDaReservaProtegida() {
+        // 1500 >= 1200 -> protegida; 1500 / 200 = 7,5 meses.
+        assertThat(service.mensagemSituacao(USUARIO, reservaDe1200("1500")))
+            .isEqualTo("Mínimo atingido: sua reserva cobre 7,5 meses de gastos.");
+    }
+
+    @Test
+    void reservaSemDadosParaOMinimoNaoTemAvisoEMostraOrientacao() {
+        // Automático, sem gastos, orçamento, fixos nem custo informado.
+        gastos();
+        recorrencias();
+        Meta r = reserva("50", true, null, 6);
+
+        assertThat(service.situacao(USUARIO, r).nivel()).isEqualTo(ReservaService.NIVEL_SEM_MINIMO);
+        assertThat(service.mensagemSituacao(USUARIO, r)).startsWith("Ainda não há gastos para calcular o mínimo");
+        assertThat(service.avisoRetirada(USUARIO, r, new BigDecimal("50"))).isEmpty();
+    }
+
     @Test
     void avisoDeRetiradaNaoValeParaObjetivo() {
         Meta objetivo = new Meta(USUARIO, "Viagem", new BigDecimal("3000"), null, "media");
