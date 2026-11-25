@@ -34,6 +34,14 @@ public final class ResumoSemanalDtos {
     /** Conta recorrente com vencimento nos próximos 7 dias. */
     public record ContaAVencer(String descricao, BigDecimal valor, LocalDate vencimento) {}
 
+    /**
+     * Situação da reserva de emergência no resumo.
+     * `nivel`: vazia | critica | atencao | protegida | sem_minimo, ou
+     * "sem_reserva" quando o usuário ainda não configurou a reserva.
+     * `mensagem`: o texto pronto (o mesmo no e-mail e na prévia).
+     */
+    public record ReservaResumo(String nome, String nivel, String mensagem) {}
+
     /** O resumo completo: o que vai no e-mail e o que aparece na prévia. */
     public record Resumo(
         LocalDate inicio,
@@ -43,6 +51,7 @@ public final class ResumoSemanalDtos {
         List<CategoriaValor> categorias,
         OrcamentoUso orcamento,
         List<MetaProgresso> metas,
-        List<ContaAVencer> contasAVencer
+        List<ContaAVencer> contasAVencer,
+        ReservaResumo reserva
     ) {}
 }

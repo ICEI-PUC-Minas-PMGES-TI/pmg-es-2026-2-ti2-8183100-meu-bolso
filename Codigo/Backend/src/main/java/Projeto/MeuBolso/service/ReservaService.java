@@ -1,5 +1,6 @@
 package Projeto.MeuBolso.service;
 
+import Projeto.MeuBolso.assistente.FormatoBRL;
 import Projeto.MeuBolso.model.Gasto;
 import Projeto.MeuBolso.model.Meta;
 import Projeto.MeuBolso.model.Orcamento;
@@ -14,6 +15,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,6 +58,8 @@ public class ReservaService {
     public static final String NIVEL_SEM_MINIMO = "sem_minimo"; // tem dinheiro, mas sem mínimo calculável
 
     private static final int MESES_HISTORICO = 3;
+    // MÃªs comercial usado para converter a cobertura em dias.
+    private static final int DIAS_NO_MES = 30;
     private static final BigDecimal CENTENA = BigDecimal.valueOf(100);
     private static final BigDecimal METADE = new BigDecimal("0.5");
 
@@ -182,6 +186,77 @@ public class ReservaService {
         if (razao.compareTo(METADE) < 0) return NIVEL_CRITICA;
         if (razao.compareTo(BigDecimal.ONE) < 0) return NIVEL_ATENCAO;
         return NIVEL_PROTEGIDA;
+    }
+
+    /* ========================================
+       TEXTOS (WhatsApp e resumo semanal)
+       Espelham components/ReservaEmergencia/reserva.js do front.
+       ======================================== */
+
+    /**
+     * Quanto tempo de gastos um valor cobre: "2,4 meses" / "1 mês" (1 casa,
+     * para baixo) ou, abaixo de 1 mês, em dias ("15 dias", "1 dia",
+     * "menos de 1 dia"). Vazio quando o valor é zero ou não há custo mensal.
+     */
+    public static String textoCobertura(BigDecimal valor, BigDecimal custoMensal) {
+        BigDecimal v = valor(valor);
+        if (v.signum() <= 0 || custoMensal == null || custoMensal.signum() <= 0) return "";
+
+        BigDecimal meses = v.divide(custoMensal, 4, RoundingMode.DOWN);
+        if (meses.compareTo(BigDecimal.ONE) < 0) {
+            int dias = meses.multiply(BigDecimal.valueOf(DIAS_NO_MES)).setScale(0, RoundingMode.DOWN).intValue();
+            if (dias < 1) return "menos de 1 dia";
+            return dias + (dias == 1 ? " dia" : " dias");
+        }
+        BigDecimal umaCasa = meses.setScale(1, RoundingMode.DOWN);
+        String numero = umaCasa.stripTrailingZeros().scale() <= 0
+            ? umaCasa.setScale(0, RoundingMode.DOWN).toPlainString()
+            : umaCasa.toPlainString().replace('.', ',');
+        return numero + (umaCasa.compareTo(BigDecimal.valueOf(2)) < 0 ? " mês" : " meses");
+    }
+
+    /** Mensagem do nível da reserva (resumo semanal e prévia do perfil). */
+    public String mensagemSituacao(String usuarioId, Meta reserva) {
+        Situacao s = situacao(usuarioId, reserva);
+        BigDecimal atual = valor(reserva.getValorAtual());
+        String cobertura = textoCobertura(atual, s.custoMensal());
+        String minimo = s.valorMinimo() == null ? "" : FormatoBRL.moeda(s.valorMinimo());
+
+        return switch (s.nivel()) {
+            case NIVEL_VAZIA -> "Sua reserva de emergência está vazia. Qualquer imprevisto vira dívida.";
+            case NIVEL_CRITICA -> cobertura.isEmpty()
+                ? "Perigo: menos da metade do mínimo (" + minimo + ")."
+                : "Perigo: sua reserva só cobre " + cobertura + " de gastos, menos da metade do mínimo (" + minimo + ").";
+            case NIVEL_ATENCAO -> "Faltam " + FormatoBRL.moeda(s.valorMinimo().subtract(atual))
+                + " para o mínimo de " + minimo
+                + (cobertura.isEmpty() ? "." : "; hoje ela cobre " + cobertura + " de gastos.");
+            case NIVEL_PROTEGIDA -> cobertura.isEmpty()
+                ? "Mínimo atingido."
+                : "Mínimo atingido: sua reserva cobre " + cobertura + " de gastos.";
+            default -> "Ainda não há gastos para calcular o mínimo. Defina um valor na página de Metas.";
+        };
+    }
+
+    /**
+     * Aviso para a confirmação de uma retirada que deixa a reserva abaixo do
+     * mínimo. Vazio quando a meta não é a reserva, não há mínimo ou a
+     * retirada não fura o mínimo.
+     */
+    public Optional<String> avisoRetirada(String usuarioId, Meta meta, BigDecimal valorRetirada) {
+        if (!meta.isReserva()) return Optional.empty();
+        Situacao s = situacao(usuarioId, meta);
+        BigDecimal minimo = s.valorMinimo();
+        if (minimo == null || minimo.signum() <= 0) return Optional.empty();
+
+        BigDecimal depois = valor(meta.getValorAtual()).subtract(valor(valorRetirada));
+        if (depois.compareTo(minimo) >= 0) return Optional.empty();
+
+        String cobertura = textoCobertura(depois, s.custoMensal());
+        String complemento = !cobertura.isEmpty()
+            ? " e só cobre " + cobertura + " de gastos"
+            : depois.signum() <= 0 ? " e fica vazia" : "";
+        return Optional.of("Atenção: depois desta retirada sua reserva de emergência fica abaixo do mínimo ("
+            + FormatoBRL.moeda(minimo) + ")" + complemento + ".");
     }
 
     /* ========================================

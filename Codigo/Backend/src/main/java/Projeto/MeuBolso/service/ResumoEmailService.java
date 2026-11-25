@@ -90,6 +90,10 @@ public class ResumoEmailService {
         }
         sb.append("\n");
 
+        if (r.reserva() != null) {
+            sb.append("Reserva de emergência:\n- ").append(r.reserva().mensagem()).append("\n\n");
+        }
+
         sb.append("Contas a vencer nos próximos 7 dias:\n");
         if (r.contasAVencer().isEmpty()) sb.append("- Nenhuma conta recorrente a vencer.\n");
         for (ContaAVencer c : r.contasAVencer()) {
@@ -132,6 +136,24 @@ public class ResumoEmailService {
 
     private static String lista(StringBuilder itens) {
         return "<ul style=\"margin:0;padding-left:18px;font-size:14px;color:#202a28;\">" + itens + "</ul>";
+    }
+
+    /**
+     * Faixa colorida da reserva de emergência, com as mesmas cores do site:
+     * vermelho (vazia/crítica), amarelo (atenção), verde (protegida) e
+     * verde-claro neutro (sem reserva ou sem mínimo).
+     */
+    static String caixaReserva(String nivel, String mensagem) {
+        String fundo;
+        String cor;
+        switch (nivel == null ? "" : nivel) {
+            case "vazia", "critica" -> { fundo = "#fdeaea"; cor = "#c94242"; }
+            case "atencao" -> { fundo = "#fff5dc"; cor = "#805b13"; }
+            case "protegida" -> { fundo = "#e5f5e9"; cor = "#328a52"; }
+            default -> { fundo = "#e9f1e7"; cor = VERDE_ESCURO; }
+        }
+        return "<p style=\"margin:0;padding:10px 12px;border-radius:10px;font-size:14px;background:" + fundo
+            + ";color:" + cor + ";\">" + esc(mensagem) + "</p>";
     }
 
     static String montarHtml(String nome, Resumo r, String linkCancelar) {
@@ -189,6 +211,11 @@ public class ResumoEmailService {
                         + MOEDA.format(m.valorAlvo()) + " (" + m.percentual() + "%)"));
             }
             h.append(lista(li));
+        }
+
+        if (r.reserva() != null) {
+            h.append(titulo("Reserva de emergência:"));
+            h.append(caixaReserva(r.reserva().nivel(), r.reserva().mensagem()));
         }
 
         h.append(titulo("Contas a vencer nos próximos 7 dias:"));
