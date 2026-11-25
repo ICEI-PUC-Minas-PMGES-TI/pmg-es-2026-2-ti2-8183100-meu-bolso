@@ -103,6 +103,26 @@
   gap: var(--espaco-2);
 }
 
+/* Link "Gerenciar" no título do card "Por categoria" */
+.link-gerenciar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: var(--radius-pequeno);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: var(--verde-escuro);
+  text-decoration: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-gerenciar:hover {
+    background-color: var(--verde-claro);
+  }
+}
+
 .abas {
   display: flex;
   padding: 3px;

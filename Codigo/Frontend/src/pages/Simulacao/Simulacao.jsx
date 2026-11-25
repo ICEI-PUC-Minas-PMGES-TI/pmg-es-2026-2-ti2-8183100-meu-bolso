@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import styles from "./Simulacao.module.css";
-import { CATEGORIAS, converterValor, validar, simular } from "./calculoSimulacao";
+import { converterValor, validar, simular } from "./calculoSimulacao";
 import { useDadosSimulacao } from "./useDadosSimulacao";
 import FormularioCompra from "./FormularioCompra";
 import ComparacaoCenario from "./ComparacaoCenario";
@@ -18,7 +18,8 @@ import EstadoCard from "./EstadoCard";
 
 const FORM_INICIAL = {
   valor: "",
-  categoria: CATEGORIAS[0],
+  // Só informativa (a simulação não grava nada); vem da biblioteca de gastos.
+  categoria: "",
   forma: "avista", // "avista" | "parcelado"
   parcelas: 2,
   juros: "", // % ao mês; vazio = sem juros
