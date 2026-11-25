@@ -31,12 +31,6 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public class FluxoChatbot {
 
-    // Mesmas listas do front (pages/Gastos/Constantes.js e pages/Receitas/Constantes.js).
-    static final List<String> CATEGORIAS_GASTO = List.of(
-        "Alimentação", "Transporte", "Lazer", "Moradia", "Educação", "Saúde", "Assinaturas", "Outros");
-    static final List<String> CATEGORIAS_RECEITA = List.of(
-        "Salário", "Freelance", "Investimentos", "Presente", "Reembolso", "Vendas", "Outros");
-
     static final int TAMANHO_MAX_DESCRICAO = 200;
 
     private static final DateTimeFormatter DATA_BR = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"));
@@ -295,7 +289,8 @@ public class FluxoChatbot {
     /* ------------------------------------------------------------------ */
 
     private String mostrarCategorias(ConversaWhatsApp c) {
-        List<String> nomes = c.getOperacao() == Operacao.RECEITA ? CATEGORIAS_RECEITA : CATEGORIAS_GASTO;
+        // Biblioteca do usuário (com as categorias criadas/renomeadas no site).
+        List<String> nomes = ops.categorias(c.getUsuarioId(), c.getOperacao() == Operacao.RECEITA);
         List<Opcao> opcoes = nomes.stream().map(n -> new Opcao(n, n, "", null)).toList();
         return mostrarLista(c, Etapa.CATEGORIA, opcoes, "Qual a categoria?");
     }

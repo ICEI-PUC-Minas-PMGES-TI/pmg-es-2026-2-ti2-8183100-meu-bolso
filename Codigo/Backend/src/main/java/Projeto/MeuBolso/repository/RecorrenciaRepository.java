@@ -13,4 +13,7 @@ public interface RecorrenciaRepository extends MongoRepository<Recorrencia, Stri
 
     // Uma recorrência específica, garantindo que pertence ao usuário.
     Optional<Recorrencia> findByIdAndUsuarioId(String id, String usuarioId);
+
+    // Recorrências do usuário numa categoria (para renomear/excluir a categoria).
+    List<Recorrencia> findByUsuarioIdAndCategoria(String usuarioId, String categoria);
 }

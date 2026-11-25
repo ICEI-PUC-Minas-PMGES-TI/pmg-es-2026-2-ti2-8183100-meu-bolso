@@ -126,6 +126,33 @@ class FluxoChatbotTest {
     }
 
     @Test
+    void usaAsCategoriasDoUsuarioComRenomeadasECriadas() {
+        // No site: "Lazer" virou "Diversão" e foi criada "Pets".
+        ops.categoriasGasto.set(ops.categoriasGasto.indexOf("Lazer"), "Diversão");
+        ops.categoriasGasto.add("Pets");
+
+        enviar("oi");
+        enviar("2");
+        String lista = enviar("40");
+        assertThat(lista).contains("3 - Diversão").contains("9 - Pets").doesNotContain("Lazer");
+
+        enviar("3");
+        enviar("Cinema");
+        enviar("1");
+        enviar("1");
+        assertThat(ops.registros).containsExactly("gasto 40.00 Diversão Cinema conta-1 2026-10-21");
+    }
+
+    @Test
+    void receitaMostraAsCategoriasDeReceitaDoUsuario() {
+        ops.categoriasReceita.add("Aluguel recebido");
+
+        enviar("oi");
+        enviar("1");
+        assertThat(enviar("800")).contains("8 - Aluguel recebido").doesNotContain("Alimentação");
+    }
+
+    @Test
     void valorInvalidoPedeDeNovoSemSairDaEtapa() {
         enviar("oi");
         enviar("2");
@@ -300,8 +327,19 @@ class FluxoChatbotTest {
             return Optional.ofNullable(avisoRetirada);
         }
 
+        // Bibliotecas de categorias do usuário (começam com os padrões).
+        final List<String> categoriasGasto = new ArrayList<>(List.of(
+            "Alimentação", "Transporte", "Lazer", "Moradia", "Educação", "Saúde", "Assinaturas", "Outros"));
+        final List<String> categoriasReceita = new ArrayList<>(List.of(
+            "Salário", "Freelance", "Investimentos", "Presente", "Reembolso", "Vendas", "Outros"));
+
         @Override public List<Opcao> metas(String usuarioId) { return metas; }
         @Override public List<Opcao> contas(String usuarioId) { return contas; }
+
+        @Override
+        public List<String> categorias(String usuarioId, boolean receita) {
+            return receita ? categoriasReceita : categoriasGasto;
+        }
 
         @Override
         public void registrarReceita(String u, BigDecimal valor, String categoria, String descricao, Opcao carteira, LocalDate data) {

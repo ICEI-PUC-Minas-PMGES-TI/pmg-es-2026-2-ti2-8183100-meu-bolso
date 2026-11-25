@@ -25,6 +25,12 @@ public interface OperacoesChatbot {
      */
     List<Opcao> contas(String usuarioId);
 
+    /**
+     * Nomes das categorias do usuário (a mesma biblioteca do site, com as
+     * personalizações), de receita (receita=true) ou de gasto.
+     */
+    List<String> categorias(String usuarioId, boolean receita);
+
     void registrarReceita(String usuarioId, BigDecimal valor, String categoria, String descricao, Opcao carteira, LocalDate data);
 
     void registrarGasto(String usuarioId, BigDecimal valor, String categoria, String descricao, Opcao carteira, LocalDate data);

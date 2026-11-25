@@ -13,4 +13,7 @@ public interface ReceitaRecorrenciaRepository extends MongoRepository<ReceitaRec
 
     // Uma recorrência específica, garantindo que pertence ao usuário.
     Optional<ReceitaRecorrencia> findByIdAndUsuarioId(String id, String usuarioId);
+
+    // Recorrências do usuário numa categoria (para renomear/excluir a categoria).
+    List<ReceitaRecorrencia> findByUsuarioIdAndCategoria(String usuarioId, String categoria);
 }
