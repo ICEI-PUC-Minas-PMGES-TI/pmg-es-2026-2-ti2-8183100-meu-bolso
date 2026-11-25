@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, Repeat, Trash2 } from "lucide-react";
 
 import {
@@ -10,6 +10,7 @@ import {
   valorParaTexto,
 } from "../../utils/Receitasutils";
 import { CATEGORIAS, TAMANHO_MAX_COMENTARIO } from "../../pages/Receitas/Constantes";
+import categoriasService, { TIPO_RECEITA } from "../../service/categoriasService";
 import IconeCategoria from "./IconeCategoria";
 import Modal from "./Modal";
 import SeletorOpcoes from "../SeletorOpcoes/SeletorOpcoes";
@@ -31,6 +32,32 @@ function FormRecorrencia({ recorrencia, carteiras = [], onCancelar, onSalvar }) 
   const [erros, setErros] = useState({});
   const [erroEnvio, setErroEnvio] = useState("");
   const [salvando, setSalvando] = useState(false);
+
+  // Mesma lista do modal de lançamento: categorias do usuário (back-end),
+  // com a lista fixa como reserva se a busca falhar.
+  const [categoriasBanco, setCategoriasBanco] = useState(null);
+
+  useEffect(() => {
+    let ativo = true;
+    categoriasService
+      .listar(TIPO_RECEITA)
+      .then((lista) => {
+        if (ativo) setCategoriasBanco(lista.map((c) => c.nome));
+      })
+      .catch(() => {
+        if (ativo) setCategoriasBanco(CATEGORIAS);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const baseCategorias = categoriasBanco ?? CATEGORIAS;
+  // A categoria atual da recorrência continua selecionável mesmo se não estiver na lista.
+  const categorias =
+    !form.categoria || baseCategorias.includes(form.categoria)
+      ? baseCategorias
+      : [...baseCategorias, form.categoria];
 
   const semCarteiras = carteiras.length === 0;
   const opcoesCarteira =
@@ -113,10 +140,7 @@ function FormRecorrencia({ recorrencia, carteiras = [], onCancelar, onSalvar }) 
         <SeletorOpcoes
           id="rec-categoria"
           valor={form.categoria}
-          opcoes={opcoesDeCategoria(
-            CATEGORIAS.includes(form.categoria) ? CATEGORIAS : [...CATEGORIAS, form.categoria],
-            IconeCategoria,
-          )}
+          opcoes={opcoesDeCategoria(categorias, IconeCategoria)}
           onAlterar={(categoria) => setForm((atual) => ({ ...atual, categoria }))}
         />
       </div>
