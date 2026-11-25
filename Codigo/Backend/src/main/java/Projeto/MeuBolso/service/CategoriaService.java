@@ -5,7 +5,9 @@ import Projeto.MeuBolso.repository.CategoriaRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Regras da biblioteca de categorias.
@@ -74,6 +76,42 @@ public class CategoriaService {
             novas.add(new Categoria(usuarioId, tipo, padrao[i][0], padrao[i][1], i));
         }
         repo.saveAll(novas);
+    }
+
+    /** Nomes da biblioteca do usuário para o tipo, na ordem de exibição. */
+    public List<String> nomes(String usuarioId, String tipo) {
+        return listarComSemente(usuarioId, tipo).stream().map(Categoria::getNome).toList();
+    }
+
+    /**
+     * Confere se a categoria existe na biblioteca do usuário e devolve o nome
+     * exatamente como está na biblioteca (a comparação ignora maiúsculas e
+     * espaços nas pontas).
+     *
+     * Exceção: "atual" é a categoria que o lançamento já tinha. Ela continua
+     * aceita mesmo que tenha saído da biblioteca, para que dê para editar um
+     * lançamento antigo sem ser obrigado a trocar a categoria.
+     *
+     * Motivo: a categoria é gravada como texto. Sem esta checagem, um nome que
+     * não existe na biblioteca (lista desatualizada numa aba, bug, chamada
+     * direta à API) cria uma categoria "fantasma" que aparece nos relatórios
+     * mas não pode ser renomeada nem removida em "Gerenciar".
+     *
+     * @throws ResponseStatusException 400 se a categoria não existir
+     */
+    public String validar(String usuarioId, String tipo, String nome, String atual) {
+        String limpo = nome == null ? "" : nome.trim();
+        if (limpo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Selecione a categoria.");
+        }
+        if (atual != null && atual.trim().equalsIgnoreCase(limpo)) {
+            return atual;
+        }
+        return nomes(usuarioId, tipo).stream()
+            .filter(existente -> existente.equalsIgnoreCase(limpo))
+            .findFirst()
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "A categoria \"" + limpo + "\" não existe mais. Atualize a página e escolha outra."));
     }
 
     /** Próxima ordem (vai para o fim da lista). */

@@ -13,6 +13,7 @@
     import Projeto.MeuBolso.repository.RecorrenciaRepository;
     import Projeto.MeuBolso.repository.UsuarioRepository;
     import Projeto.MeuBolso.service.CarteiraService;
+    import Projeto.MeuBolso.service.CategoriaService;
     import Projeto.MeuBolso.service.GastoRecorrenciaService;
     import Projeto.MeuBolso.service.GastoService;
 
@@ -54,19 +55,22 @@
         private final GastoRecorrenciaService recorrenciaService;
         private final CarteiraService carteiraService;
         private final GastoService gastoService;
+        private final CategoriaService categoriaService;
 
         public GastoController(GastoRepository gastoRepository,
                             RecorrenciaRepository recorrenciaRepository,
                             UsuarioRepository usuarioRepository,
                             GastoRecorrenciaService recorrenciaService,
                             CarteiraService carteiraService,
-                            GastoService gastoService) {
+                            GastoService gastoService,
+                            CategoriaService categoriaService) {
             this.gastoRepository = gastoRepository;
             this.recorrenciaRepository = recorrenciaRepository;
             this.usuarioRepository = usuarioRepository;
             this.recorrenciaService = recorrenciaService;
             this.carteiraService = carteiraService;
             this.gastoService = gastoService;
+            this.categoriaService = categoriaService;
         }
 
 
@@ -117,11 +121,15 @@
                     "Cadastre uma conta na Carteira antes de registrar gastos.");
             }
 
+            // Categoria precisa estar na biblioteca; a que o gasto já tinha continua aceita.
+            String categoria = categoriaService.validar(
+                usuarioId, CategoriaService.TIPO_GASTO, request.categoria(), gasto.getCategoria());
+
             String carteiraAntiga = gasto.getCarteiraId();
             BigDecimal valorAntigo = gasto.getValor();
 
             gasto.setDescricao(request.descricao().trim());
-            gasto.setCategoria(request.categoria());
+            gasto.setCategoria(categoria);
             gasto.setCarteira(request.carteira());
             gasto.setData(request.data());
             gasto.setValor(request.valor());
@@ -187,10 +195,14 @@
             Recorrencia rec = recorrenciaRepository.findByIdAndUsuarioId(id, usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recorrência não encontrada."));
 
+            // Categoria precisa estar na biblioteca; a que a regra já tinha continua aceita.
+            String categoria = categoriaService.validar(
+                usuarioId, CategoriaService.TIPO_GASTO, request.categoria(), rec.getCategoria());
+
             boolean reativando = request.ativa() && !rec.isAtiva();
 
             rec.setDescricao(request.descricao().trim());
-            rec.setCategoria(request.categoria());
+            rec.setCategoria(categoria);
             rec.setCarteira(request.carteira());
             rec.setValor(request.valor());
             rec.setComentario(comentarioLimpo(request.comentario()));
