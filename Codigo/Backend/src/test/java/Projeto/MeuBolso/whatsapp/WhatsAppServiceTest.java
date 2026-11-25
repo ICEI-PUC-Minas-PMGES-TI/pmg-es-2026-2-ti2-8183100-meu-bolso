@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class WhatsAppServiceTest {
 
     private static final String CHAT = "5531997186768@c.us";
+    private static final String TELEFONE_CHAT = "5531997186768";
     private static final Instant AGORA = Instant.parse("2026-10-21T15:00:00Z");
 
     @Mock ConversaWhatsAppRepository conversaRepository;
@@ -69,8 +70,76 @@ class WhatsAppServiceTest {
     void conversaEmAndamentoNaoPrecisaDaPalavra() {
         ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
         c.setUsuarioId("u1");
+        c.setTelefone(TELEFONE_CHAT);
         c.setEtapa(Etapa.MENU);
         c.setAtualizadoEm(AGORA.minusSeconds(60));
+        when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
+        when(usuarioRepository.findById("u1")).thenReturn(Optional.of(usuario));
+
+        assertThat(servico("meu bolso", false).processar(msg("6"))).contains("Seus saldos");
+        verify(usuarioRepository, never()).findByTelefoneIn(anyCollection());
+    }
+
+    @Test
+    void novaConversaReidentificaMesmoComVinculoAntigo() {
+        // Caso real: o chat ficou preso à conta que tinha este número antes.
+        ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
+        c.setUsuarioId("conta-antiga");
+        c.setTelefone(TELEFONE_CHAT);
+        c.setEtapa(Etapa.OCIOSO);
+        c.setAtualizadoEm(AGORA.minusSeconds(30));
+        when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
+        when(usuarioRepository.findByTelefoneIn(anyCollection())).thenReturn(List.of(usuario));
+
+        assertThat(servico("meu bolso", false).processar(msg("meu bolso"))).startsWith("Olá, Gabriel!");
+        assertThat(c.getUsuarioId()).isEqualTo("u1");
+        verify(usuarioRepository, never()).findById("conta-antiga");
+    }
+
+    @Test
+    void telefoneDaContaMudouNoMeioDaConversaDescartaOVinculo() {
+        Usuario antigo = new Usuario("Outra Pessoa", "o@teste.com", "31988887777", "hash");
+        antigo.setId("conta-antiga");
+        ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
+        c.setUsuarioId("conta-antiga");
+        c.setTelefone(TELEFONE_CHAT);
+        c.setEtapa(Etapa.MENU);
+        c.setAtualizadoEm(AGORA.minusSeconds(30));
+        when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
+        when(usuarioRepository.findById("conta-antiga")).thenReturn(Optional.of(antigo));
+        when(usuarioRepository.findByTelefoneIn(anyCollection())).thenReturn(List.of(usuario));
+
+        // "6" (saldos) não é executado na conta antiga: o bot reinicia na conta certa.
+        String r = servico("meu bolso", false).processar(msg("6"));
+
+        assertThat(r).startsWith("Olá, Gabriel!").doesNotContain("Seus saldos");
+        assertThat(c.getUsuarioId()).isEqualTo("u1");
+    }
+
+    @Test
+    void conversaGravadaSemTelefoneEhReidentificada() {
+        // Documentos antigos (antes do campo telefone) não são confiáveis.
+        ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
+        c.setUsuarioId("conta-antiga");
+        c.setEtapa(Etapa.MENU);
+        c.setAtualizadoEm(AGORA.minusSeconds(30));
+        when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
+        when(usuarioRepository.findByTelefoneIn(anyCollection())).thenReturn(List.of(usuario));
+
+        servico("meu bolso", false).processar(msg("6"));
+
+        assertThat(c.getUsuarioId()).isEqualTo("u1");
+        assertThat(c.getTelefone()).isEqualTo(TELEFONE_CHAT);
+    }
+
+    @Test
+    void vinculoValeComOuSemONonoDigito() {
+        // O WhatsApp manda o número sem o 9 ("553197186768"); a conta tem com o 9.
+        ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
+        c.setUsuarioId("u1");
+        c.setTelefone("553197186768");
+        c.setEtapa(Etapa.MENU);
+        c.setAtualizadoEm(AGORA.minusSeconds(30));
         when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
         when(usuarioRepository.findById("u1")).thenReturn(Optional.of(usuario));
 
@@ -111,10 +180,13 @@ class WhatsAppServiceTest {
         // Estado em memória que o "repositório" devolve e atualiza a cada mensagem.
         ConversaWhatsApp c = new ConversaWhatsApp(CHAT);
         c.setUsuarioId("u1");
+        c.setTelefone(TELEFONE_CHAT);
         c.setEtapa(Etapa.MENU);
         c.setAtualizadoEm(AGORA.minusSeconds(30));
         when(conversaRepository.findById(CHAT)).thenReturn(Optional.of(c));
         when(usuarioRepository.findById("u1")).thenReturn(Optional.of(usuario));
+        // A reativação depois do "0" identifica o usuário de novo pelo telefone.
+        when(usuarioRepository.findByTelefoneIn(anyCollection())).thenReturn(List.of(usuario));
         WhatsAppService s = servico("meu bolso", false);
 
         assertThat(s.processar(msg("0"))).isEqualTo("Encerrado! Digite \"meu bolso\" para iniciar o processo novamente.");

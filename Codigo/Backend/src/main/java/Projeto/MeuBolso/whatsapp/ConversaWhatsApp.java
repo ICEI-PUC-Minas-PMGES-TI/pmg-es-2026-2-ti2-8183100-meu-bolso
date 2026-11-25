@@ -29,6 +29,9 @@ public class ConversaWhatsApp {
     private String chatId;
 
     private String usuarioId;
+    // Telefone do chat (só dígitos) usado para achar o usuarioId. Serve para
+    // conferir, a cada mensagem, se o telefone da conta ainda é o deste chat.
+    private String telefone;
     private Etapa etapa = Etapa.OCIOSO;
     private Operacao operacao;
 
@@ -69,6 +72,7 @@ public class ConversaWhatsApp {
 
     public String getChatId() { return chatId; }
     public String getUsuarioId() { return usuarioId; }
+    public String getTelefone() { return telefone; }
     public Etapa getEtapa() { return etapa; }
     public Operacao getOperacao() { return operacao; }
     public BigDecimal getValor() { return valor; }
@@ -83,6 +87,7 @@ public class ConversaWhatsApp {
 
     public void setChatId(String chatId) { this.chatId = chatId; }
     public void setUsuarioId(String usuarioId) { this.usuarioId = usuarioId; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
     public void setEtapa(Etapa etapa) { this.etapa = etapa; }
     public void setOperacao(Operacao operacao) { this.operacao = operacao; }
     public void setValor(BigDecimal valor) { this.valor = valor; }

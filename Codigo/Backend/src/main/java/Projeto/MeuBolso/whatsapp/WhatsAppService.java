@@ -126,17 +126,20 @@ public class WhatsAppService {
             return null;
         }
 
-        Usuario usuario = conversa.getUsuarioId() == null
-            ? null
-            : usuarioRepository.findById(conversa.getUsuarioId()).orElse(null);
+        // Cada nova conversa (a partir de OCIOSO) identifica o usuário de novo pelo
+        // telefone. No meio de uma conversa, reaproveita o vínculo só se o telefone
+        // da conta ainda for o deste chat (o número pode ter mudado de conta).
+        Usuario usuario = ocioso ? null : usuarioVinculado(conversa);
         if (usuario == null) {
-            usuario = identificar(msg.chatId()).orElse(null);
+            Optional<String> telefone = telefoneDoChat(msg.chatId());
+            usuario = telefone.flatMap(this::buscarPorTelefone).orElse(null);
             if (usuario == null) {
                 log.info("WhatsApp: número sem cadastro ({})", msg.chatId());
                 return responderNaoCadastrados ? NAO_CADASTRADO : null;
             }
             conversa.limparOperacao(Etapa.OCIOSO);
             conversa.setUsuarioId(usuario.getId());
+            conversa.setTelefone(telefone.get());
         }
 
         String resposta = fluxo.processar(conversa, msg.texto(), usuario.getNome());
@@ -151,16 +154,34 @@ public class WhatsAppService {
     }
 
     /**
-     * Acha o usuário pelo número do chat. Se o chat vier como LID (identificador
-     * anônimo do WhatsApp), pede o número ao WAHA. Compara com e sem o nono dígito.
+     * Usuário já vinculado à conversa, desde que o telefone atual da conta ainda
+     * corresponda ao telefone do chat (com ou sem o nono dígito). Conversas
+     * gravadas antes deste campo existir (telefone nulo) são reidentificadas.
      */
-    Optional<Usuario> identificar(String chatId) {
-        Optional<String> telefone = chatId.endsWith("@lid")
-            ? waha.telefoneDoLid(chatId)
-            : Optional.of(chatId.replaceAll("@.*$", ""));
-        if (telefone.isEmpty()) return Optional.empty();
+    private Usuario usuarioVinculado(ConversaWhatsApp conversa) {
+        if (conversa.getUsuarioId() == null || conversa.getTelefone() == null) return null;
+        Usuario usuario = usuarioRepository.findById(conversa.getUsuarioId()).orElse(null);
+        if (usuario == null) return null;
+        if (!Telefone.variantes(usuario.getTelefone()).contains(Telefone.normalizar(conversa.getTelefone()))) {
+            log.info("WhatsApp: o telefone da conta {} mudou; reidentificando o chat {}", usuario.getId(), conversa.getChatId());
+            return null;
+        }
+        return usuario;
+    }
 
-        List<Usuario> encontrados = usuarioRepository.findByTelefoneIn(Telefone.variantes(telefone.get()));
+    /**
+     * Número de telefone do chat. Se o chat vier como LID (identificador
+     * anônimo do WhatsApp), pede o número ao WAHA.
+     */
+    private Optional<String> telefoneDoChat(String chatId) {
+        return chatId.endsWith("@lid")
+            ? waha.telefoneDoLid(chatId)
+            : Optional.of(chatId.replaceAll("@.*$", "")).filter(t -> !t.isEmpty());
+    }
+
+    /** Acha o usuário pelo telefone, comparando com e sem o nono dígito. */
+    private Optional<Usuario> buscarPorTelefone(String telefone) {
+        List<Usuario> encontrados = usuarioRepository.findByTelefoneIn(Telefone.variantes(telefone));
         if (encontrados.size() > 1) {
             log.warn("WhatsApp: {} usuários com o mesmo telefone; usando o primeiro.", encontrados.size());
         }
