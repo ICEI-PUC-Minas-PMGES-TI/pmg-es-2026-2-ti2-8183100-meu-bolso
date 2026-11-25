@@ -37,9 +37,21 @@
      * onSalvar recebe os dados prontos e devolve uma Promise; se ela falhar,
      * a mensagem de erro aparece aqui dentro do modal.
      */
-    // "seletorTipo" (opcional): conteúdo mostrado no topo do formulário. A página
-    // de Movimentações usa para alternar entre Gasto e Receita ao adicionar.
-    export default function ModalGasto({ gasto, mesSelecionado, carteiras = [], onFechar, onSalvar, seletorTipo }) {
+    // Props opcionais usadas pela página de Movimentações para alternar entre
+    // Gasto e Receita ao adicionar sem perder o que já foi digitado:
+    //  - seletorTipo: conteúdo mostrado no topo do formulário;
+    //  - rascunho: valores iniciais do formulário (só ao adicionar);
+    //  - onRascunho(form): recebe o formulário a cada alteração.
+    export default function ModalGasto({
+    gasto,
+    mesSelecionado,
+    carteiras = [],
+    onFechar,
+    onSalvar,
+    seletorTipo,
+    rascunho,
+    onRascunho,
+    }) {
     const editando = Boolean(gasto);
 
     const [form, setForm] = useState(() =>
@@ -54,8 +66,12 @@
             comentario: gasto.comentario ?? "",
             recorrente: false,
             }
-        : { ...FORM_INICIAL, data: dataInicial(mesSelecionado) },
+        : { ...FORM_INICIAL, data: dataInicial(mesSelecionado), ...rascunho },
     );
+
+    useEffect(() => {
+        onRascunho?.(form);
+    }, [form, onRascunho]);
     const [erros, setErros] = useState({});
     const [erroEnvio, setErroEnvio] = useState("");
     const [salvando, setSalvando] = useState(false);

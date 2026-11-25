@@ -112,6 +112,12 @@ export default function Movimentacoes() {
   //  { tipo: "orcamento" }
   const [modal, setModal] = useState(null);
   const [itemAberto, setItemAberto] = useState(null);
+  // Último estado do formulário de "Nova movimentação", para não perder o que
+  // foi digitado ao trocar entre Gasto e Receita.
+  const rascunhoRef = useRef(null);
+  const guardarRascunho = useCallback((form) => {
+    rascunhoRef.current = form;
+  }, []);
   const [menuRecorrentes, setMenuRecorrentes] = useState(false);
   const menuRecorrentesRef = useRef(null);
   // Chaves das linhas que estão fazendo a animação de saída
@@ -421,8 +427,20 @@ export default function Movimentacoes() {
   if (modal?.tipo === "nova" || modal?.tipo === "editar") {
     const editando = modal.tipo === "editar";
     const natureza = editando ? modal.item.tipo : modal.natureza;
+    // Ao trocar o tipo, leva tudo o que foi digitado; só a categoria é limpa,
+    // porque as categorias de gasto e de receita são listas diferentes.
     const seletor = editando ? undefined : (
-      <SeletorTipo tipo={natureza} onTrocar={(nova) => setModal({ tipo: "nova", natureza: nova })} />
+      <SeletorTipo
+        tipo={natureza}
+        onTrocar={(nova) => {
+          if (nova === natureza) return;
+          setModal({
+            tipo: "nova",
+            natureza: nova,
+            rascunho: rascunhoRef.current ? { ...rascunhoRef.current, categoria: "" } : undefined,
+          });
+        }}
+      />
     );
     const props = {
       mesSelecionado,
@@ -430,6 +448,8 @@ export default function Movimentacoes() {
       onFechar: fecharModal,
       onSalvar: (dadosForm) => salvar(dadosForm, natureza, editando ? modal.item : null),
       seletorTipo: seletor,
+      rascunho: editando ? undefined : modal.rascunho,
+      onRascunho: editando ? undefined : guardarRascunho,
     };
     modalLancamento =
       natureza === TIPO_RECEITA ? (
