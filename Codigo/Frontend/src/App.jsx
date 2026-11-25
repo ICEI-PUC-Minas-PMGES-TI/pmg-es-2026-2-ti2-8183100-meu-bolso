@@ -10,8 +10,7 @@ import CancelarResumo from "./pages/ResumoSemanal/CancelarResumo";
 
 // Páginas que já existem
 import Dashboard from "./pages/Dashboard/Dashboard";
-import Gastos from "./pages/Gastos/Gastos";
-import Receitas from "./pages/Receitas/Receitas";
+import Movimentacoes from "./pages/Movimentacoes/Movimentacoes";
 import Carteiras from "./pages/Carteiras/Carteiras";
 import Metas from "./pages/Metas/Metas";
 import Simulacao from "./pages/Simulacao/Simulacao";
@@ -42,8 +41,16 @@ function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/gastos" element={<Gastos />} />
-            <Route path="/receitas" element={<Receitas />} />
+            <Route path="/movimentacoes" element={<Movimentacoes />} />
+            {/* Gastos e Receitas agora são uma página só; os links antigos abrem o chip certo */}
+            <Route
+              path="/gastos"
+              element={<Navigate to="/movimentacoes?tipo=saidas" replace />}
+            />
+            <Route
+              path="/receitas"
+              element={<Navigate to="/movimentacoes?tipo=entradas" replace />}
+            />
             <Route path="/carteiras" element={<Carteiras />} />
             <Route path="/metas" element={<Metas />} />
             {/* A evolução financeira agora fica na Visão geral */}
