@@ -310,6 +310,31 @@
   color: var(--cor-texto-principal);
 }
 
+.linha-descricao {
+  min-width: 0;
+}
+
+.linha-selos {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.linha-selos:empty {
+  display: none;
+}
+
+/* Só aparece no celular, onde o botão de comentário fica escondido */
+.linha-selo-comentario {
+  display: none;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: var(--radius-redondo);
+  background-color: var(--verde-claro);
+  color: var(--verde-escuro);
+}
+
 .linha-data {
   padding: 2px 8px;
   border-radius: var(--radius-redondo);
@@ -576,13 +601,107 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .ferramentas,
+  /* Ferramentas: chips na primeira linha; busca + Filtros na segunda */
+  .ferramentas {
+    gap: var(--espaco-2);
+    padding: var(--espaco-4);
+  }
+
+  .chips {
+    flex: 1 1 100%;
+  }
+
+  .chip {
+    flex: 1;
+  }
+
+  .busca {
+    min-width: 0;
+  }
+
+  /* Ordenar: uma linha só, com rolagem lateral */
   .ordenacao {
-    padding-left: var(--espaco-4);
-    padding-right: var(--espaco-4);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: var(--espaco-3) var(--espaco-4) 0;
+    scrollbar-width: none;
+  }
+
+  .ordenacao::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ordenacao-botao,
+  .ordenacao-rotulo {
+    flex-shrink: 0;
   }
 
   .lista {
     padding: 0 var(--espaco-4) var(--espaco-3);
+  }
+
+  /* Linha: tocar abre o painel com as ações, então os botões saem da linha */
+  .linha-acoes {
+    display: none;
+  }
+
+  .linha-principal {
+    margin-left: 0;
+    padding: var(--espaco-3) 0;
+  }
+
+  .linha-icone {
+    width: 36px;
+    height: 36px;
+  }
+
+  .linha-titulo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .linha-descricao {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .linha-selos {
+    gap: 4px;
+  }
+
+  .linha-selo-comentario {
+    display: inline-flex;
+  }
+
+  /* Rodapé: contagem numa linha, total na de baixo */
+  .rodape {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: var(--espaco-3) var(--espaco-4);
+  }
+
+  /* Painel lateral: tela inteira, ações fixas no rodapé */
+  .painel {
+    max-width: none;
+    padding: var(--espaco-4);
+  }
+
+  .painel-acoes {
+    position: sticky;
+    bottom: calc(var(--espaco-4) * -1);
+    flex-direction: column;
+    margin: auto calc(var(--espaco-4) * -1) calc(var(--espaco-4) * -1);
+    padding: var(--espaco-3) var(--espaco-4) var(--espaco-4);
+    background-color: var(--cor-superficie);
+    border-top: var(--borda-padrao);
+  }
+
+  .painel-acoes :global(.btn) {
+    width: 100%;
+    justify-content: center;
   }
 }

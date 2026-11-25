@@ -72,7 +72,7 @@ export default function FiltrosMovimentacoes({
             name="busca"
             type="search"
             className="form-input"
-            placeholder="Buscar pela descrição"
+            placeholder="Buscar…"
             value={filtros.busca}
             onChange={alterar}
             autoComplete="off"

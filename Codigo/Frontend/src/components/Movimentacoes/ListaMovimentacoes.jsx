@@ -93,7 +93,8 @@ function Linha({ item, indice, mostrarData, saindo, onAbrir, onEditar, onExcluir
 
         <span className={styles["linha-meio"]}>
           <span className={styles["linha-titulo"]}>
-            <span>{item.descricao}</span>
+            <span className={styles["linha-descricao"]}>{item.descricao}</span>
+            <span className={styles["linha-selos"]}>
             {item.recorrenciaId && (
               <span
                 className={g["gastos-selo-recorrente"]}
@@ -114,6 +115,14 @@ function Linha({ item, indice, mostrarData, saindo, onAbrir, onEditar, onExcluir
             {(mostrarData || item.projetado) && (
               <span className={styles["linha-data"]}>{formatarData(item.data)}</span>
             )}
+            {/* No celular o botão de comentário some; este selo avisa que existe um. */}
+            {item.comentario && !item.projetado && (
+              <span className={styles["linha-selo-comentario"]} title="Tem comentário">
+                <MessageSquareText size={12} aria-hidden="true" />
+                <span className={g["gastos-sr-only"]}>Tem comentário</span>
+              </span>
+            )}
+            </span>
           </span>
           <span className={styles["linha-sub"]}>
             {item.categoria} · {item.carteira}
@@ -262,7 +271,7 @@ export default function ListaMovimentacoes({
         ))}
       </div>
 
-      <footer className={g["gastos-rodape"]}>
+      <footer className={`${g["gastos-rodape"]} ${styles.rodape}`}>
         <span className="texto-secundario texto-pequeno" aria-live="polite">
           {filtrando
             ? `${itens.length} de ${quantidadeDoMes} ${plural(quantidadeDoMes, "movimentação", "movimentações")}`
