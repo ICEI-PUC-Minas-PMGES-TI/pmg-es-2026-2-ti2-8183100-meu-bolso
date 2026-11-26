@@ -4,15 +4,12 @@ import Projeto.MeuBolso.model.ResumoSemanalDtos.CategoriaValor;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.ContaAVencer;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.MetaProgresso;
 import Projeto.MeuBolso.model.ResumoSemanalDtos.Resumo;
+import Projeto.MeuBolso.email.EnviadorEmail;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
@@ -28,13 +25,10 @@ public class ResumoEmailService {
     private static final NumberFormat MOEDA = NumberFormat.getCurrencyInstance(Locale.of("pt", "BR"));
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private final JavaMailSender mailSender;
+    private final EnviadorEmail enviador;
 
-    @Value("${app.mail.from}")
-    private String remetente;
-
-    public ResumoEmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public ResumoEmailService(EnviadorEmail enviador) {
+        this.enviador = enviador;
     }
 
     /**
@@ -44,14 +38,12 @@ public class ResumoEmailService {
     @Async
     public void enviar(String para, String nome, Resumo resumo, String linkCancelar) {
         try {
-            MimeMessage mensagem = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mensagem, true, "UTF-8");
-            helper.setFrom(remetente);
-            helper.setTo(para);
-            helper.setSubject("Meu Bolso - Seu resumo semanal");
             // texto simples (fallback) + HTML (o que a maioria dos leitores mostra)
-            helper.setText(montarTexto(nome, resumo, linkCancelar), montarHtml(nome, resumo, linkCancelar));
-            mailSender.send(mensagem);
+            enviador.enviarHtml(
+                para,
+                "Meu Bolso - Seu resumo semanal",
+                montarTexto(nome, resumo, linkCancelar),
+                montarHtml(nome, resumo, linkCancelar));
         } catch (Exception e) {
             log.error("Falha ao enviar resumo semanal: {}", e.getMessage());
         }
