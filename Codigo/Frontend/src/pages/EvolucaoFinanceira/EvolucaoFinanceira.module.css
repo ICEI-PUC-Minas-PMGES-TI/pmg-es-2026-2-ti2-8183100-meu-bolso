@@ -49,6 +49,35 @@
   gap: var(--espaco-4);
 }
 
+/* Corpo em duas colunas: cartões (1/3) à esquerda, evolução (2/3) à direita.
+   min-width:0 nas colunas impede o conteúdo de forçar rolagem horizontal. */
+.corpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
+  /* stretch: as duas colunas ganham a mesma altura, então o quadro de
+     "Meus cartões" acompanha a altura do quadro do gráfico. */
+  align-items: stretch;
+}
+
+.coluna {
+  min-width: 0;
+}
+
+/* Na coluna de 2/3, o card do gráfico ocupa a largura disponível
+   (o limite de 800px vale só no layout de coluna única). */
+.coluna .card,
+.coluna .estado {
+  max-width: none;
+}
+
+/* Abaixo de 1024px: coluna única (cartões em cima, evolução embaixo). */
+@media (max-width: 1024px) {
+  .corpo {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Seletor de gráfico com ícones (dentro do card, canto sup. direito) */
 .seletor {
   display: inline-flex;

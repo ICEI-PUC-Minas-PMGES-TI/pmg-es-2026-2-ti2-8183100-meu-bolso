@@ -13,6 +13,12 @@
   padding: 24px 32px 32px;
 }
 
+/* Dashboard: largura máxima 8% maior (1400px -> 1512px), só nesta rota.
+   Centralização e padding lateral seguem os mesmos. */
+.app-main-largo {
+  max-width: 1512px;
+}
+
 @media (max-width: 768px) {
   .app-main {
     padding: 20px 16px;

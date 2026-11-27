@@ -38,7 +38,7 @@ import { mesAtualChave, mudarMes } from "../../utils/Gastosutils";
 // título é um <h2> dentro de uma <section>.
 // ============================================================
 
-function EvolucaoFinanceira({ mostrarResumo = false }) {
+function EvolucaoFinanceira({ mostrarResumo = false, lateral = null }) {
   const [transacoes, setTransacoes] = useState([]);
   const [aportes, setAportes] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -243,7 +243,16 @@ function EvolucaoFinanceira({ mostrarResumo = false }) {
         <CardsResumo resumo={resumo} />
       )}
 
-      {renderConteudo()}
+      {/* Com `lateral` e já carregado: duas colunas (cartões | evolução).
+          Carregando/erro e o caso sem `lateral` ficam em largura total. */}
+      {lateral && !carregando && !erro ? (
+        <div className={styles.corpo}>
+          <div className={styles.coluna}>{lateral}</div>
+          <div className={styles.coluna}>{renderConteudo()}</div>
+        </div>
+      ) : (
+        renderConteudo()
+      )}
     </section>
   );
 }

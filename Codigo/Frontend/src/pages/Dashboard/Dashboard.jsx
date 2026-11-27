@@ -1,6 +1,7 @@
 import styles from "./Dashboard.module.css";
 import { obterUsuario } from "../../service/Api";
 import EvolucaoFinanceira from "../EvolucaoFinanceira/EvolucaoFinanceira";
+import MeusCartoes from "../EvolucaoFinanceira/MeusCartoes";
 import AlertaReserva from "../../components/ReservaEmergencia/AlertaReserva";
 
 function Dashboard() {
@@ -17,7 +18,7 @@ function Dashboard() {
       <AlertaReserva />
 
       {/* Evolução financeira (gráficos de gastos x renda, saldo e investimentos) */}
-      <EvolucaoFinanceira mostrarResumo />
+      <EvolucaoFinanceira mostrarResumo lateral={<MeusCartoes />} />
     </div>
   );
 }

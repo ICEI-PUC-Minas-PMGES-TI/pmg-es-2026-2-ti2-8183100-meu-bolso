@@ -1,0 +1,68 @@
+/* ========================================
+   MEUS CARTÕES (quadro lateral do Dashboard)
+   O fundo/borda/raio/sombra vêm da classe global .card (mesmo quadro
+   do gráfico). Aqui cuidamos só da estrutura interna.
+======================================== */
+
+.bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  /* Ocupa a altura da coluna (o grid usa align-items: stretch), para o
+     quadro acompanhar a altura do quadro do gráfico em telas largas. */
+  height: 100%;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cabecalho h3 {
+  margin: 0;
+}
+
+.verTodos {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--verde-escuro);
+}
+
+/* Área abaixo do cabeçalho: ocupa o espaço restante e centraliza a
+   pilha na horizontal e na vertical. */
+.centro {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estados (vazio/carregando/erro): centralizados no mesmo quadro,
+   sem borda interna (o quadro já é o .card do bloco). */
+.estado {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  text-align: center;
+}
+
+/* Pilha: todos os cartões ocupam a mesma célula do grid (1/1) e cada
+   um é deslocado 40px para baixo via margin-top. Como têm a mesma
+   altura, o último (frente) define a altura total da pilha.
+   max-width acompanha o cartão (340px) e centraliza na coluna. */
+.pilha {
+  display: grid;
+  width: 100%;
+  max-width: 340px;
+}
+
+.camada {
+  grid-area: 1 / 1;
+}
