@@ -20,6 +20,8 @@ import GraficoBarras from "./GraficoBarras";
 import GraficoInvestimento from "./GraficoInvestimento";
 import SeletorGrafico from "./SeletorGrafico";
 import SeletorPrevisao from "./SeletorPrevisao";
+import CardsResumo from "./CardsResumo";
+import { mesAtualChave, mudarMes } from "../../utils/Gastosutils";
 
 // ============================================================
 // EVOLUÇÃO FINANCEIRA (RF-06)
@@ -36,7 +38,7 @@ import SeletorPrevisao from "./SeletorPrevisao";
 // título é um <h2> dentro de uma <section>.
 // ============================================================
 
-function EvolucaoFinanceira() {
+function EvolucaoFinanceira({ mostrarResumo = false }) {
   const [transacoes, setTransacoes] = useState([]);
   const [aportes, setAportes] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -97,10 +99,55 @@ function EvolucaoFinanceira() {
     () => calcularAcumulado(dadosMensais),
     [dadosMensais],
   );
-  const dadosInvestido = useMemo(
-    () => calcularAcumuladoInvestido(agruparInvestimentosPorMes(aportes)),
+  // Aportes de investimento agrupados por mês (cada item tem a chave
+  // "AAAA-MM"); base tanto do gráfico quanto da variação do card Guardado.
+  const investimentosMensais = useMemo(
+    () => agruparInvestimentosPorMes(aportes),
     [aportes],
   );
+  const dadosInvestido = useMemo(
+    () => calcularAcumuladoInvestido(investimentosMensais),
+    [investimentosMensais],
+  );
+
+  // Totais dos cards de resumo (só o realizado, sem previsto/futuro) e os
+  // valores do fim do mês anterior, para a variação percentual. O mês
+  // anterior é identificado pela chave "AAAA-MM" (mudarMes), nunca por
+  // posição no array, para não depender do filtro de previsão.
+  //  - saldoAtual: saldo realizado acumulado até o mês;
+  //  - guardado:   total investido acumulado até o mês;
+  //  - receitasMes/gastosMes: realizado do próprio mês.
+  const resumo = useMemo(() => {
+    const mesAtual = mesAtualChave();
+    const mesAnterior = mudarMes(mesAtual, -1);
+
+    // Saldo realizado acumulado até o fim de um mês (inclusive).
+    const saldoAteMes = (chaveLimite) =>
+      dadosMensais
+        .filter((d) => d.chave <= chaveLimite)
+        .reduce((soma, d) => soma + d.rendaRealizada - d.gastosRealizados, 0);
+
+    // Total investido acumulado até o fim de um mês (inclusive), a partir
+    // dos aportes agrupados (cada um com sua chave de mês).
+    const investidoAteMes = (chaveLimite) =>
+      investimentosMensais
+        .filter((d) => d.chave <= chaveLimite)
+        .reduce((soma, d) => soma + d.aporte, 0);
+
+    const mes = dadosMensais.find((d) => d.chave === mesAtual);
+    const anterior = dadosMensais.find((d) => d.chave === mesAnterior);
+
+    return {
+      saldoAtual: saldoAteMes(mesAtual),
+      saldoAnterior: saldoAteMes(mesAnterior),
+      guardado: investidoAteMes(mesAtual),
+      guardadoAnterior: investidoAteMes(mesAnterior),
+      receitasMes: mes?.rendaRealizada ?? 0,
+      receitasAnterior: anterior?.rendaRealizada ?? 0,
+      gastosMes: mes?.gastosRealizados ?? 0,
+      gastosAnterior: anterior?.gastosRealizados ?? 0,
+    };
+  }, [dadosMensais, investimentosMensais]);
 
   const temDados = dadosMensais.length > 0;
 
@@ -191,13 +238,10 @@ function EvolucaoFinanceira() {
   }
 
   return (
-    <section className={styles.evolucao} aria-labelledby="evolucao-titulo">
-      <div className={styles.cabecalho}>
-        <h2 id="evolucao-titulo">Evolução financeira</h2>
-        <p className="texto-secundario">
-          Acompanhe o crescimento do seu dinheiro ao longo dos meses.
-        </p>
-      </div>
+    <section className={styles.evolucao} aria-label="Evolução financeira">
+      {mostrarResumo && !carregando && !erro && (
+        <CardsResumo resumo={resumo} />
+      )}
 
       {renderConteudo()}
     </section>

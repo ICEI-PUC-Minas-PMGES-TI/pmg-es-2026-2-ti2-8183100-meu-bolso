@@ -49,16 +49,6 @@
   gap: var(--espaco-4);
 }
 
-/* Cabeçalho da seção (dentro da Visão geral) */
-.cabecalho h2 {
-  font-size: var(--titulo-md);
-  font-weight: 700;
-}
-
-.cabecalho p {
-  margin-top: var(--espaco-1);
-}
-
 /* Seletor de gráfico com ícones (dentro do card, canto sup. direito) */
 .seletor {
   display: inline-flex;
