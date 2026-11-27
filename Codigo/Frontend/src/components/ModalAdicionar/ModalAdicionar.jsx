@@ -50,13 +50,13 @@ function numParaTexto(n) {
   return n == null ? "" : String(n);
 }
 
-// Posições de destaque das contas (ordem fixa).
-const POSICOES_CONTA = ["principal", "secundaria", "terciaria"];
+// Posições de destaque (ordem fixa), iguais para contas e cartões.
+const POSICOES_DESTAQUE = ["principal", "secundaria", "terciaria"];
 
-/** Primeira posição de destaque ainda livre; "" (não destacar) se as 3 ocupadas. */
-function primeiraPosicaoLivre(contas) {
-  const usadas = new Set(contas.map((c) => c.posicao).filter(Boolean));
-  return POSICOES_CONTA.find((p) => !usadas.has(p)) ?? "";
+/** Primeira posição de destaque ainda livre na lista; "" (não destacar) se as 3 ocupadas. */
+function primeiraPosicaoLivre(itens) {
+  const usadas = new Set(itens.map((c) => c.posicao).filter(Boolean));
+  return POSICOES_DESTAQUE.find((p) => !usadas.has(p)) ?? "";
 }
 
 /** Monta o estado do formulário a partir de um item existente. */
@@ -80,7 +80,7 @@ function formDoItem(item) {
   };
 }
 
-function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando = null, tipoInicial = null }) {
+function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], cartoes = [], itemEditando = null, tipoInicial = null }) {
   const editando = Boolean(itemEditando);
   // Estado inicializado a partir das props. O componente é remontado via
   // `key` no pai sempre que muda o alvo (adicionar x editar um item), então
@@ -91,9 +91,13 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
   const [erros, setErros] = useState({});
   const [form, setForm] = useState(() => {
     if (itemEditando) return formDoItem(itemEditando);
-    // Nova conta: já sugere a primeira posição de destaque livre.
+    // Nova conta/cartão: já sugere a primeira posição de destaque livre,
+    // contada na lista do próprio tipo (conta não conta cartão e vice-versa).
     if ((tipoInicial ?? null) === "conta") {
       return { ...formInicial, posicao: primeiraPosicaoLivre(contas) };
+    }
+    if ((tipoInicial ?? null) === "cartao") {
+      return { ...formInicial, posicao: primeiraPosicaoLivre(cartoes) };
     }
     return formInicial;
   });
@@ -144,6 +148,7 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
         ...(editando && itemEditando.faturaAtual != null
           ? { faturaAtual: itemEditando.faturaAtual }
           : {}),
+        posicao: form.posicao || null,
         tema: itemEditando?.tema || "roxo",
       };
     }
@@ -248,6 +253,11 @@ function ModalAdicionar({ aberto, onFechar, onSalvar, contas = [], itemEditando 
                       setForm((f) => ({
                         ...f,
                         posicao: primeiraPosicaoLivre(contas),
+                      }));
+                    } else if (opcao.tipo === "cartao") {
+                      setForm((f) => ({
+                        ...f,
+                        posicao: primeiraPosicaoLivre(cartoes),
                       }));
                     }
                     setTipoSelecionado(opcao.tipo);
@@ -443,6 +453,20 @@ function CamposPorTipo({ tipo, form, atualizar, contas, erros = {} }) {
                   {c.apelido}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className={styles.campo}>
+            <label htmlFor="posicaoCartao">Posição na carteira (opcional)</label>
+            <select
+              id="posicaoCartao"
+              value={form.posicao}
+              onChange={(e) => atualizar("posicao", e.target.value)}
+            >
+              <option value="principal">Principal</option>
+              <option value="secundaria">Secundária</option>
+              <option value="terciaria">Terciária</option>
+              <option value="">Não destacar</option>
             </select>
           </div>
 

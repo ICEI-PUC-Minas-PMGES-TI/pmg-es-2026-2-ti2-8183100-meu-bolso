@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import CarteiraVisual from "../../components/CarteiraVisual/CarteiraVisual";
+import CartaoVisual from "../../components/CartaoVisual/CartaoVisual";
 import CarteiraFisica from "../../components/CarteiraFisica/CarteiraFisica";
 import PainelDetalhes from "../../components/PainelDetalhes/PainelDetalhes";
 import PainelContas from "../../components/PainelContas/PainelContas";
@@ -125,6 +126,14 @@ function Carteiras() {
     contasEfetivas.find((c) => c.posicaoEfetiva === p)
   ).filter(Boolean);
 
+  // Todos os cartões, ordenados: classificados (principal→secundária→
+  // terciária) primeiro e, em seguida, os sem posição.
+  const cartoesClassificados = ORDEM_POSICAO.map((p) =>
+    cartoes.find((c) => c.posicao === p)
+  ).filter(Boolean);
+  const cartoesRestantes = cartoes.filter((c) => !ORDEM_POSICAO.includes(c.posicao));
+  const cartoesVisiveis = [...cartoesClassificados, ...cartoesRestantes];
+
   // Item em edição (null = modal em modo "adicionar").
   const [itemEditando, setItemEditando] = useState(null);
 
@@ -195,7 +204,7 @@ function Carteiras() {
     if (dados.id) {
       setListaPorTipo(dados.tipo, (lista) => {
         let nova = lista.map((i) => (i.id === dados.id ? { ...i, ...dados } : i));
-        if (dados.tipo === "conta") {
+        if (dados.tipo === "conta" || dados.tipo === "cartao") {
           nova = reatribuirPosicoes(nova, dados.id, dados.posicao);
         }
         return nova;
@@ -207,7 +216,7 @@ function Carteiras() {
       const item = { ...dados, id: `${dados.tipo}-${Date.now()}` };
       setListaPorTipo(dados.tipo, (lista) => {
         const base = [...lista, item];
-        return dados.tipo === "conta"
+        return dados.tipo === "conta" || dados.tipo === "cartao"
           ? reatribuirPosicoes(base, item.id, item.posicao)
           : base;
       });
@@ -337,10 +346,10 @@ function Carteiras() {
           </div>
         ) : (
           <CarteiraFisica
-            manterAberta={cartoes.some((c) => c.id === itemSelecionado?.id)}
-            indiceSelecionado={cartoes.findIndex((c) => c.id === itemSelecionado?.id)}
+            manterAberta={cartoesVisiveis.some((c) => c.id === itemSelecionado?.id)}
+            indiceSelecionado={cartoesVisiveis.findIndex((c) => c.id === itemSelecionado?.id)}
           >
-            {cartoes.map((item) => (
+            {cartoesVisiveis.map((item) => (
               <ItemCarteira
                 key={item.id}
                 item={item}
@@ -494,6 +503,7 @@ function Carteiras() {
         }}
         onSalvar={salvarItem}
         contas={contas}
+        cartoes={cartoes}
         itemEditando={itemEditando}
         tipoInicial={tipoAdicionar}
       />
@@ -571,17 +581,7 @@ function ItemCarteira({ item, selecionado, onSelecionar, semRodape = false }) {
       }}
       aria-label={`Abrir detalhes de ${item.apelido}`}
     >
-      <CarteiraVisual
-        tipo={item.tipo}
-        apelido={item.apelido}
-        banco={item.banco}
-        instituicao={item.instituicao}
-        bandeira={item.bandeira}
-        tema={item.tema}
-        ultimosDigitos={item.ultimosDigitos}
-        validade={item.validade}
-        valor={formatarBRL(item.saldo)}
-      />
+      <CartaoVisual cartao={item} />
 
       {!semRodape && (
         <div className={styles.itemRodape}>
