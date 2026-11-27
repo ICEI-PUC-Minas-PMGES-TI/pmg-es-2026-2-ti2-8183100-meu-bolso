@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Mail, Eye, Send, CheckCircle2, Info } from "lucide-react";
 
 import { resumoSemanalApi } from "../../service/Api";
@@ -87,7 +87,10 @@ function Previa({ resumo }) {
   );
 }
 
-export default function ResumoSemanalConfig() {
+const ResumoSemanalConfig = forwardRef(function ResumoSemanalConfig(
+  { destacado = false },
+  ref,
+) {
   const [carregando, setCarregando] = useState(true);
   const [ativo, setAtivo] = useState(false);
   const [email, setEmail] = useState("");
@@ -165,7 +168,10 @@ export default function ResumoSemanalConfig() {
   }
 
   return (
-    <section className={styles.cartao}>
+    <section
+      ref={ref}
+      className={`${styles.cartao} ${destacado ? styles.cartaoDestacado : ""}`}
+    >
       <div className={styles.cartaoCabecalho}>
         <span className={styles.cartaoIcone}>
           <Mail size={18} aria-hidden="true" />
@@ -263,4 +269,6 @@ export default function ResumoSemanalConfig() {
       )}
     </section>
   );
-}
+});
+
+export default ResumoSemanalConfig;

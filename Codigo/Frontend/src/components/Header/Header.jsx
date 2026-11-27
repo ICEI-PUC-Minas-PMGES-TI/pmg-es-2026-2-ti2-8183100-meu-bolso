@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { ChevronDown, UserPen, LogOut, Menu, X, Moon, Sun, Tags } from "lucide-react";
+import { ChevronDown, UserPen, LogOut, Menu, X, Moon, Sun, Tags, Mail } from "lucide-react";
 import logo from "/images/Logo_meu_bolso_clean.png";
 import styles from "./Header.module.css";
 import { obterUsuario, sair } from "../../service/Api";
@@ -59,8 +59,10 @@ function Header() {
   const [navAberta, setNavAberta] = useState(false);
   const navRef = useRef(null);
 
-  // Controle do modal de editar perfil.
+  // Controle do modal de editar perfil. `perfilFocarResumo` faz o modal abrir
+  // já rolado na seção do resumo semanal (atalho "Resumo por e-mail").
   const [perfilAberto, setPerfilAberto] = useState(false);
+  const [perfilFocarResumo, setPerfilFocarResumo] = useState(false);
 
   // Tema claro/escuro (salvo no localStorage).
   const { tema, alternarTema } = useTema();
@@ -125,6 +127,14 @@ function Header() {
   function handleEditarPerfil() {
     setMenuAberto(false);
     setMenuFechando(false);
+    setPerfilFocarResumo(false);
+    setPerfilAberto(true);
+  }
+
+  function handleResumoEmail() {
+    setMenuAberto(false);
+    setMenuFechando(false);
+    setPerfilFocarResumo(true);
     setPerfilAberto(true);
   }
 
@@ -275,6 +285,16 @@ function Header() {
 
               <button
                 type="button"
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={handleResumoEmail}
+              >
+                <Mail size={18} aria-hidden="true" />
+                Resumo por e-mail
+              </button>
+
+              <button
+                type="button"
                 className={`${styles.menuItem} ${styles.menuItemPerigo}`}
                 role="menuitem"
                 onClick={handleSair}
@@ -290,6 +310,7 @@ function Header() {
       {/* Modal de edição de perfil (sobrepõe a tela atual) */}
       <ModalPerfil
         aberto={perfilAberto}
+        focarResumo={perfilFocarResumo}
         onFechar={() => setPerfilAberto(false)}
         onAtualizado={() => setUsuario(obterUsuario())}
       />

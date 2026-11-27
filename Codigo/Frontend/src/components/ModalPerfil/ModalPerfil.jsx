@@ -38,8 +38,10 @@ import AvatarUsuario from "../AvatarUsuario/AvatarUsuario";
  *  - aberto: boolean
  *  - onFechar: fecha o modal
  *  - onAtualizado: (perfil) => void — avisa o pai que o perfil mudou
+ *  - focarResumo: abre já rolado e com destaque na seção "Resumo semanal
+ *    por e-mail" (usado pelo atalho do menu do perfil)
  */
-function ModalPerfil({ aberto, onFechar, onAtualizado }) {
+function ModalPerfil({ aberto, onFechar, onAtualizado, focarResumo = false }) {
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -60,6 +62,9 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
   const [foto, setFoto] = useState(() => obterUsuario()?.foto ?? null);
   const [enviandoFoto, setEnviandoFoto] = useState(false);
   const inputFotoRef = useRef(null);
+  // Seção do resumo semanal: o atalho do menu rola até ela e a destaca.
+  const resumoRef = useRef(null);
+  const [resumoDestacado, setResumoDestacado] = useState(false);
 
   // Busca o perfil completo (inclui telefone, que não está no localStorage).
   useEffect(() => {
@@ -94,6 +99,29 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
       ativo = false;
     };
   }, [aberto]);
+
+  // Quando o modal abre pelo atalho "Resumo por e-mail", rola até a seção e
+  // aplica um realce breve para o usuário localizar o controle de imediato.
+  useEffect(() => {
+    if (!aberto || !focarResumo) {
+      // Garante que o realce não fique "preso" ao reabrir sem foco. O reset
+      // vai para um timeout para não chamar setState no corpo do efeito.
+      const resetId = window.setTimeout(() => setResumoDestacado(false), 0);
+      return () => window.clearTimeout(resetId);
+    }
+    const rolaId = window.setTimeout(() => {
+      resumoRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      setResumoDestacado(true);
+    }, 120);
+    const limpaId = window.setTimeout(() => setResumoDestacado(false), 2000);
+    return () => {
+      window.clearTimeout(rolaId);
+      window.clearTimeout(limpaId);
+    };
+  }, [aberto, focarResumo]);
 
   if (!aberto) return null;
 
@@ -477,7 +505,7 @@ function ModalPerfil({ aberto, onFechar, onAtualizado }) {
             </section>
 
             {/* ===== Resumo semanal por e-mail ===== */}
-            <ResumoSemanalConfig />
+            <ResumoSemanalConfig ref={resumoRef} destacado={resumoDestacado} />
 
             {erro && (
               <p className={styles.erro} role="alert">
