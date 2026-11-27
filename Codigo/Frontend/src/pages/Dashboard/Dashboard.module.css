@@ -9,10 +9,11 @@
 }
 
 .saudacao h1 {
-  font-size: var(--titulo-xl);
-  font-weight: 800;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 16px;
 }
 
-.saudacao p {
-  margin-top: var(--espaco-1);
+.nome {
+  color: var(--verde-principal);
 }
