@@ -53,6 +53,10 @@ public class GeminiClienteIA implements ClienteIA {
             .build();
         this.apiKey = apiKey;
         this.modelo = modelo;
+
+        boolean chavePresente = apiKey != null && !apiKey.isBlank();
+        log.info("Gemini configurado: modelo={}, chave={}", modelo,
+            chavePresente ? "presente" : "ausente");
     }
 
     @Override
@@ -80,18 +84,25 @@ public class GeminiClienteIA implements ClienteIA {
             resposta = JSON.readTree(bruto == null ? "" : bruto);
         } catch (RestClientResponseException e) {
             HttpStatusCode status = e.getStatusCode();
-            log.warn("Gemini respondeu com erro HTTP {}", status.value());
+            // Corpo da resposta de erro do Gemini (a chave vai só no header, não aqui),
+            // truncado para não poluir o log. É aqui que aparece o motivo real
+            // (modelo inexistente, chave inválida, cota etc.).
+            log.error("Gemini respondeu erro HTTP {}: corpo={} | {}: {}",
+                status.value(), truncar(e.getResponseBodyAsString()),
+                e.getClass().getSimpleName(), e.getMessage());
             boolean limite = status.value() == 429;
             throw new IaIndisponivelException("Falha ao consultar a IA.", limite);
         } catch (RestClientException | com.fasterxml.jackson.core.JacksonException e) {
-            // Timeout, falha de conexão ou corpo ilegível (mensagem não é logada).
-            log.warn("Falha de comunicação com o Gemini.");
+            // Timeout, falha de conexão ou corpo ilegível.
+            log.error("Falha de comunicação com o Gemini | {}: {}",
+                e.getClass().getSimpleName(), e.getMessage());
             throw new IaIndisponivelException("Falha ao consultar a IA.");
         }
 
         ResultadoIA resultado = interpretar(resposta);
         if (resultado == null) {
-            log.warn("Gemini respondeu sem texto nem functionCall utilizável.");
+            log.error("Gemini respondeu sem texto nem functionCall utilizável: corpo={}",
+                truncar(resposta == null ? null : resposta.toString()));
             throw new IaIndisponivelException("Resposta da IA sem conteúdo.");
         }
         // Traduz o nome sanitizado de volta para o id original da pergunta.
@@ -191,5 +202,11 @@ public class GeminiClienteIA implements ClienteIA {
     /** Troca por "_" tudo que não casar com [A-Za-z0-9_]. */
     private String sanitizar(String nome) {
         return nome == null ? "" : nome.replaceAll("[^A-Za-z0-9_]", "_");
+    }
+
+    /** Limita o texto a 500 caracteres para o log (a resposta de erro não tem a chave). */
+    private static String truncar(String texto) {
+        if (texto == null || texto.isBlank()) return "(vazio)";
+        return texto.length() <= 500 ? texto : texto.substring(0, 500) + "...(truncado)";
     }
 }
