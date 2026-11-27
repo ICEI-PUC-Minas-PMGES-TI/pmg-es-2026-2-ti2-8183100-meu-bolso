@@ -1,57 +1,42 @@
-# 💰 Meu Bolso 👨‍💻
+# Introdução
 
-> Aplicação web de **controle e educação financeira** para jovens que estão começando a lidar com dinheiro próprio (mesada, primeiro salário ou aumento de renda), com um **assistente de IA** que transforma os dados do usuário em orientações práticas e em linguagem acessível.
+Informações básicas do projeto.
 
-<table>
-  <tr>
-    <td width="800px">
-      <div align="justify">
-        O <b>Meu Bolso</b> é uma aplicação web de controle e educação financeira pessoal voltada a jovens que estão começando a lidar com dinheiro próprio. A proposta é oferecer um espaço simples para registrar o que se gasta, acompanhar o que se recebe e o que se guarda, definir metas e receber, por meio de um assistente baseado em inteligência artificial, orientações em linguagem acessível sobre os próprios hábitos financeiros. O projeto foi concebido na disciplina de <b>Trabalho Interdisciplinar</b> do Instituto de Ciências Exatas e Informática (ICEI) da PUC Minas, seguindo as etapas de <b>Design Thinking</b> (empatia, definição, ideação e prototipação), e está associado ao <b>ODS 8</b> (trabalho decente e crescimento econômico) da Agenda 2030 da ONU.
-      </div>
-    </td>
-  </tr>
-</table>
+* **Projeto:** Meu Bolso
+* **Repositório GitHub:** [pmg-es-2026-2-ti2-8183100-meu-bolso](https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti2-8183100-meu-bolso)
+* **Membros da equipe:**
+  * Arthur Moraes Braga Araujo
+  * Daniel Eiji Serra Tsuruga
+  * David Aurelio Pedrosa
+  * Gabriel de Souza Junqueira Hermont
+  * Vinicius Eduardo de Souza Matos Silva
+
+A documentação do projeto é estruturada da seguinte forma:
+
+1. Introdução
+2. [Contexto do Projeto](#1-contexto-do-projeto)
+3. [Personas e Mapas de Empatia](#2-personas-e-mapas-de-empatia)
+4. [Especificação do Projeto](#3-especificação-do-projeto)
+5. [Priorização das Funcionalidades (Kanban)](#4-priorização-das-funcionalidades-kanban)
+6. [Metodologia](#5-metodologia)
+7. [Tecnologias](#6-tecnologias)
+8. [Referências](#7-referências)
+
+✅ [Documentação de Design Thinking (Miro)](https://miro.com/app/board/uXjVHxiBGwc=/)
+
+# Ferramentas
+
+Relação de ferramentas empregadas pelo grupo durante o projeto.
+
+| Ambiente | Plataforma | Link de acesso |
+|---|---|---|
+| Processo de Design Thinking | Miro | <https://miro.com/app/board/uXjVHxiBGwc=/> |
+| Protótipo Interativo | Figma | <https://www.figma.com/make/Q8zHsaZnUu3KyRLcZcRIA0/MeuBolso-Wireframe-Desktop?p=f&t=n9PhvkrWvweEkrSG-0&fullscreen=1> |
+| Repositório e versionamento | GitHub | <https://github.com/ICEI-PUC-Minas-PMGES-TI/pmg-es-2026-2-ti2-8183100-meu-bolso> |
+| Quadro Kanban | GitHub Projects | <https://github.com/orgs/ICEI-PUC-Minas-PMGES-TI/projects/787/views/1> |
+| Comunicação da equipe | Discord / WhatsApp | — |
 
 ---
-
-## 🚧 Status do Projeto
-
-![Status](https://img.shields.io/badge/Status-MVP%20em%20desenvolvimento-green?style=for-the-badge)
-![Etapa](https://img.shields.io/badge/Etapa-Implementação-blue?style=for-the-badge)
-![Disciplina](https://img.shields.io/badge/PUC%20Minas-Trabalho%20Interdisciplinar-007ec6?style=for-the-badge)
-
-> As etapas de **Empatizar**, **Definir** e **Idear** estão concluídas e a **Prototipação** foi entregue. A **Implementação** do MVP está em andamento: já existem autenticação de usuários (cadastro, login e perfil) com JWT, persistência em MongoDB, as metas financeiras integradas à API e as telas de dashboard, gastos, carteiras, metas e evolução financeira. As instruções de instalação e execução estão no [README principal](../README.md) e nos READMEs de [`Codigo/Backend`](../Codigo/Backend/Readme.md) e [`Codigo/Frontend`](../Codigo/Frontend/README.md).
-
----
-
-## 📚 Índice
-
-- [Integrantes e Orientador](#-integrantes-e-orientador)
-- [1. Contexto do Projeto](#1-contexto-do-projeto)
-- [2. Personas e Mapas de Empatia](#2-personas-e-mapas-de-empatia)
-- [3. Especificação do Projeto](#3-especificação-do-projeto)
-- [4. Priorização das Funcionalidades (Kanban)](#4-priorização-das-funcionalidades-kanban)
-- [5. Metodologia](#5-metodologia)
-- [6. Tecnologias (planejadas)](#6-tecnologias-planejadas)
-- [7. Referências](#7-referências)
-
----
-
-## 👥 Integrantes e Orientador
-
-**Integrantes da equipe:**
-
-- Arthur Moraes
-- Daniel Eiji
-- David Aurélio
-- Gabriel Hermont
-- Vinicius Eduardo
-
-**Orientador(a):** 
-
-- Rommel Vieira Carneiro
-- Cleiton Silva Tavares
-- Rafael Henrique Nogueira Diniz
 
 # 1. Contexto do Projeto
 
